@@ -105,9 +105,15 @@ export default function(context) {
   // Get the index of the selected option in dropdown
   var sel = groupArtboardSelect.indexOfSelectedItem();
 
+  // If the User Angle! button
   if (response == NSAlertFirstButtonReturn) {
     // get artboard name with index
-    var a = options[sel].artboard;
+    var artboard = options[sel].artboard;
+    var layers = MSPasteboardLayers.pasteboardLayersWithLayers([artboard]);
+    MSPasteboardManager.writePasteboardLayers_toPasteboard(
+      layers,
+      NSPasteboard.generalPasteboard()
+    );
 
     // deselect all layers
     // selection.clear();
@@ -116,25 +122,32 @@ export default function(context) {
     // context.document.currentPage().changeSelectionBySelectingLayers([a]);
 
     // Pasteboard
-    // var pasteboard = NSPasteboard.generalPasteboard();
-    // var pasteboardItems = pasteboard.pasteboardItems;
-    // var imgData = pasteboard.dataForType(NSPasteboardTypePNG);
+    var pasteboard = NSPasteboard.generalPasteboard();
+    var pasteboardItems = pasteboard.pasteboardItems;
+    var imgData = pasteboard.dataForType(NSPasteboardTypePNG);
+    var imgTiffData = pasteboard.dataForType(NSPasteboardTypeTIFF);
     var selectedLayers = context.selection.firstObject();
-    var imgData = MSPasteboardLayers.pasteboardLayersWithLayers([a]);
-    MSPasteboardManager.writePasteboardLayers_toPasteboard(
-      imgData,
-      NSPasteboard.generalPasteboard()
-    );
 
-    if (imgData) {
-      var image = NSImage.alloc().initWithData(imgData);
+    if (imgData || imgTiffData) {
+      var image;
       if (selectedLayers.isKindOfClass(MSShapeGroup)) {
+        // Remove all the selected shape layer's fills
+        selectedLayers.style().removeAllStyleFills();
+        // Add new fill to the shape layer
+        selectedLayers.style().addStylePartOfType(0);
         // Set the layer shape Fills to Pattern Fill
         var fill = selectedLayers
           .style()
           .fills()
           .firstObject();
         fill.setFillType(4);
+
+        if (imgData) {
+          image = NSImage.alloc().initWithData(imgData);
+        } else if (imgTiffData) {
+          image = NSImage.alloc().initWithData(imgTiffData);
+        }
+
         // Paste in the image from pasteboard and set the Pattern Fill type to Fill
         fill.setImage(MSImageData.alloc().initWithImage(image));
         selectedLayers
