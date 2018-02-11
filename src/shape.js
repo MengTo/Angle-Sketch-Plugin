@@ -156,7 +156,7 @@ export default function(context) {
 
   if (selectedLayers.count() != 1) {
 
-    context.document.showMessage("Please, select only one element at a time")
+    context.document.showMessage("Please, select only 1️⃣ element at a time");
     return
   }
 
@@ -191,7 +191,8 @@ export default function(context) {
   var artboardForSelection = options[selectionIndex].artboard;
 
   let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(artboardForSelection);
-  var exportRequest = MSExportRequest.exportRequestsFromLayerAncestry(layerAncestry).firstObject();
+  let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(4, "Angle", "png")
+  var exportRequest = MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry,[exportFormat]).firstObject();
 
   var exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, NSColorSpace.sRGBColorSpace());
 
@@ -211,6 +212,8 @@ export default function(context) {
   imageFill.fillType = StyleFillType.pattern;
 
   selectedLayer.style().addStyleFill(imageFill);
+
+  context.document.showMessage("You got angle! 📱");
 }
 
 function normalizedVectorFrom (rawPoints) {

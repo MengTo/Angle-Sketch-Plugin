@@ -4,9 +4,10 @@
   "icon": "icon.png",
   "commands": [
     {
-      "name": "Angle artboard into quadrilater",
+      "name": "Angle into shape",
       "identifier": "Angle-4-Point-Shape",
-      "script": "./my-command.js"
+      "script": "./shape.js",
+      "shortcut": "cmd shift option \/"
     }
   ],
   "menu": {
