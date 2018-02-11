@@ -13,11 +13,11 @@ function pointsFromBezierPath(bezierPath) {
 
   let count = bezierPath.elementCount();
 
-  let array = Array.from({length: count}, (x, i) => i);
+  let array = Array.from({ length: count }, (x, i) => i);
 
   return array.map(
-    (a,i,as) => {
-      var pointsPointer = MOPointer.alloc().initWithValue_(CGPointMake(0,0));
+    (a, i, as) => {
+      var pointsPointer = MOPointer.alloc().initWithValue_(CGPointMake(0, 0));
       var element = bezierPath.elementAtIndex_associatedPoints_(i, pointsPointer);
 
       let point = pointsPointer.value();
@@ -27,7 +27,7 @@ function pointsFromBezierPath(bezierPath) {
   );
 }
 
-function introspect (type) {
+function introspect(type) {
 
   let mocha = type.class().mocha();
 
@@ -105,7 +105,7 @@ function getSelectionAlertResponseAndSelectionFor(options) {
 
   // Description
   alert.setInformativeText("Choose an Artboard to mirror into the selected mockup:");
-  
+
   // Icon
 
   // Buttons
@@ -123,7 +123,7 @@ function getSelectionAlertResponseAndSelectionFor(options) {
 
   // First Right Column - Dropdown
   let groupArtboardSelectRect = NSMakeRect(leftColWidth, settingY, fieldWidth, 28);
-  
+
   var groupArtboardSelect = createSelect({
     items: options,
     selected: 0,
@@ -150,7 +150,7 @@ function getSelectionAlertResponseAndSelectionFor(options) {
   return { alertOption: alert.runModal(), selectionElement: groupArtboardSelect }
 }
 
-export default function(context) {
+export default function (context) {
 
   let selectedLayers = context.selection;
 
@@ -171,7 +171,7 @@ export default function(context) {
       artboard: artboards[i]
     });
   }
-    
+
   //Sort artboards by name
   options.sort((a, b) => a.name > b.name);
 
@@ -190,16 +190,16 @@ export default function(context) {
   // get artboard name with index
   var artboardForSelection = options[selectionIndex].artboard;
 
-  let pixelDensity = 5;
+  let pixelDensity = 2;
 
   let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(artboardForSelection);
-  let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(pixelDensity, "Angle", "png")
-  var exportRequest = MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry,[exportFormat]).firstObject();
+  let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(pixelDensity, "Angle", "jpg")
+  var exportRequest = MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
 
   var exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, NSColorSpace.sRGBColorSpace());
 
   var imageData = exporter.bitmapImageRep().TIFFRepresentation();
-  
+
   var selectedLayer = selectedLayers.firstObject();
   let bezierPath = selectedLayer.bezierPath();
   var rawPoints = pointsFromBezierPath(bezierPath);
@@ -218,10 +218,10 @@ export default function(context) {
   context.document.showMessage("You got angle! 📱");
 }
 
-function normalizedVectorFrom_atHorizontal_andVerticalRatio (rawPoints, horizontalRatio, verticalRatio) {
-  let minimumX = rawPoints.reduce(( (p, a, i, as) => p > a.x ? a.x : p ), rawPoints[0].x);
-  let minimumY = rawPoints.reduce(( (p, a, i, as) => p > a.y ? a.y : p ), rawPoints[0].y);
-  let maximumY = rawPoints.reduce(( (p, a, i, as) => p < a.y ? a.y : p ), rawPoints[0].y);
+function normalizedVectorFrom_atHorizontal_andVerticalRatio(rawPoints, horizontalRatio, verticalRatio) {
+  let minimumX = rawPoints.reduce(((p, a, i, as) => p > a.x ? a.x : p), rawPoints[0].x);
+  let minimumY = rawPoints.reduce(((p, a, i, as) => p > a.y ? a.y : p), rawPoints[0].y);
+  let maximumY = rawPoints.reduce(((p, a, i, as) => p < a.y ? a.y : p), rawPoints[0].y);
 
   return rawPoints.map(
     function (a, i, as) {
@@ -229,10 +229,10 @@ function normalizedVectorFrom_atHorizontal_andVerticalRatio (rawPoints, horizont
       let yValue = minimumY >= 0 ? a.y - minimumY : a.y + minimumY;
 
       return CIVector.vectorWithX_Y(xValue * horizontalRatio, (maximumY - minimumY - yValue) * verticalRatio);
-  });
+    });
 }
 
-function perspectiveTransform_withPoints (sourceImage, points) {
+function perspectiveTransform_withPoints(sourceImage, points) {
 
   let perspectiveTransform = CIFilter.filterWithName("CIPerspectiveTransform");
 

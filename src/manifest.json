@@ -4,7 +4,7 @@
   "icon": "icon.png",
   "commands": [
     {
-      "name": "Angle into shape",
+      "name": "Apply Mockup",
       "identifier": "Angle-4-Point-Shape",
       "script": "./shape.js",
       "shortcut": "cmd shift option \/"
@@ -15,5 +15,8 @@
     "items": [
       "Angle-4-Point-Shape"
     ]
-  }
+  },
+  "description": "Create your perfect perspective mockup.",
+  "homepage": "https://designcode.io/angle",
+  "authorEmail": "support@designcode.io"
 }
