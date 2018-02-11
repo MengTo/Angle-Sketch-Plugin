@@ -7,7 +7,7 @@
       "name": "Apply Mockup",
       "identifier": "Angle-4-Point-Shape",
       "script": "./shape.js",
-      "shortcut": "cmd shift option \/"
+      "shortcut": "cmd \\"
     }
   ],
   "menu": {
