@@ -190,8 +190,10 @@ export default function(context) {
   // get artboard name with index
   var artboardForSelection = options[selectionIndex].artboard;
 
+  let pixelDensity = 5;
+
   let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(artboardForSelection);
-  let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(4, "Angle", "png")
+  let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(pixelDensity, "Angle", "png")
   var exportRequest = MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry,[exportFormat]).firstObject();
 
   var exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, NSColorSpace.sRGBColorSpace());
@@ -201,7 +203,7 @@ export default function(context) {
   var selectedLayer = selectedLayers.firstObject();
   let bezierPath = selectedLayer.bezierPath();
   var rawPoints = pointsFromBezierPath(bezierPath);
-  let points = normalizedVectorFrom(rawPoints);
+  let points = normalizedVectorFrom_atHorizontal_andVerticalRatio(rawPoints, pixelDensity, pixelDensity);
 
   transformedImage = perspectiveTransform_withPoints(imageData, points);
 
@@ -216,7 +218,7 @@ export default function(context) {
   context.document.showMessage("You got angle! 📱");
 }
 
-function normalizedVectorFrom (rawPoints) {
+function normalizedVectorFrom_atHorizontal_andVerticalRatio (rawPoints, horizontalRatio, verticalRatio) {
   let minimumX = rawPoints.reduce(( (p, a, i, as) => p > a.x ? a.x : p ), rawPoints[0].x);
   let minimumY = rawPoints.reduce(( (p, a, i, as) => p > a.y ? a.y : p ), rawPoints[0].y);
   let maximumY = rawPoints.reduce(( (p, a, i, as) => p < a.y ? a.y : p ), rawPoints[0].y);
@@ -226,7 +228,7 @@ function normalizedVectorFrom (rawPoints) {
       let xValue = minimumX >= 0 ? a.x - minimumX : a.x + minimumX;
       let yValue = minimumY >= 0 ? a.y - minimumY : a.y + minimumY;
 
-      return CIVector.vectorWithX_Y(xValue, maximumY - minimumY - yValue);
+      return CIVector.vectorWithX_Y(xValue * horizontalRatio, (maximumY - minimumY - yValue) * verticalRatio);
   });
 }
 
