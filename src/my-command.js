@@ -1,64 +1,11 @@
 const StyleFillType = { solid: 0, gradient: 1, pattern: 4, noise: 5 };
 
-var debug = function(arg) {
-	log(arg);
-}
-
-// var resourcesPath = function(context) {
-// 	var basePath = NSString.stringWithFormat_(context.scriptPath)
-// 	.stringByDeletingLastPathComponent()
-// 	.stringByDeletingLastPathComponent()
-//   .stringByDeletingLastPathComponent()
-
-// 	var plugin = context.plugin
-// 	if ( ! basePath || ! plugin) {
-// 		var _application = NSApplication.sharedApplication();
-// 		var _delegate = _application.delegate()
-// 		var _plugins = _delegate.pluginManager().plugins()
-// 		var _plugin = _plugins["design.angle"]
-// 		var _path = _plugin.url().copy().path() + "/Contents/Resources"
-// 		return _path
-//   }
-// 	return basePath + "/Contents/Resources/";
-// }
-
-// var loadFramework = function(frameworkName, directory){
-//   var mocha = Mocha.sharedRuntime();
-// 	if (mocha.loadFrameworkWithName_inDirectory_(frameworkName,directory)) {
-// 		debug("loadFramework: `" + frameworkName + "` success!");
-// 		return true;
-//   }
-// 	debug("❌  loadFramework: `" + frameworkName + "` failed!");
-// 	return false;
-// }
-
-// var initialize = function(context) {
-//   var path = context.scriptPath
-//     .stringByDeletingLastPathComponent()
-//     .stringByDeletingLastPathComponent()
-//     .stringByDeletingLastPathComponent();
-// 	// var path = resourcesPath(context);
-// 	log("resource:" + path);
-// 	if (NSClassFromString("Angle") == null) {
-
-//     let contents = NSFileManager.defaultManager().contentsOfDirectoryAtPath_error_(path, null);
-
-//     print(contents);
-
-// 		loadFramework("Angle", path);
-// 	}
-// }
-
 function descriptionForBezierPoint_(bezierPoint) {
   switch (bezierPoint.elementType) {
-    case NSMoveToBezierPathElement:
-      return "MOVE TO: x:" + bezierPoint.point.x + "\t\ty: " + bezierPoint.point.y
-    case NSLineToBezierPathElement:
-      return "LINE TO: x:" + bezierPoint.point.x + "\t\ty: " + bezierPoint.point.y
-    case NSCurveToBezierPathElement:
-      return "CURVE TO: x:" + bezierPoint.point.x + "\t\ty: " + bezierPoint.point.y
-    case NSClosePathBezierPathElement:
-      return "CLOSE PATH"
+    case NSMoveToBezierPathElement: return "MOVE TO: x:" + bezierPoint.point.x + "\t\ty: " + bezierPoint.point.y
+    case NSLineToBezierPathElement: return "LINE TO: x:" + bezierPoint.point.x + "\t\ty: " + bezierPoint.point.y
+    case NSCurveToBezierPathElement: return "CURVE TO: x:" + bezierPoint.point.x + "\t\ty: " + bezierPoint.point.y
+    case NSClosePathBezierPathElement: return "CLOSE PATH"
   }
 }
 
@@ -74,8 +21,6 @@ function pointsFromBezierPath(bezierPath) {
       var element = bezierPath.elementAtIndex_associatedPoints_(i, pointsPointer);
 
       let point = pointsPointer.value();
-
-      // print(descriptionForBezierPoint_({elementType: element, point: point}));
 
       return point
     }
@@ -93,78 +38,228 @@ function loadLocalImage(filePath) {
   return NSImage.alloc().initWithContentsOfFile(filePath);
 }
 
-function fetchImage(url,ingnoreCache) {
-  var request = ingnoreCache ?NSURLRequest.requestWithURL_cachePolicy_timeoutInterval(NSURL.URLWithString(url),NSURLRequestReloadIgnoringLocalCacheData,60) : NSURLRequest.requestWithURL(NSURL.URLWithString(url));
-  var responsePtr = MOPointer.alloc().init();
-  var errorPtr = MOPointer.alloc().init();
-
-  var data = NSURLConnection.sendSynchronousRequest_returningResponse_error(request, responsePtr, errorPtr);
-  if(errorPtr.value() != null) {
-      print(errorPtr.value());
-      return null;
-  }
-
-  var response = responsePtr.value();
-  if(response.statusCode() != 200) {
-      return null;
-  }
-
-  var mimeType = response.allHeaderFields()["Content-Type"];
-  if(!mimeType || !mimeType.hasPrefix("image/")) {
-      return null;
-  }
-
-  return data; // NSImage.alloc().initWithData(data)
-}
-
 function introspect (type) {
 
   let mocha = type.class().mocha();
 
+  print("-----------------------------------------------");
+  print("PROPERTIES-------------------------------------");
+  print("-----------------------------------------------");
+
   print(mocha.properties()); // array of MSDocument specific properties defined on a MSDocument instance
   print(mocha.propertiesWithAncestors()); // array of all the properties defined on a MSDocument instance
 
+  print("-----------------------------------------------");
+  print("INSTANCE METHODS-------------------------------");
+  print("-----------------------------------------------");
   print(mocha.instanceMethods()); // array of methods defined on a MSDocument instance
   print(mocha.instanceMethodsWithAncestors());
 
+  print("-----------------------------------------------");
+  print("CLASS METHODS----------------------------------");
+  print("-----------------------------------------------");
   print(mocha.classMethods()); // array of methods defined on the MSDocument class
   print(mocha.classMethodsWithAncestors());
 
+  print("-----------------------------------------------");
+  print("PROTOCOLS--------------------------------------");
+  print("-----------------------------------------------");
   print(mocha.protocols()); // array of protocols the MSDocument class inherits from
   print(mocha.protocolsWithAncestors());
 }
 
+// Generate a Label
+function createLabel(text, size, frame) {
+  var label = NSTextField.alloc().initWithFrame(frame);
+
+  label.setStringValue(text);
+  label.setFont(NSFont.boldSystemFontOfSize(size));
+  label.setBezeled(false);
+  label.setDrawsBackground(false);
+  label.setEditable(false);
+  label.setSelectable(false);
+
+  return label;
+}
+
+// Generate a Dropdown
+function createSelect(options = {}) {
+
+  if (options.items === null || options.items.count < 1) { return }
+
+  if (options.selected === null || options.selected < 0) {
+    options.selected = 0
+  }
+
+  var comboBox = NSComboBox.alloc().initWithFrame(options.frame);
+
+  comboBox.addItemsWithObjectValues(options.items);
+  comboBox.selectItemAtIndex(options.selected);
+
+  return comboBox;
+}
+
+function getSelectionAlertResponseAndSelectionFor(options) {
+
+  //show a native popup box
+  var alert = NSAlert.alloc().init();
+  var alertContent = NSView.alloc().init();
+  var settingY = 0;
+  var textOffset = 2;
+  var leftColWidth = 120;
+  var labelHeight = 16;
+  var windowWidth = 310;
+  var fieldWidth = 190;
+
+  // Title
+  alert.setMessageText("Design+Code Angle");
+
+  // Description
+  alert.setInformativeText("Choose an Artboard to mirror into the selected mockup:");
+  
+  // Icon
+
+  // Buttons
+  alert.addButtonWithTitle("Angle!");
+  alert.addButtonWithTitle("Close");
+
+  // First Left Column - Label
+  var groupArtboardLabel = createLabel(
+    "Artboard",
+    12,
+    NSMakeRect(0, settingY + textOffset * 2, leftColWidth, labelHeight)
+  );
+
+  alertContent.addSubview(groupArtboardLabel);
+
+  // First Right Column - Dropdown
+  let groupArtboardSelectRect = NSMakeRect(leftColWidth, settingY, fieldWidth, 28);
+  
+  var groupArtboardSelect = createSelect({
+    items: options,
+    selected: 0,
+    frame: groupArtboardSelectRect
+  });
+
+  alertContent.addSubview(groupArtboardSelect);
+
+  // Create some offset below the object, here is the dropdown, so that new element can show below it instead of overlapping
+  settingY = CGRectGetMaxY(groupArtboardSelect.frame()) + textOffset;
+
+  // Render those label, dropdown etc into the Alert view
+  alertContent.frame = NSMakeRect(
+    0,
+    0,
+    windowWidth,
+    CGRectGetMaxY(groupArtboardSelect.frame())
+  );
+
+  alert.accessoryView = alertContent;
+
+  // Reverse order of the content elements
+  alertContent.setFlipped(true);
+
+  // With this will run the modalbox
+  return { alertOption: alert.runModal(), selectionElement: groupArtboardSelect }
+}
+
 export default function(context) {
 
-  // var imageData = fetchImage("https://s3.amazonaws.com/sketch-plugins-cookbook/jake_the_dog.png");
-  // let nsImage = NSImage.alloc().initWithData(imageData);
-
-  var selectedLayers = context.selection;
+  let selectedLayers = context.selection;
 
   if (selectedLayers.count() != 1) {
 
     context.document.showMessage("Please, select only one element at a time")
     return
   }
+
+
+  //reference the Sketch Document
+  let artboards = context.document.artboards();
+  let pages = context.document.pages();
+
+  // Just for deselect stuff - selection.clear();
+  let sketch = context.api();
+  let document = sketch.selectedDocument;
+
+  // loop through a list of artboards of the page
+  var options = [];
+
+  for (var i = 0; i < artboards.count(); i++) {
+    options.push({
+      name: artboards[i].name(),
+      artboard: artboards[i]
+    });
+  }
+    
+  //Sort artboards by name
+  options.sort((a, b) => a.name > b.name);
+
+  // Get sorted array of names for artboards
+  var names = options.map((a) => a.name);
+
+  // //loop through the pages of the document
+  // for (var k = 0; k < pages.count(); k++) {
+  //   //reference each pages
+  //   var page = pages[k];
+
+  //   //get the name of the pages
+  //   var pageName = [page.name()];
+
+  //   //show the page name in the console
+  //   log("Pages in current document: " + pageName);
+  // }
+
+  // In earlier versions of Sketch, the modal does not layout properly.
+  let response = getSelectionAlertResponseAndSelectionFor(names);
+  // let response = { alertOption: NSAlertFirstButtonReturn, selectionElement: { indexOfSelectedItem : () => 0 }}
+
+  if (response.alertOption != NSAlertFirstButtonReturn) { print("Close"); return }
+
+  // Get the index of the selected option in dropdown
+  var selectionIndex = response.selectionElement.indexOfSelectedItem();
+
+  // get artboard name with index
+  var artboardForSelection = options[selectionIndex].artboard;
+
+  let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(artboardForSelection);
+  var exportRequest = MSExportRequest.exportRequestsFromLayerAncestry(layerAncestry).firstObject();
+
+  var exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, NSColorSpace.sRGBColorSpace());
+
+  var imageData = exporter.bitmapImageRep().TIFFRepresentation();
   
-  var layer = selectedLayers.firstObject();
-
-  //introspect(MSImageData);
-
-  let bezierPath = layer.bezierPath();
+  var selectedLayer = selectedLayers.firstObject();
+  let bezierPath = selectedLayer.bezierPath();
   var rawPoints = pointsFromBezierPath(bezierPath);
-  
+  let points = normalizedVectorFrom(rawPoints);
+
+  transformedImage = perspectiveTransform_withPoints(imageData, points);
+
+  let imageFill = MSStyleFill.alloc().init();
+
+  let msImage = MSImageData.alloc().initWithImage_(transformedImage);
+  imageFill.setImage(msImage);
+  imageFill.fillType = StyleFillType.pattern;
+
+  selectedLayer.style().addStyleFill(imageFill);
+}
+
+function normalizedVectorFrom (rawPoints) {
   let minimumX = rawPoints.reduce(( (p, a, i, as) => p > a.x ? a.x : p ), rawPoints[0].x);
   let minimumY = rawPoints.reduce(( (p, a, i, as) => p > a.y ? a.y : p ), rawPoints[0].y);
   let maximumY = rawPoints.reduce(( (p, a, i, as) => p < a.y ? a.y : p ), rawPoints[0].y);
 
-  let points = rawPoints.map(
+  return rawPoints.map(
     function (a, i, as) {
       let xValue = minimumX >= 0 ? a.x - minimumX : a.x + minimumX;
       let yValue = minimumY >= 0 ? a.y - minimumY : a.y + minimumY;
 
       return CIVector.vectorWithX_Y(xValue, maximumY - minimumY - yValue);
   });
+}
+
+function perspectiveTransform_withPoints (sourceImage, points) {
 
   let perspectiveTransform = CIFilter.filterWithName("CIPerspectiveTransform");
 
@@ -178,53 +273,21 @@ export default function(context) {
     .stringByDeletingLastPathComponent()
     .stringByDeletingLastPathComponent();
 
-  let imageNSImage = NSImage.alloc().initWithContentsOfFile(basePath + "/screen.png");
-
-  let imageTiff = imageNSImage.TIFFRepresentation();
-  let imageBitmap = NSBitmapImageRep.imageRepWithData(imageTiff);
+  let imageBitmap = NSBitmapImageRep.imageRepWithData(sourceImage);
   let image = CIImage.alloc().initWithBitmapImageRep(imageBitmap);
 
   perspectiveTransform.setValue_forKey(image, "inputImage");
-  print(perspectiveTransform);
 
   let perspectiveImage = perspectiveTransform.valueForKey("outputImage");
 
-  print(perspectiveImage);
-
-  if (perspectiveImage) {
-    print("There is an image");
-  } else {
+  if (!perspectiveImage) {
     print("There is no image");
     return
   }
-
-  // Angle.angleImage_forPoints();
-
-  // print(NSCIImageRep.class().mocha().classMethods());
-
-  // var pointerForImageRepresentation = MOPointer.alloc().initWithValue_(perspectiveImage);
 
   let representation = NSCIImageRep.imageRepWithCIImage(perspectiveImage);
   let transformedImage = NSImage.alloc().initWithSize(representation.size());
   transformedImage.addRepresentation(representation);
 
-  let newFill = MSStyleFill.alloc().init();
-
-  let msImage = MSImageData.alloc().initWithImage_convertColorSpace_(transformedImage, true);
-  newFill.setImage(msImage);
-  newFill.fillType = StyleFillType.pattern;
-
-  layer.style().addStyleFill(newFill);
-
-  //let transformedImage = NSImage.alloc().initWithCIImage_(composite.outputImage());
-
-  // const fill = layer.style().firstEnabledFill();
-
-  //fill.image = MSImageData.alloc().initWithImage(image);
-
-  // print("I'm here");
+  return transformedImage
 }
-
-  // var documentName = context.document.displayName();
-  // log('The current document is named: ' + documentName)
-  // print(CIImage.class().mocha().classMethods());

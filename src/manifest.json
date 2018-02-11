@@ -4,15 +4,15 @@
   "icon": "icon.png",
   "commands": [
     {
-      "name": "my-command",
-      "identifier": "my-command-identifier",
+      "name": "Angle artboard into quadrilater",
+      "identifier": "Angle-4-Point-Shape",
       "script": "./my-command.js"
     }
   ],
   "menu": {
     "title": "Angle",
     "items": [
-      "my-command-identifier"
+      "Angle-4-Point-Shape"
     ]
   }
 }
