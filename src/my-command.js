@@ -27,17 +27,6 @@ function pointsFromBezierPath(bezierPath) {
   );
 }
 
-function loadLocalImage(filePath) {
-  if(!NSFileManager.defaultManager().fileExistsAtPath(filePath)) {
-      print("File does not exist at path");
-      return null;
-  }
-
-  print("Image loaded");
-
-  return NSImage.alloc().initWithContentsOfFile(filePath);
-}
-
 function introspect (type) {
 
   let mocha = type.class().mocha();
@@ -148,10 +137,8 @@ function getSelectionAlertResponseAndSelectionFor(options) {
 
   // Render those label, dropdown etc into the Alert view
   alertContent.frame = NSMakeRect(
-    0,
-    0,
-    windowWidth,
-    CGRectGetMaxY(groupArtboardSelect.frame())
+    0, 0,
+    windowWidth, CGRectGetMaxY(groupArtboardSelect.frame())
   );
 
   alert.accessoryView = alertContent;
@@ -159,7 +146,7 @@ function getSelectionAlertResponseAndSelectionFor(options) {
   // Reverse order of the content elements
   alertContent.setFlipped(true);
 
-  // With this will run the modalbox
+  // With this will run the modal and return a reference to the selection element
   return { alertOption: alert.runModal(), selectionElement: groupArtboardSelect }
 }
 
@@ -173,14 +160,7 @@ export default function(context) {
     return
   }
 
-
-  //reference the Sketch Document
   let artboards = context.document.artboards();
-  let pages = context.document.pages();
-
-  // Just for deselect stuff - selection.clear();
-  let sketch = context.api();
-  let document = sketch.selectedDocument;
 
   // loop through a list of artboards of the page
   var options = [];
@@ -197,18 +177,6 @@ export default function(context) {
 
   // Get sorted array of names for artboards
   var names = options.map((a) => a.name);
-
-  // //loop through the pages of the document
-  // for (var k = 0; k < pages.count(); k++) {
-  //   //reference each pages
-  //   var page = pages[k];
-
-  //   //get the name of the pages
-  //   var pageName = [page.name()];
-
-  //   //show the page name in the console
-  //   log("Pages in current document: " + pageName);
-  // }
 
   // In earlier versions of Sketch, the modal does not layout properly.
   let response = getSelectionAlertResponseAndSelectionFor(names);
