@@ -19,19 +19,6 @@ function getSortedArtboardsFor(context) {
 }
 
 // ---------------------------------
-// DESCRIPTION FOR BEZIER PATH
-// ---------------------------------
-
-function descriptionForBezierPoint_(bezierPoint) {
-  switch (bezierPoint.elementType) {
-    case NSMoveToBezierPathElement: return "MOVE TO: x:" + bezierPoint.point.x + "\t\ty: " + bezierPoint.point.y
-    case NSLineToBezierPathElement: return "LINE TO: x:" + bezierPoint.point.x + "\t\ty: " + bezierPoint.point.y
-    case NSCurveToBezierPathElement: return "CURVE TO: x:" + bezierPoint.point.x + "\t\ty: " + bezierPoint.point.y
-    case NSClosePathBezierPathElement: return "CLOSE PATH"
-  }
-}
-
-// ---------------------------------
 // CREATE LABEL ELEMENT
 // ---------------------------------
 
@@ -115,16 +102,16 @@ function getSelectionAlertResponseAndSelectionFor(options) {
   var fieldWidth = 190;
 
   // Title
-  alert.setMessageText("Design+Code Angle");
+  alert.setMessageText("Apply Mockup");
 
   // Description
-  alert.setInformativeText("Choose an Artboard to mirror into the selected mockup:");
+  alert.setInformativeText("Choose an Artboard to apply into the selected shape");
 
   // Icon
 
   // Buttons
-  alert.addButtonWithTitle("Angle!");
-  alert.addButtonWithTitle("Close");
+  alert.addButtonWithTitle("Apply");
+  alert.addButtonWithTitle("Cancel");
 
   // First Left Column - Label
   var groupArtboardLabel = createLabel(
@@ -178,7 +165,7 @@ export default function (context) {
 
   if (selectedLayers.count() != 1) {
 
-    context.document.showMessage("Please, select only 1️⃣ element at a time");
+    context.document.showMessage("Select only 1 shape at a time.");
     return
   }
 
@@ -200,9 +187,11 @@ export default function (context) {
     context: context,
   });
 
+  if (!perspectiveImage) {
+    print("There is no image.");
   if (angleInstance == null) { return }
 
   angleInstance.addImageFill();
 
-  context.document.showMessage("You got angle! 📱");
+  context.document.showMessage("You got angled! 📱");
 }
