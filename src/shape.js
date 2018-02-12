@@ -57,35 +57,6 @@ function createSelect(options = {}) {
 }
 
 // ---------------------------------
-// VALIDATE POINTS IN POLYGON
-// ---------------------------------
-
-function pointsAreValid(points) {
-  
-  let length = points.length
-
-  if (length != 7) { // Not a quadrilater
-
-    if (length > 7) {
-      context.document.showMessage("Maybe your shape has too many sides.");
-      return false
-    }
-  
-    if (length < 7) {
-      context.document.showMessage("Maybe your shape does not have enought sides.");
-      return false
-    }
-  }
-
-  // If the shape is an X crossing shape, fail
-  // If two or more points coincide, fail
-
-  // There seems to be something wrong with your shape 😕
-
-  return true
-}
-
-// ---------------------------------
 // GET RESPONSE FOR OPTIONS
 // ---------------------------------
 
@@ -187,8 +158,6 @@ export default function (context) {
     context: context,
   });
 
-  if (!perspectiveImage) {
-    print("There is no image.");
   if (angleInstance == null) { return }
 
   angleInstance.addImageFill();
