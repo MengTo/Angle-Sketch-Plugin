@@ -16,7 +16,8 @@
       "Angle-4-Point-Shape"
     ]
   },
-  "description": "Create your perfect perspective mockup.",
+  "description": "Apply perspective transforms on screen mockups. Auto-detect screens by resolution and works on shapes and symbols. Super fast.",
   "homepage": "https://designcode.io/angle",
+  "author": "Design+Code",
   "authorEmail": "support@designcode.io"
 }
