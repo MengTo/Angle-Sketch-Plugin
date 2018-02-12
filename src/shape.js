@@ -101,16 +101,16 @@ function getSelectionAlertResponseAndSelectionFor(options) {
   var fieldWidth = 190;
 
   // Title
-  alert.setMessageText("Design+Code Angle");
+  alert.setMessageText("Apply Mockup");
 
   // Description
-  alert.setInformativeText("Choose an Artboard to mirror into the selected mockup:");
+  alert.setInformativeText("Choose an Artboard to apply into the selected shape");
 
   // Icon
 
   // Buttons
-  alert.addButtonWithTitle("Angle!");
-  alert.addButtonWithTitle("Close");
+  alert.addButtonWithTitle("Apply");
+  alert.addButtonWithTitle("Cancel");
 
   // First Left Column - Label
   var groupArtboardLabel = createLabel(
@@ -156,7 +156,7 @@ export default function (context) {
 
   if (selectedLayers.count() != 1) {
 
-    context.document.showMessage("Please, select only 1️⃣ element at a time");
+    context.document.showMessage("Select only 1 shape at a time.");
     return
   }
 
@@ -215,7 +215,7 @@ export default function (context) {
 
   selectedLayer.style().addStyleFill(imageFill);
 
-  context.document.showMessage("You got angle! 📱");
+  context.document.showMessage("You got angled! 📱");
 }
 
 function normalizedVectorFrom_atHorizontal_andVerticalRatio(rawPoints, horizontalRatio, verticalRatio) {
@@ -254,7 +254,7 @@ function perspectiveTransform_withPoints(sourceImage, points) {
   let perspectiveImage = perspectiveTransform.valueForKey("outputImage");
 
   if (!perspectiveImage) {
-    print("There is no image");
+    print("There is no image.");
     return
   }
 
