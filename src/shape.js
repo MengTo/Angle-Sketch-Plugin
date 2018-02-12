@@ -1,4 +1,26 @@
-const StyleFillType = { solid: 0, gradient: 1, pattern: 4, noise: 5 };
+// ---------------------------------
+// SORTED ARTBOARDS IN CONTEXT
+// ---------------------------------
+
+function getSortedArtboardsFor(context) {
+
+  let artboards = context.document.artboards();
+
+  // loop through a list of artboards of the page
+  var artboardObjects = [];
+
+  for (var i = 0; i < artboards.count(); i++) {
+    artboardObjects.push({ name: artboards[i].name(), artboard: artboards[i] });
+  }
+
+  artboardObjects.sort((a, b) => a.name > b.name);
+
+  return artboardObjects
+}
+
+// ---------------------------------
+// DESCRIPTION FOR BEZIER PATH
+// ---------------------------------
 
 function descriptionForBezierPoint_(bezierPoint) {
   switch (bezierPoint.elementType) {
@@ -9,55 +31,10 @@ function descriptionForBezierPoint_(bezierPoint) {
   }
 }
 
-function pointsFromBezierPath(bezierPath) {
+// ---------------------------------
+// CREATE LABEL ELEMENT
+// ---------------------------------
 
-  let count = bezierPath.elementCount();
-
-  let array = Array.from({ length: count }, (x, i) => i);
-
-  return array.map(
-    (a, i, as) => {
-      var pointsPointer = MOPointer.alloc().initWithValue_(CGPointMake(0, 0));
-      var element = bezierPath.elementAtIndex_associatedPoints_(i, pointsPointer);
-
-      let point = pointsPointer.value();
-
-      return point
-    }
-  );
-}
-
-function introspect(type) {
-
-  let mocha = type.class().mocha();
-
-  print("-----------------------------------------------");
-  print("PROPERTIES-------------------------------------");
-  print("-----------------------------------------------");
-
-  print(mocha.properties()); // array of MSDocument specific properties defined on a MSDocument instance
-  print(mocha.propertiesWithAncestors()); // array of all the properties defined on a MSDocument instance
-
-  print("-----------------------------------------------");
-  print("INSTANCE METHODS-------------------------------");
-  print("-----------------------------------------------");
-  print(mocha.instanceMethods()); // array of methods defined on a MSDocument instance
-  print(mocha.instanceMethodsWithAncestors());
-
-  print("-----------------------------------------------");
-  print("CLASS METHODS----------------------------------");
-  print("-----------------------------------------------");
-  print(mocha.classMethods()); // array of methods defined on the MSDocument class
-  print(mocha.classMethodsWithAncestors());
-
-  print("-----------------------------------------------");
-  print("PROTOCOLS--------------------------------------");
-  print("-----------------------------------------------");
-  print(mocha.protocols()); // array of protocols the MSDocument class inherits from
-  print(mocha.protocolsWithAncestors());
-}
-
-// Generate a Label
 function createLabel(text, size, frame) {
   var label = NSTextField.alloc().initWithFrame(frame);
 
@@ -70,6 +47,10 @@ function createLabel(text, size, frame) {
 
   return label;
 }
+
+// ---------------------------------
+// CREATE NEW SELECTION BOX
+// ---------------------------------
 
 // Generate a Dropdown
 function createSelect(options = {}) {
@@ -87,6 +68,39 @@ function createSelect(options = {}) {
 
   return comboBox;
 }
+
+// ---------------------------------
+// VALIDATE POINTS IN POLYGON
+// ---------------------------------
+
+function pointsAreValid(points) {
+  
+  let length = points.length
+
+  if (length != 7) { // Not a quadrilater
+
+    if (length > 7) {
+      context.document.showMessage("Maybe your shape has too many sides.");
+      return false
+    }
+  
+    if (length < 7) {
+      context.document.showMessage("Maybe your shape does not have enought sides.");
+      return false
+    }
+  }
+
+  // If the shape is an X crossing shape, fail
+  // If two or more points coincide, fail
+
+  // There seems to be something wrong with your shape 😕
+
+  return true
+}
+
+// ---------------------------------
+// GET RESPONSE FOR OPTIONS
+// ---------------------------------
 
 function getSelectionAlertResponseAndSelectionFor(options) {
 
@@ -150,9 +164,17 @@ function getSelectionAlertResponseAndSelectionFor(options) {
   return { alertOption: alert.runModal(), selectionElement: groupArtboardSelect }
 }
 
+// ---------------------------------
+// MAIN FUNCTION
+// ---------------------------------
+
+const Angle = require('./Angle');
+
 export default function (context) {
 
   let selectedLayers = context.selection;
+
+  if (selectedLayers == null) { return }
 
   if (selectedLayers.count() != 1) {
 
@@ -160,23 +182,8 @@ export default function (context) {
     return
   }
 
-  let artboards = context.document.artboards();
-
-  // loop through a list of artboards of the page
-  var options = [];
-
-  for (var i = 0; i < artboards.count(); i++) {
-    options.push({
-      name: artboards[i].name(),
-      artboard: artboards[i]
-    });
-  }
-
-  //Sort artboards by name
-  options.sort((a, b) => a.name > b.name);
-
-  // Get sorted array of names for artboards
-  var names = options.map((a) => a.name);
+  let artboards = getSortedArtboardsFor(context);
+  var names = artboards.map((a) => a.name);
 
   // In earlier versions of Sketch, the modal does not layout properly.
   let response = getSelectionAlertResponseAndSelectionFor(names);
@@ -187,80 +194,15 @@ export default function (context) {
   // Get the index of the selected option in dropdown
   var selectionIndex = response.selectionElement.indexOfSelectedItem();
 
-  // get artboard name with index
-  var artboardForSelection = options[selectionIndex].artboard;
+  let angleInstance = Angle.angleFor({
+    selectedLayer: selectedLayers.firstObject(),
+    artboard: artboards[selectionIndex].artboard,
+    context: context,
+  });
 
-  let pixelDensity = 2;
+  if (angleInstance == null) { return }
 
-  let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(artboardForSelection);
-  let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(pixelDensity, "Angle", "jpg")
-  var exportRequest = MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
-
-  var exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, NSColorSpace.sRGBColorSpace());
-
-  var imageData = exporter.bitmapImageRep().TIFFRepresentation();
-
-  var selectedLayer = selectedLayers.firstObject();
-  let bezierPath = selectedLayer.bezierPath();
-  var rawPoints = pointsFromBezierPath(bezierPath);
-  let points = normalizedVectorFrom_atHorizontal_andVerticalRatio(rawPoints, pixelDensity, pixelDensity);
-
-  transformedImage = perspectiveTransform_withPoints(imageData, points);
-
-  let imageFill = MSStyleFill.alloc().init();
-
-  let msImage = MSImageData.alloc().initWithImage_(transformedImage);
-  imageFill.setImage(msImage);
-  imageFill.fillType = StyleFillType.pattern;
-
-  selectedLayer.style().addStyleFill(imageFill);
+  angleInstance.addImageFill();
 
   context.document.showMessage("You got angle! 📱");
-}
-
-function normalizedVectorFrom_atHorizontal_andVerticalRatio(rawPoints, horizontalRatio, verticalRatio) {
-  let minimumX = rawPoints.reduce(((p, a, i, as) => p > a.x ? a.x : p), rawPoints[0].x);
-  let minimumY = rawPoints.reduce(((p, a, i, as) => p > a.y ? a.y : p), rawPoints[0].y);
-  let maximumY = rawPoints.reduce(((p, a, i, as) => p < a.y ? a.y : p), rawPoints[0].y);
-
-  return rawPoints.map(
-    function (a, i, as) {
-      let xValue = minimumX >= 0 ? a.x - minimumX : a.x + minimumX;
-      let yValue = minimumY >= 0 ? a.y - minimumY : a.y + minimumY;
-
-      return CIVector.vectorWithX_Y(xValue * horizontalRatio, (maximumY - minimumY - yValue) * verticalRatio);
-    });
-}
-
-function perspectiveTransform_withPoints(sourceImage, points) {
-
-  let perspectiveTransform = CIFilter.filterWithName("CIPerspectiveTransform");
-
-  perspectiveTransform.setValue_forKey(points[0], "inputTopLeft");
-  perspectiveTransform.setValue_forKey(points[1], "inputTopRight");
-  perspectiveTransform.setValue_forKey(points[2], "inputBottomRight");
-  perspectiveTransform.setValue_forKey(points[3], "inputBottomLeft");
-
-  let basePath = context.scriptPath
-    .stringByDeletingLastPathComponent()
-    .stringByDeletingLastPathComponent()
-    .stringByDeletingLastPathComponent();
-
-  let imageBitmap = NSBitmapImageRep.imageRepWithData(sourceImage);
-  let image = CIImage.alloc().initWithBitmapImageRep(imageBitmap);
-
-  perspectiveTransform.setValue_forKey(image, "inputImage");
-
-  let perspectiveImage = perspectiveTransform.valueForKey("outputImage");
-
-  if (!perspectiveImage) {
-    print("There is no image");
-    return
-  }
-
-  let representation = NSCIImageRep.imageRepWithCIImage(perspectiveImage);
-  let transformedImage = NSImage.alloc().initWithSize(representation.size());
-  transformedImage.addRepresentation(representation);
-
-  return transformedImage
 }

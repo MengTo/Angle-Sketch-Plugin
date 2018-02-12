@@ -4,6 +4,18 @@
   "icon": "icon.png",
   "commands": [
     {
+      "name": "Rotate Mockup",
+      "identifier": "Angle-Rotate-Mockup",
+      "script": "./rotate.js",
+      "shortcut": "cmd shift option r"
+    },
+    {
+      "name": "Flip Mockup",
+      "identifier": "Angle-Rotate-Flip",
+      "script": "./simmetry.js",
+      "shortcut": "cmd shift option s"
+    },
+    {
       "name": "Apply Mockup",
       "identifier": "Angle-4-Point-Shape",
       "script": "./shape.js",
@@ -13,6 +25,8 @@
   "menu": {
     "title": "Angle",
     "items": [
+      "Angle-Rotate-Flip",
+      "Angle-Rotate-Mockup",
       "Angle-4-Point-Shape"
     ]
   },
