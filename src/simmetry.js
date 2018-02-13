@@ -3,6 +3,7 @@
 // ---------------------------------
 
 const Angle = require('./Angle');
+require('./shared');
 
 export default function (context) {
 

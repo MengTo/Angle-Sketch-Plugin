@@ -1,24 +1,4 @@
 // ---------------------------------
-// SORTED ARTBOARDS IN CONTEXT
-// ---------------------------------
-
-function getSortedArtboardsFor(context) {
-
-  let artboards = context.document.artboards();
-
-  // loop through a list of artboards of the page
-  var artboardObjects = [];
-
-  for (var i = 0; i < artboards.count(); i++) {
-    artboardObjects.push({ name: artboards[i].name(), artboard: artboards[i] });
-  }
-
-  artboardObjects.sort((a, b) => a.name > b.name);
-
-  return artboardObjects
-}
-
-// ---------------------------------
 // CREATE LABEL ELEMENT
 // ---------------------------------
 
@@ -127,6 +107,8 @@ function getSelectionAlertResponseAndSelectionFor(options) {
 // ---------------------------------
 
 const Angle = require('./Angle');
+require('./shared');
+
 
 export default function (context) {
 
@@ -140,7 +122,29 @@ export default function (context) {
     return
   }
 
-  let artboards = getSortedArtboardsFor(context);
+  let layer = selectedLayers.firstObject();
+
+  let angleInstance = Angle.angleFor({
+    selectedLayer: layer,
+    context: context,
+  });
+
+  if (angleInstance == null) { return }
+
+  // ---------------------------------
+  // SORTED ARTBOARDS IN CONTEXT
+  // ---------------------------------
+
+  let parentArtboard = layer.parentArtboard();
+  let allArtboards = context.document.artboards();
+  let artboards = [];
+
+  for (var i = 0; i < allArtboards.count(); i++) {
+    if (allArtboards[i] != parentArtboard) {
+      artboards.push({ name: allArtboards[i].name(), artboard: allArtboards[i] });
+    }
+  }
+
   var names = artboards.map((a) => a.name);
 
   // In earlier versions of Sketch, the modal does not layout properly.
@@ -152,13 +156,9 @@ export default function (context) {
   // Get the index of the selected option in dropdown
   var selectionIndex = response.selectionElement.indexOfSelectedItem();
 
-  let angleInstance = Angle.angleFor({
-    selectedLayer: selectedLayers.firstObject(),
-    artboard: artboards[selectionIndex].artboard,
-    context: context,
-  });
+  return
 
-  if (angleInstance == null) { return }
+  angleInstance.artboard = artboards[selectionIndex].artboard;
 
   angleInstance.addImageFill();
 

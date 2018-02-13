@@ -217,62 +217,7 @@ class Angle {
         return transformedImage
     }
 }
-
-class SymbolicAngle extends Angle {
-    constructor (options = {}) {
-        super(options);
-  
-        const existingOverrides = this.selectedLayer.overrides() || NSDictionary.dictionary();
-        const overrides = NSMutableDictionary.dictionaryWithDictionary(existingOverrides);
-    
-        let availableOverrides = this.selectedLayer.availableOverrides();
-        this.imageOverride = availableOverrides.reduce ( function (p, a, i, as) {
-            if (a.currentValue().class() == MSImageData) { return a }
-            return p
-        }, nil);
-    
-        this.targetLayer = this.imageOverride.affectedLayer();
-    
-        this.targetPath = this.targetLayer.bezierPath();
-    }
-
-    addImageFill () {
-
-        let transformedImage = this.perspectiveTransform_withPoints();
-
-        let image = MSImageData.alloc().initWithImage_(transformedImage);
-
-        let objectID = this.targetLayer.objectID();
-
-        const existingOverrides = this.selectedLayer.overrides() || NSDictionary.dictionary();
-        const overrides = NSMutableDictionary.dictionaryWithDictionary(existingOverrides);
-
-        overrides.setObject_forKey(image, objectID);
-
-        this.selectedLayer.overrides = overrides;
-    }
-}
-
-class ShapeAngle extends Angle {
-    constructor (options = {}) {
-        super(options);
-
-        this.targetLayer = this.selectedLayer;
-
-        this.targetPath = this.selectedLayer.bezierPath();
-    }
-
-    addImageFill () {
-
-        let transformedImage = this.perspectiveTransform_withPoints();
-
-        let image = MSImageData.alloc().initWithImage_(transformedImage);
-
-        let imageFill = MSStyleFill.alloc().init();
-        imageFill.setImage(image);
-        imageFill.fillType = StyleFillType.pattern;
-    
-        this.targetLayer.style().addStyleFill(imageFill);
+        return MSImageData.alloc().initWithImage_(transformedImage)
     }
 }
 
