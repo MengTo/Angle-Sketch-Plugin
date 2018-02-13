@@ -1,46 +1,96 @@
-// ---------------------------------
-// SKETCH MNEMONIC ENUMS
-// ---------------------------------
-
-const StyleFillType = { solid: 0, gradient: 1, pattern: 4, noise: 5 };
-
 class Angle {
 
-    static angleFor(options = {}) {
+    // ---------------------------------
+    // PERSISTENT PROPERTIES
+    // ---------------------------------
 
-        let angleInstance;
+    get artboardID () {
+        if (this._artboardID != undefined) { return this._artboardID; }
         
-        if (options.selectedLayer.class() == MSSymbolInstance) {
-            angleInstance = new SymbolicAngle(options)
-        } else {
-            angleInstance = new ShapeAngle(options)
-        }
+        // Javascript string cohersion
+        this._artboardID = this.loadValueForKey("artboard-id") + "";
 
-        if (!angleInstance.validatePoints()) {
-            return null
-        }
-
-        angleInstance.context = options.context;
-
-        if (options.artboard != null) {
-            angleInstance.artboard = options.artboard;
-        } else {
-            angleInstance.loadPersistentData();
-        }
-
-        angleInstance.imageData = angleInstance.retrieveImageData();
-
-        angleInstance.imprintPersistenceData();
-
-        return angleInstance;
+        return this._artboardID;
     }
+    set artboardID (value) { return }
+
+    get artboard () {
+        if (this._artboard != undefined) { return this._artboard; }
+
+        if (this.artboardID == undefined) {
+            print("🛑 No artboard ID registered");
+            return
+        }
+
+        let artboards = this.context.document.artboards();
+
+        for (let index = 0; index < artboards.count(); index++) {
+            if (artboards[index].objectID() == this.artboardID) {
+                this._artboard = artboards[index];
+            }
+        }
+
+        if (this._artboard == undefined) {
+            print("🛑 Not able to retrieve artboard from id in document");
+            return
+        }
+
+        return this._artboard
+    }
+
+    set artboard (value) {
+        this._artboard = value;
+        this.imprintValue_forKey(value.objectID(), "artboard-id");
+    }
+
+    get rotation () {
+        if (this._rotation == undefined) {
+            this._rotation = this.loadValueForKey("rotation");
+        }
+        return this._rotation;
+    }
+    set rotation (value) {
+        this._rotation = value;
+        this.imprintValue_forKey(value, "rotation");
+    }
+
+    get pixelDensity () {
+        if (this._pixelDensity == undefined) {
+            this._pixelDensity = this.loadValueForKey("pixel-density");
+        }
+        return this._pixelDensity;
+    }
+    set pixelDensity (value) {
+        this._pixelDensity = value;
+        this.imprintValue_forKey(value, "pixel-density");
+    }
+
+    get reversed () {
+        if (this._reversed == undefined) {
+            // Javascript boolean cohersion
+            this._reversed = this.loadValueForKey("reversed") == 0 ? false : true;
+        }
+        return this._reversed;
+    }
+    set reversed (value) {
+        this._reversed = value;
+        this.imprintValue_forKey(value, "reversed");
+    }
+
+    // ---------------------------------
+    // PERSISTENCY METHODS
+    // ---------------------------------
 
     imprintValue_forKey(value, key) {
         if (this.selectedLayer == null) {
             print("🛑 Imprinting value before selected layer assignment");
             return
         }
+
         this.context.command.setValue_forKey_onLayer(value, key, this.selectedLayer);
+
+        print("☑️ Persistent data imprinted into layer: " + key);
+        print("Value: " + value);
     }
 
     imprintValues_forKeys(dictionary) {
@@ -49,57 +99,58 @@ class Angle {
         }
     }
 
-    imprintPersistenceData() {
-        this.imprintValue_forKey(this.artboard.objectID(), "artboard-id");
-        this.imprintValue_forKey(this.pixelDensity, "pixel-density");
-        this.imprintValue_forKey(this.rotation, "rotation");
-        this.imprintValue_forKey(this.reversed, "reversed");
+    loadValueForKey(key) {
+        let value = this.context.command.valueForKey_onLayer(key, this.selectedLayer);
+        print("☑️ Persistent data loadad from layer: " + key);
+        print("Value: " + value);
+        return value
     }
 
-    loadPersistentData() {
-        let artboardID = this.context.command.valueForKey_onLayer("artboard-id", this.selectedLayer);
-        let artboards = this.context.document.artboards();
-
-        for (let index = 0; index < artboards.count(); index++) {
-            if (artboards[index].objectID() == artboardID) {
-                this.artboard = artboards[index];
-            }
-        }
-
-        if (this.artboard == null) {
-            print("🛑 Not able to retrieve artboard from id in document");
-        }
-
-        this.rotation = this.context.command.valueForKey_onLayer("rotation", this.selectedLayer);
-        this.reversed = this.context.command.valueForKey_onLayer("reversed", this.selectedLayer) == 0 ? false : true;
-        this.pixelDensity = this.context.command.valueForKey_onLayer("pixel-density", this.selectedLayer);
-    }
+    // ---------------------------------
+    // CONSTRUCTOR
+    // ---------------------------------
 
     constructor (options = {}) {
+
+        this.context = options.context;
+        this.selectedLayer = options.selectedLayer;
 
         options.rotation = options.rotation || 0;
         options.reversed = options.reversed || false;
         options.pixelDensity = options.pixelDensity || 2;
         
-        this.rotation = options.rotation;
-        this.reversed = options.reversed;
-        this.pixelDensity = options.pixelDensity;
-
-        this.selectedLayer = options.selectedLayer;
+        this.rotation = this.rotation || options.rotation;
+        this.reversed = this.reversed || options.reversed;
+        this.pixelDensity = this.pixelDensity || options.pixelDensity;
     }
 
-    retrieveImageData () {
+    // ---------------------------------
+    // IMAGE DATA
+    // ---------------------------------
+
+    get imageData () {
 
         let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(this.artboard);      
         let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(this.pixelDensity, "Angle", "jpg");
         let exportRequest = MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
         let exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, NSColorSpace.sRGBColorSpace());
-      
-        return exporter.bitmapImageRep().TIFFRepresentation();
+        let imageData = exporter.bitmapImageRep().TIFFRepresentation();
+
+        if (imageData == undefined) {
+            print("🛑 Unable to retrieve image data");
+        } else {
+            print("🖼 Image data retrieved");
+        }
+
+        return imageData
     }
 
-    validatePoints() {
-        let points = this.pointsFromBezierPath();
+    // ---------------------------------
+    // PATH
+    // ---------------------------------
+
+    get pointsAreValid () {
+        let points = this.pointsFromBezierPath;
         let length = points.length;
 
         if (length != 7) { // Not a quadrilater
@@ -123,13 +174,17 @@ class Angle {
         return true
     }
 
-    pointsFromBezierPath () {
+    get pointsFromBezierPath () {
+
+        if (this._pointsFromBezierPath != undefined) {
+            return this._pointsFromBezierPath;
+        }
 
         let count = this.targetPath.elementCount();
 
         let array = Array.from({ length: count }, (x, i) => i);
 
-        return array.map(
+        let points = array.map(
             (a, i, as) => {
             var pointsPointer = MOPointer.alloc().initWithValue_(CGPointMake(0, 0));
             var element = this.targetPath.elementAtIndex_associatedPoints_(i, pointsPointer);
@@ -139,11 +194,15 @@ class Angle {
             return point
             }
         );
+
+        this._pointsFromBezierPath = points;
+
+        return points;
     }
 
-    normalizedVector () {
+    get normalizedPoints () {
 
-        rawPoints = this.pointsFromBezierPath();
+        rawPoints = this.pointsFromBezierPath;
         horizontalRatio = this.pixelDensity;
         verticalRatio = this.pixelDensity;
 
@@ -160,6 +219,26 @@ class Angle {
         });
     }
 
+    // ---------------------------------
+    // INTERFACE
+    // ---------------------------------
+
+    rotate () {
+
+        this.rotation = (this.rotation + (this.reversed ? 1 : 3))%4;
+    }
+
+    reverseSimmetry () {
+
+        this.rotation = (this.rotation + (this.reversed ? 1 : 3))%4;
+
+        this.reversed = !this.reversed;
+    }
+
+    // ---------------------------------
+    // DRAWING
+    // ---------------------------------
+
     mappedIndexFor (index) {
 
         if (this.reversed) {
@@ -168,28 +247,9 @@ class Angle {
         return (index + this.rotation) % 4;
     }
 
-    rotate () {
+    get transformedImage () {
 
-        this.rotation = (this.rotation + (this.reversed ? 1 : 3))%4;
-
-        this.imprintValue_forKey(this.rotation, "rotation");
-    }
-
-    reverseSimmetry () {
-
-        this.rotation = (this.rotation + (this.reversed ? 1 : 3))%4;
-
-        this.reversed = !this.reversed;
-
-        this.imprintValue_forKey(this.rotation, "rotation");
-        this.imprintValue_forKey(this.reversed, "reversed");
-    }
-
-    perspectiveTransform_withPoints () {
-
-        let sourceImage = this.imageData;
-
-        let points = this.normalizedVector();
+        let points = this.normalizedVector;
 
         let perspectiveTransform = CIFilter.filterWithName("CIPerspectiveTransform");
         
@@ -198,7 +258,7 @@ class Angle {
         perspectiveTransform.setValue_forKey(points[this.mappedIndexFor(2)], "inputBottomRight");
         perspectiveTransform.setValue_forKey(points[this.mappedIndexFor(3)], "inputBottomLeft");
     
-        let imageBitmap = NSBitmapImageRep.imageRepWithData(sourceImage);
+        let imageBitmap = NSBitmapImageRep.imageRepWithData(this.imageData);
         let image = CIImage.alloc().initWithBitmapImageRep(imageBitmap);
     
         perspectiveTransform.setValue_forKey(image, "inputImage");
@@ -206,7 +266,7 @@ class Angle {
         let perspectiveImage = perspectiveTransform.valueForKey("outputImage");
     
         if (!perspectiveImage) {
-            print("There is no image");
+            print("🛑 Unable to form perspective image");
             return
         }
     
@@ -214,9 +274,6 @@ class Angle {
         let transformedImage = NSImage.alloc().initWithSize(representation.size());
         transformedImage.addRepresentation(representation);
     
-        return transformedImage
-    }
-}
         return MSImageData.alloc().initWithImage_(transformedImage)
     }
 }
