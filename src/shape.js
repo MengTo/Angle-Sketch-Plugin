@@ -16,90 +16,83 @@ function createLabel(text, size, frame) {
 }
 
 // ---------------------------------
-// CREATE NEW SELECTION BOX
-// ---------------------------------
-
-// Generate a Dropdown
-function createSelect(options = {}) {
-
-  if (options.items === null || options.items.count < 1) { return }
-
-  if (options.selected === null || options.selected < 0) {
-    options.selected = 0
-  }
-
-  var comboBox = NSComboBox.alloc().initWithFrame(options.frame);
-
-  comboBox.addItemsWithObjectValues(options.items);
-  comboBox.selectItemAtIndex(options.selected);
-
-  return comboBox;
-}
-
-// ---------------------------------
 // GET RESPONSE FOR OPTIONS
 // ---------------------------------
 
+const PixelDensities = [
+  { title: "Auto", selectionLabel: "Auto (Efficient)" },
+  { title: "1x", selectionLabel: "1x" },
+  { title: "2x", selectionLabel: "2x" },
+  { title: "3x", selectionLabel: "3x" },
+  { title: "4x", selectionLabel: "4x" },
+]
+
 function getSelectionAlertResponseAndSelectionFor(options) {
+
+  if (options === null || options.length < 1) {
+    return { alertOption: NSAlertFirstButtonReturn, artboardSelectionElement: { indexOfSelectedItem : () => 0 }};
+  }
 
   //show a native popup box
   var alert = NSAlert.alloc().init();
   var alertContent = NSView.alloc().init();
-  var settingY = 0;
-  var textOffset = 2;
-  var leftColWidth = 120;
-  var labelHeight = 16;
-  var windowWidth = 310;
-  var fieldWidth = 190;
 
-  // Title
   alert.setMessageText("Apply Mockup");
-
-  // Description
   alert.setInformativeText("Choose an Artboard to apply into the selected shape");
-
-  // Icon
-
-  // Buttons
   alert.addButtonWithTitle("Apply");
   alert.addButtonWithTitle("Cancel");
 
-  // First Left Column - Label
-  var groupArtboardLabel = createLabel(
-    "Artboard",
-    12,
-    NSMakeRect(0, settingY + textOffset * 2, leftColWidth, labelHeight)
-  );
+  var movingYPosition = 0;
+  var leftColWidth = 180;
+  var labelHeight = 16;
+  const windowWidth = 310;
 
-  alertContent.addSubview(groupArtboardLabel);
+  var rectangle;
 
-  // First Right Column - Dropdown
-  let groupArtboardSelectRect = NSMakeRect(leftColWidth, settingY, fieldWidth, 28);
+  // Labels
 
-  var groupArtboardSelect = createSelect({
-    items: options,
-    selected: 0,
-    frame: groupArtboardSelectRect
-  });
+  rectangle = NSMakeRect(0, movingYPosition, leftColWidth, labelHeight);
+  var artboardLabel = createLabel("Artboard", 12, rectangle);
+  alertContent.addSubview(artboardLabel);
 
-  alertContent.addSubview(groupArtboardSelect);
+  rectangle = NSMakeRect(leftColWidth, movingYPosition, windowWidth - leftColWidth, labelHeight);
+  var densityLabel = createLabel("Sampling density", 12, rectangle);
+  alertContent.addSubview(densityLabel);
 
-  // Create some offset below the object, here is the dropdown, so that new element can show below it instead of overlapping
-  settingY = CGRectGetMaxY(groupArtboardSelect.frame()) + textOffset;
+  movingYPosition = CGRectGetMaxY(rectangle) + 4;
+
+  var fieldWidth = 190;
+
+  // Artboard selection element
+
+  rectangle = NSMakeRect(0, movingYPosition, leftColWidth, 28);
+  var popUpButton = NSPopUpButton.alloc().initWithFrame(rectangle);
+  popUpButton.addItemsWithTitles(options);
+  popUpButton.selectItemAtIndex(0);
+
+  alertContent.addSubview(popUpButton);
+
+  // Resolution selection element
+
+  rectangle = NSMakeRect(leftColWidth, movingYPosition, windowWidth - leftColWidth, 28);
+  var resolutionPopUp = NSPopUpButton.alloc().initWithFrame(rectangle);
+  resolutionPopUp.addItemsWithTitles(PixelDensities.map((a) => a.selectionLabel));
+  resolutionPopUp.selectItemAtIndex(0);
+
+  alertContent.addSubview(resolutionPopUp);
+
+  movingYPosition = CGRectGetMaxY(rectangle);
 
   // Render those label, dropdown etc into the Alert view
-  alertContent.frame = NSMakeRect(
-    0, 0,
-    windowWidth, CGRectGetMaxY(groupArtboardSelect.frame())
-  );
-
-  alert.accessoryView = alertContent;
-
+  alertContent.frame = NSMakeRect( 0, 0, windowWidth, movingYPosition);
+  
   // Reverse order of the content elements
   alertContent.setFlipped(true);
 
+  alert.accessoryView = alertContent;
+
   // With this will run the modal and return a reference to the selection element
-  return { alertOption: alert.runModal(), selectionElement: groupArtboardSelect }
+  return { alertOption: alert.runModal(), artboardSelectionElement: popUpButton, densitySelectionElement: resolutionPopUp }
 }
 
 // ---------------------------------
@@ -132,7 +125,7 @@ export default function (context) {
   if (angleInstance == null) { return }
 
   // ---------------------------------
-  // SORTED ARTBOARDS IN CONTEXT
+  // ARTBOARDS IN CONTEXT
   // ---------------------------------
 
   let parentArtboard = layer.parentArtboard();
@@ -140,25 +133,59 @@ export default function (context) {
   let artboards = [];
 
   for (var i = 0; i < allArtboards.count(); i++) {
+
+    // Not list the parent artboard of the select symbol or shape
     if (allArtboards[i] != parentArtboard) {
       artboards.push({ name: allArtboards[i].name(), artboard: allArtboards[i] });
     }
   }
 
-  var names = artboards.map((a) => a.name);
+  if (artboards.length == 0) {
+    // There are no artboards
+    // Explain that Angle leverages artboards
+    var alert = NSAlert.alloc().init();
 
-  // In earlier versions of Sketch, the modal does not layout properly.
-  let response = getSelectionAlertResponseAndSelectionFor(names);
-  // let response = { alertOption: NSAlertFirstButtonReturn, selectionElement: { indexOfSelectedItem : () => 0 }}
+    // alert.showsHelp = true;
+    alert.setMessageText("Getting started with Angle");
+    alert.setInformativeText("Angle let's you create mockups based on designs in artboard. To start using Angle, please create a new artboard different from the one that contains your mockup.");
+    alert.addButtonWithTitle("OK");
 
-  if (response.alertOption != NSAlertFirstButtonReturn) { print("Close"); return }
+    alert.runModal();
 
-  // Get the index of the selected option in dropdown
-  var selectionIndex = response.selectionElement.indexOfSelectedItem();
+    return
+  }
 
-  return
+  // TODO: Sort and filter artboards by relevance
 
-  angleInstance.artboard = artboards[selectionIndex].artboard;
+  let selectedArtboard;
+  let selectedPixelDensity;
+
+  if (artboards.length == 1) {
+    
+    selectedArtboard = artboards[0].artboard;
+    selectedPixelDensity = 2;
+  
+  } else {
+
+    var artboardNames = artboards.map((a) => a.name);
+    var resolutions = [];
+
+    // In earlier versions of Sketch, the modal does not layout properly.
+    let response = getSelectionAlertResponseAndSelectionFor(artboardNames);
+    // let response = { alertOption: NSAlertFirstButtonReturn, artboardSelectionElement: { indexOfSelectedItem : () => 0 }}
+
+    if (response.alertOption != NSAlertFirstButtonReturn) { print("Close"); return }
+
+    // Get the index of the selected option in dropdown
+    var artboardSelectionIndex = response.artboardSelectionElement.indexOfSelectedItem();
+    var densitySelectionIndex = response.densitySelectionElement.indexOfSelectedItem();
+
+    selectedArtboard = artboards[artboardSelectionIndex].artboard;
+    selectedPixelDensity = densitySelectionIndex;
+  }
+
+  angleInstance.artboard = selectedArtboard;
+  angleInstance.pixelDensity = selectedPixelDensity;
 
   angleInstance.addImageFill();
 
