@@ -163,7 +163,7 @@ export default function (context) {
   if (artboards.length == 1) {
     
     selectedArtboard = artboards[0].artboard;
-    selectedPixelDensity = 2;
+    selectedPixelDensity = 0;
   
   } else {
 

@@ -24,6 +24,20 @@ class ShapeAngle extends Angle {
         this.targetLayer.style().removeAllStyleFills();
         this.targetLayer.style().addStyleFill(imageFill);
     }
+
+    estimatePixelDensity () {
+
+        // Best guess of a 2x sampling of the image if the mockup is in it's original scale
+        
+        let [layerWidth, layerHeight] = this.maximumVerticesWidthAndHeight();
+        
+        let widthRatio = layerWidth / this.artboard.rect().size.width;
+        let heightRatio = layerHeight / this.artboard.rect().size.height;
+        
+        let estimate = widthRatio > heightRatio ? widthRatio : heightRatio;
+        
+        return estimate;
+    }
 }
 
 module.exports = ShapeAngle

@@ -203,17 +203,22 @@ class Angle {
         return points;
     }
 
-    estimatePixelDensity () {
-
-        // Best guess of a 2x sampling of the image if the mockup is in it's original scale
+    verticesLengths () {
 
         let points = this.pointsFromBezierPath;
-        
+
         let verticesLengths = Array.from({ length: 4 }, (x, i) => i).map(function (a, i, as) {
             let width = points[i].x - points[(i + 1) % 4].x;
             let height = points[i].y - points[(i + 1) % 4].y;
             return Math.sqrt( Math.pow(width, 2) + Math.pow(height, 2) )
         });
+
+        return verticesLengths;
+    }
+
+    maximumVerticesWidthAndHeight () {
+
+        let verticesLengths = this.verticesLengths();
         
         let layerWidth, layerHeight;
         
@@ -224,13 +229,8 @@ class Angle {
             layerWidth = verticesLengths[1] > verticesLengths[3] ? verticesLengths[1] : verticesLengths[3];
             layerHeight = verticesLengths[0] > verticesLengths[2] ? verticesLengths[0] : verticesLengths[2];
         }
-        
-        let widthRatio = this.selectedLayer.rect().size.width * layerWidth / (this.selectedLayer.naturalSize().width * this.artboard.rect().size.width);
-        let heightRatio = this.selectedLayer.rect().size.height * layerHeight / (this.selectedLayer.naturalSize().height * this.artboard.rect().size.height);
-        
-        let estimate = widthRatio > heightRatio ? widthRatio : heightRatio;
-        
-        return estimate;
+
+        return [layerWidth, layerHeight];
     }
 
     get normalizedCIVectors () {
