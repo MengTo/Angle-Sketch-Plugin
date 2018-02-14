@@ -187,7 +187,7 @@ export default function (context) {
   angleInstance.artboard = selectedArtboard;
   angleInstance.pixelDensity = selectedPixelDensity;
 
-  angleInstance.addImageFill();
+  angleInstance.applyImage();
 
   context.document.showMessage("You got angled! 📱");
 }

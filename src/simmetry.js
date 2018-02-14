@@ -26,7 +26,7 @@ export default function (context) {
 
     angleInstance.reverseSimmetry();
 
-    angleInstance.addImageFill();
+    angleInstance.applyImage();
 
     context.document.showMessage("Angle flipped! ↔️");
 

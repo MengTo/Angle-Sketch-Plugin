@@ -19,7 +19,7 @@ class SymbolicAngle extends Angle {
         this.targetPath = imageOverride.affectedLayer().bezierPath();
     }
 
-    addImageFill () {
+    applyImage () {
 
         let objectID = this.targetLayer.objectID();
 

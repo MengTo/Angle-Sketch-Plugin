@@ -15,12 +15,13 @@ class ShapeAngle extends Angle {
         this.targetPath = this.selectedLayer.bezierPath();
     }
 
-    addImageFill () {
+    applyImage () {
 
         let imageFill = MSStyleFill.alloc().init();
         imageFill.setImage(this.transformedImage);
         imageFill.fillType = StyleFillType.pattern;
     
+        this.targetLayer.style().removeAllStyleFills();
         this.targetLayer.style().addStyleFill(imageFill);
     }
 }
