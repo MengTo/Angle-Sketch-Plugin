@@ -20,7 +20,7 @@ function createLabel(text, size, frame) {
 // ---------------------------------
 
 const PixelDensities = [
-  { title: "Auto", selectionLabel: "Auto (Efficient)" },
+  { title: "Auto", selectionLabel: "Auto" },
   { title: "1x", selectionLabel: "1x" },
   { title: "2x", selectionLabel: "2x" },
   { title: "3x", selectionLabel: "3x" },
@@ -49,7 +49,7 @@ const CompressionRatio = {
 function getSelectionAlertResponseAndSelectionFor(options) {
 
   if (options === null || options.length < 1) {
-    return { alertOption: NSAlertFirstButtonReturn, artboardSelectionElement: { indexOfSelectedItem : () => 0 }};
+    return { alertOption: NSAlertFirstButtonReturn, artboardSelectionElement: { indexOfSelectedItem: () => 0 } };
   }
 
   //show a native popup box
@@ -57,7 +57,7 @@ function getSelectionAlertResponseAndSelectionFor(options) {
   var alertContent = NSView.alloc().init();
 
   alert.setMessageText("Apply Mockup");
-  alert.setInformativeText("Choose an Artboard to apply into the selected shape");
+  alert.setInformativeText("Choose an Artboard to apply into the selected shape.");
   alert.addButtonWithTitle("Apply");
   alert.addButtonWithTitle("Cancel");
 
@@ -112,8 +112,8 @@ function getSelectionAlertResponseAndSelectionFor(options) {
   movingYPosition = CGRectGetMaxY(rectangle);
 
   // Render those label, dropdown etc into the Alert view
-  alertContent.frame = NSMakeRect( 0, 0, windowWidth, movingYPosition);
-  
+  alertContent.frame = NSMakeRect(0, 0, windowWidth, movingYPosition);
+
   // Reverse order of the content elements
   alertContent.setFlipped(true);
 
@@ -179,8 +179,8 @@ export default function (context) {
     var alert = NSAlert.alloc().init();
 
     // alert.showsHelp = true;
-    alert.setMessageText("Getting started with Angle");
-    alert.setInformativeText("Angle let's you create mockups based on designs in artboard. To start using Angle, please create a new artboard different from the one that contains your mockup.");
+    alert.setMessageText("Angle needs an Artboard");
+    alert.setInformativeText("To start using Angle, create a new Artboard that contains your screen.");
     alert.addButtonWithTitle("OK");
 
     alert.runModal();
@@ -195,7 +195,7 @@ export default function (context) {
   let selectedCompressionRatio;
 
   if (artboards.length == 1) {
-    
+
     selectedArtboard = artboards[0].artboard;
     selectedPixelDensity = 0;
     selectedCompressionRatio = 0;
@@ -226,5 +226,5 @@ export default function (context) {
 
   angleInstance.applyImage();
 
-  context.document.showMessage("You got angled! 📱");
+  context.document.showMessage("You got Angled! 📱");
 }
