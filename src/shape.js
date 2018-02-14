@@ -27,6 +27,25 @@ const PixelDensities = [
   { title: "4x", selectionLabel: "4x" },
 ]
 
+const CompressionRatio = {
+  best: {
+    selectionLabel: "Best",
+    ratio: 1.0
+  },
+  better: {
+    selectionLabel: "Better",
+    ratio: 0.9
+  },
+  good: {
+    selectionLabel: "Good",
+    ratio: 0.8
+  },
+  average: {
+    selectionLabel: "Average",
+    ratio: 0.7
+  }
+}
+
 function getSelectionAlertResponseAndSelectionFor(options) {
 
   if (options === null || options.length < 1) {
@@ -43,43 +62,52 @@ function getSelectionAlertResponseAndSelectionFor(options) {
   alert.addButtonWithTitle("Cancel");
 
   var movingYPosition = 0;
-  var leftColWidth = 180;
   var labelHeight = 16;
-  const windowWidth = 310;
+
+  var fisrtColumnWidth = 180;
+  var secondColumnWidth = 130;
+  var thirdColumnWidth = 130;
+
+  const windowWidth = fisrtColumnWidth + secondColumnWidth + thirdColumnWidth;
 
   var rectangle;
 
-  // Labels
+  // Artboard selection element
 
-  rectangle = NSMakeRect(0, movingYPosition, leftColWidth, labelHeight);
+  rectangle = NSMakeRect(0, 0, fisrtColumnWidth, labelHeight);
   var artboardLabel = createLabel("Artboard", 12, rectangle);
   alertContent.addSubview(artboardLabel);
 
-  rectangle = NSMakeRect(leftColWidth, movingYPosition, windowWidth - leftColWidth, labelHeight);
-  var densityLabel = createLabel("Sampling density", 12, rectangle);
-  alertContent.addSubview(densityLabel);
-
-  movingYPosition = CGRectGetMaxY(rectangle) + 4;
-
-  var fieldWidth = 190;
-
-  // Artboard selection element
-
-  rectangle = NSMakeRect(0, movingYPosition, leftColWidth, 28);
+  rectangle = NSMakeRect(0, labelHeight + 4, fisrtColumnWidth, 28);
   var popUpButton = NSPopUpButton.alloc().initWithFrame(rectangle);
   popUpButton.addItemsWithTitles(options);
   popUpButton.selectItemAtIndex(0);
 
   alertContent.addSubview(popUpButton);
 
-  // Resolution selection element
+  // Pixel density selection element
+  
+  rectangle = NSMakeRect(fisrtColumnWidth, 0, secondColumnWidth, labelHeight);
+  var densityLabel = createLabel("Pixel Density", 12, rectangle);
+  alertContent.addSubview(densityLabel);
 
-  rectangle = NSMakeRect(leftColWidth, movingYPosition, windowWidth - leftColWidth, 28);
+  rectangle = NSMakeRect(fisrtColumnWidth, labelHeight + 4, secondColumnWidth, 28);
   var resolutionPopUp = NSPopUpButton.alloc().initWithFrame(rectangle);
   resolutionPopUp.addItemsWithTitles(PixelDensities.map((a) => a.selectionLabel));
   resolutionPopUp.selectItemAtIndex(0);
-
   alertContent.addSubview(resolutionPopUp);
+
+  // Compression ratio selection element
+    
+  rectangle = NSMakeRect(fisrtColumnWidth + secondColumnWidth, 0, thirdColumnWidth, labelHeight);
+  var compressionLabel = createLabel("Quality", 12, rectangle);
+  alertContent.addSubview(compressionLabel);
+
+  rectangle = NSMakeRect(fisrtColumnWidth + secondColumnWidth, labelHeight + 4, thirdColumnWidth, 28);
+  var compressionPopUp = NSPopUpButton.alloc().initWithFrame(rectangle);
+  compressionPopUp.addItemsWithTitles(Object.values(CompressionRatio).map((a) => a.selectionLabel));
+  compressionPopUp.selectItemAtIndex(0);
+  alertContent.addSubview(compressionPopUp);
 
   movingYPosition = CGRectGetMaxY(rectangle);
 
@@ -92,7 +120,12 @@ function getSelectionAlertResponseAndSelectionFor(options) {
   alert.accessoryView = alertContent;
 
   // With this will run the modal and return a reference to the selection element
-  return { alertOption: alert.runModal(), artboardSelectionElement: popUpButton, densitySelectionElement: resolutionPopUp }
+  return {
+    alertOption: alert.runModal(),
+    artboardSelectionElement: popUpButton,
+    densitySelectionElement: resolutionPopUp,
+    compressionSelectionElement: compressionPopUp,
+  }
 }
 
 // ---------------------------------
@@ -159,12 +192,13 @@ export default function (context) {
 
   let selectedArtboard;
   let selectedPixelDensity;
+  let selectedCompressionRatio;
 
   if (artboards.length == 1) {
     
     selectedArtboard = artboards[0].artboard;
     selectedPixelDensity = 0;
-  
+    selectedCompressionRatio = 0;
   } else {
 
     var artboardNames = artboards.map((a) => a.name);
@@ -179,13 +213,16 @@ export default function (context) {
     // Get the index of the selected option in dropdown
     var artboardSelectionIndex = response.artboardSelectionElement.indexOfSelectedItem();
     var densitySelectionIndex = response.densitySelectionElement.indexOfSelectedItem();
+    var compressionSelectionIndex = response.compressionSelectionElement.indexOfSelectedItem();
 
     selectedArtboard = artboards[artboardSelectionIndex].artboard;
     selectedPixelDensity = densitySelectionIndex;
+    selectedCompressionRatio = compressionSelectionIndex;
   }
 
   angleInstance.artboard = selectedArtboard;
   angleInstance.pixelDensity = selectedPixelDensity;
+  angleInstance.compressionRatio = selectedCompressionRatio;
 
   angleInstance.applyImage();
 

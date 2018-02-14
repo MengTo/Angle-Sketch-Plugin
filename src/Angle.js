@@ -1,3 +1,22 @@
+const CompressionRatio = {
+    best: {
+      selectionLabel: "Best",
+      ratio: 1.0
+    },
+    better: {
+      selectionLabel: "Better",
+      ratio: 0.9
+    },
+    good: {
+      selectionLabel: "Good",
+      ratio: 0.8
+    },
+    average: {
+      selectionLabel: "Average",
+      ratio: 0.7
+    }
+}
+
 class Angle {
 
     // ---------------------------------
@@ -60,7 +79,7 @@ class Angle {
         }
 
         if (this._pixelDensity == 0) {
-            return this.estimatePixelDensity();
+            return 2 * this.estimatePixelDensity();
         }
 
         return this._pixelDensity;
@@ -68,6 +87,18 @@ class Angle {
     set pixelDensity (value) {
         this._pixelDensity = value;
         this.imprintValue_forKey(value, "pixel-density");
+    }
+
+    get compressionRatio () {
+        if (this._compressionRatio == undefined) {
+            this._compressionRatio = this.loadValueForKey("compression-ratio") + 0;
+        }
+
+        return this._compressionRatio;
+    }
+    set compressionRatio (value) {
+        this._compressionRatio = value;
+        this.imprintValue_forKey(value, "compression-ratio");
     }
 
     get reversed () {
@@ -332,8 +363,10 @@ class Angle {
 
         let ouputNSImage;
 
-        if (false) {
-            ouputNSImage = this.lossyCompressionOfImage_atRate(perspectiveImage, 0.4);
+        let compressionRatio = Object.values(CompressionRatio)[this.compressionRatio].ratio;
+
+        if (compressionRatio != 1.0) {
+            ouputNSImage = this.lossyCompressionOfImage_atRate(perspectiveImage, compressionRatio);
         } else {
             ouputNSImage = this.pixelAccurateRepresentationOfImage(perspectiveImage);
         }
