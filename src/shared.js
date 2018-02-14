@@ -14,12 +14,16 @@ Angle.angleFor = function (options = {}) {
             print("🛑 Unable to retrieve target for override");
             return null
         }
-    } else {
+    } else if (options.selectedLayer.class() == MSShapeGroup) {
+        
         angleInstance = new ShapeAngle(options)
+    } else {
+        context.document.showMessage("Angle only supports shapes and Angle Mockups.");
+        return null
     }
 
     if (!angleInstance.pointsAreValid) {
-        context.document.showMessage("There seems to be an issue with the same we are trying to apply.");
+        context.document.showMessage("There seems to be an issue with the shape we are trying to apply.");
         return null
     }
 
