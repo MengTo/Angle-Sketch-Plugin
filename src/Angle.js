@@ -134,7 +134,7 @@ class Angle {
     get imageData () {
 
         let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(this.artboard);      
-        let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(this.pixelDensity, "Angle", "jpg");
+        let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(this.pixelDensity, "Angle", "png");
         let exportRequest = MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
         let exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, NSColorSpace.sRGBColorSpace());
         let imageData = exporter.bitmapImageRep().TIFFRepresentation();
@@ -283,6 +283,30 @@ class Angle {
         return (index + this.rotation) % 4;
     }
 
+    lossyCompressionOfImage_atRate(image, rate) {
+
+        let representation = NSBitmapImageRep.alloc().initWithCIImage(image);
+        let properties = NSMutableDictionary.dictionary();
+
+        properties.setObject_forKey(NSTIFFCompressionJPEG, NSImageCompressionMethod);
+        properties.setObject_forKey(rate, NSImageCompressionFactor);
+        properties.setObject_forKey(NSColor.whiteColor(), NSImageFallbackBackgroundColor);
+
+        let compressed = representation.representationUsingType_properties(NSJPEGFileType, properties);
+        let nsImage = NSImage.alloc().initWithData(compressed);
+
+        return nsImage;
+    }
+
+    pixelAccurateRepresentationOfImage(image) {
+
+        let representation = NSCIImageRep.imageRepWithCIImage(image);
+        let nsImage = NSImage.alloc().initWithSize(representation.size());
+        nsImage.addRepresentation(representation);
+    
+        return nsImage
+    }
+
     get transformedImage () {
 
         let vectors = this.normalizedCIVectors;
@@ -305,12 +329,16 @@ class Angle {
             print("🛑 Unable to form perspective image");
             return
         }
+
+        let ouputNSImage;
+
+        if (false) {
+            ouputNSImage = this.lossyCompressionOfImage_atRate(perspectiveImage, 0.4);
+        } else {
+            ouputNSImage = this.pixelAccurateRepresentationOfImage(perspectiveImage);
+        }
     
-        let representation = NSCIImageRep.imageRepWithCIImage(perspectiveImage);
-        let transformedImage = NSImage.alloc().initWithSize(representation.size());
-        transformedImage.addRepresentation(representation);
-    
-        return MSImageData.alloc().initWithImage_(transformedImage)
+        return MSImageData.alloc().initWithImage_(ouputNSImage)
     }
 }
 
