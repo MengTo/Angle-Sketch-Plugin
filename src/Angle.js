@@ -73,7 +73,7 @@ class Angle {
     get reversed () {
         if (this._reversed == undefined) {
             // Javascript boolean cohersion
-            this._reversed = this.loadValueForKey("reversed") == 0 ? false : true;
+            this._reversed = this.loadValueForKey("reversed") == 1 ? true : false;
         }
         return this._reversed;
     }
