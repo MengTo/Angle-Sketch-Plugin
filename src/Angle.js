@@ -180,7 +180,7 @@ class Angle {
     }
 
     // ---------------------------------
-    // PATH
+    // PATH VALIDATION AND CORRECTION
     // ---------------------------------
 
     get pointsAreValid () {
@@ -208,6 +208,81 @@ class Angle {
         return true
     }
 
+    guessRotationAndReversion () {
+
+        // Avoid double inference overriding user configuration
+
+        let hasAlreadyGuessed = this.loadValueForKey("guessed-rotation") == 1 ? true : false;
+
+        if (hasAlreadyGuessed) {
+            print("⚠️ Angle has already guessed rotation and simmetry for this shape");
+            return
+        }
+
+        print("🔄↔️ Angle has just guessed rotation and simmetry for this shape");
+        this.imprintValue_forKey(true, "guessed-rotation");
+
+        let verticesLengths = this.verticesLengths;
+
+        //introspect(MSSymbolMaster);
+
+        let artboardSize = this.artboard.frame();
+
+        let firstVerticeLength = verticesLengths[0];
+        let secondVerticeLength = verticesLengths[1];
+
+        let isHorizontal = firstVerticeLength > secondVerticeLength;
+        let hasHorizontalArtboard = artboardSize.width() > artboardSize.height();
+
+        if (isHorizontal) {
+            // Ensures that the first vertice is smaller
+            print("🛑 HORIZONTAL");
+            this.rotate();
+        }
+
+        if (hasHorizontalArtboard) {
+            print("🛑 HAS HORIZONTAL ARTBOARD");
+            this.rotate();
+        }
+
+        let points = this.pointsFromBezierPath;
+        let minimumX = points.reduce(((p, a, i, as) => p > a.x ? a.x : p), points[0].x);
+        let minimumY = points.reduce(((p, a, i, as) => p > a.y ? a.y : p), points[0].y);
+
+        print(points);
+
+        let mappedFirstPoint = points[this.mappedIndexFor(0)];
+        let mappedSecondPoint = points[this.mappedIndexFor(1)];
+
+        let isUpsideDown = !((mappedFirstPoint.y == minimumY) || (mappedSecondPoint.y == minimumY));
+
+        if (isUpsideDown) {
+            print("🛑 UPSIDE DOWN");
+            this.rotate();
+            this.rotate();
+        }
+
+        let maximumY = points.reduce(((p, a, i, as) => p < a.y ? a.y : p), points[0].y);
+
+        let shoelaceSumOfPoints = Array.from({ length: 4 }, (x, i) => i).reduce(function (p, a, i, as) {
+            let edgeSum = (- points[i].x + points[(i + 1) % 4].x) * (2 * maximumY - points[i].y - points[(i + 1) % 4].y)
+            return p + edgeSum;
+        }, 0);
+
+        if (shoelaceSumOfPoints < 0) {
+            print("🛑 COUNTERCLOCKWISE");
+            this.reverseSimmetry();
+        } else if (shoelaceSumOfPoints > 0) {
+            print("🛑 CLOCKWISE");
+        } else{
+            print("🛑 UNDEFINED CHIRALITY");
+        }
+    }
+
+    // ---------------------------------
+    // PATH
+    // ---------------------------------
+
     get pointsFromBezierPath () {
 
         if (this._pointsFromBezierPath != undefined) {
@@ -234,7 +309,11 @@ class Angle {
         return points;
     }
 
-    verticesLengths () {
+    get verticesLengths () {
+
+        if (this._verticesLengths != undefined) {
+            return this._verticesLengths;
+        }
 
         let points = this.pointsFromBezierPath;
 
@@ -244,12 +323,14 @@ class Angle {
             return Math.sqrt( Math.pow(width, 2) + Math.pow(height, 2) )
         });
 
+        this._verticesLengths = verticesLengths;
+
         return verticesLengths;
     }
 
     maximumVerticesWidthAndHeight () {
 
-        let verticesLengths = this.verticesLengths();
+        let verticesLengths = this.verticesLengths;
         
         let layerWidth, layerHeight;
         

@@ -224,6 +224,7 @@ export default function (context) {
   angleInstance.pixelDensity = selectedPixelDensity;
   angleInstance.compressionRatio = selectedCompressionRatio;
 
+  angleInstance.guessRotationAndReversion();
   angleInstance.applyImage();
 
   context.document.showMessage("You got Angled! 📱");
