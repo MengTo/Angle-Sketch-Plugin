@@ -7,13 +7,13 @@
       "name": "Rotate Mockup",
       "identifier": "Angle-Rotate-Mockup",
       "script": "./rotate.js",
-      "shortcut": "cmd shift option r"
+      "shortcut": "control \\"
     },
     {
       "name": "Flip Mockup",
       "identifier": "Angle-Rotate-Flip",
       "script": "./simmetry.js",
-      "shortcut": "cmd shift option s"
+      "shortcut": "cmd shift \\"
     },
     {
       "name": "Apply Mockup",
@@ -24,7 +24,8 @@
     {
       "name": "Reset Mockup",
       "identifier": "Reset-Metadata",
-      "script": "./reset.js"
+      "script": "./reset.js",
+      "shortcut": "cmd control \\"
     }
   ],
   "menu": {
