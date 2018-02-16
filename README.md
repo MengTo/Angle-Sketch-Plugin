@@ -5,7 +5,6 @@ Angle is a free and lightweight Sketch plugin for applying perspective transform
 The only thing that you need for Angle to work is an Artboard containing your Screen. Nothing else. Don't need to set each Artboard manually.
 ![](https://cl.ly/2e1c3X2E3M29/download/Angle-GIF.gif)
 
-
 ## Usage
 All you need to do is select a Screen shape and Apply Mockup. That's it.
 ![](https://cl.ly/2g133f1m1s0T/download/Angle-Usage.png)
@@ -23,7 +22,7 @@ When applying a mockup, Angle automatically detects all the Artboards, except th
 If you have a single Artboard with your screen, Angle will skip the modal and apply right away. Boom!
 
 ## Working with Symbols
-If you have a Symbol that contains your Mockup, make sure to add a **Single Fill with Image**. That's how Angle knows that your Symbol contains a mockup.
+If you have a Symbol that contains your Mockup, make sure to have an **Image Fill**. That's how Angle knows that your Symbol contains a mockup.
 ![](https://cl.ly/1L2Q3u1n0T33/download/Angle-Symbol.png)
 
 ## Pixel Density
