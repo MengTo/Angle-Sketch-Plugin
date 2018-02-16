@@ -7,7 +7,7 @@ The only thing that you need for Angle to work is an Artboard containing your Sc
 
 ## Usage
 All you need to do is select a Screen shape and Apply Mockup. That's it.
-![](https://cl.ly/2x1H1z2q2q2e/download/Angle-Usage.png)
+![](https://cl.ly/2g133f1m1s0T/download/Angle-Usage.png)
 
 - Apply Mockup (`Command + \`): this will apply an Artboard to your selected shape.
 - Flip Mockup (`Command + Shift + \`): once a mockup is applied, you can decide to Flip it.
@@ -16,14 +16,14 @@ All you need to do is select a Screen shape and Apply Mockup. That's it.
 
 ## Auto-Detect
 When applying a mockup, Angle automatically detects all the Artboards, except the current Artboard. No expensive operations while you're designing, as this only happens when you activate Angle.
-![](https://cl.ly/2N1R3W3h0p41/download/Angle-Detect.png)
+![](https://cl.ly/2W3o332N0p25/download/Angle-Detect.png)
 
 ## Single Artboard
 If you have a single Artboard with your screen, Angle will skip the modal and apply right away. Boom!
 
 ## Working with Symbols
 If you have a Symbol that contains your Mockup, make sure to add a **Single Fill with Image**. That's how Angle knows that your Symbol contains a mockup.
-![](https://cl.ly/1S0M1V1Z0l2O/download/Angle-Symbol.png)
+![](https://cl.ly/1L2Q3u1n0T33/download/Angle-Symbol.png)
 
 ## Pixel Density
 By default, it's set to Auto, which will detect the size of selected Shape and apply a 2X pixel density.
