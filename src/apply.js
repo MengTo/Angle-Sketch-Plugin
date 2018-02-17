@@ -46,6 +46,23 @@ const CompressionRatio = {
   }
 }
 
+function loadLocalImage(context, filePath) {
+
+  let basePath = context.scriptPath
+    .stringByDeletingLastPathComponent()
+    .stringByDeletingLastPathComponent()
+    .stringByDeletingLastPathComponent();
+
+  if(!NSFileManager.defaultManager().fileExistsAtPath(basePath + "/" + filePath)) {
+      print("File does not exist at path");
+      return null;
+  }
+
+  print("Image loaded");
+
+  return NSImage.alloc().initWithContentsOfFile(basePath + "/" + filePath);
+}
+
 function getSelectionAlertResponseAndSelectionFor(options) {
 
   if (options === null || options.length < 1) {
@@ -60,6 +77,7 @@ function getSelectionAlertResponseAndSelectionFor(options) {
   alert.setInformativeText("Choose an Artboard to apply into the selected shape.");
   alert.addButtonWithTitle("Apply");
   alert.addButtonWithTitle("Cancel");
+  alert.icon = angleLogo;
 
   var movingYPosition = 0;
   var labelHeight = 16;
@@ -135,6 +153,7 @@ function getSelectionAlertResponseAndSelectionFor(options) {
 const Angle = require('./Angle');
 require('./shared');
 
+const angleLogo = loadLocalImage(context, "/Contents/Resources/logo.png");
 
 export default function (context) {
 
@@ -182,6 +201,7 @@ export default function (context) {
     alert.setMessageText("Angle needs an Artboard");
     alert.setInformativeText("To start using Angle, create a new Artboard that contains your screen.");
     alert.addButtonWithTitle("OK");
+    alert.icon = angleLogo;
 
     alert.runModal();
 

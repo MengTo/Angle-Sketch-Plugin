@@ -17,13 +17,13 @@
     },
     {
       "name": "Apply Mockup",
-      "identifier": "Angle-4-Point-Shape",
+      "identifier": "Angle-Apply-Mockup",
       "script": "./apply.js",
       "shortcut": "cmd \\"
     },
     {
       "name": "Reset Mockup",
-      "identifier": "Reset-Metadata",
+      "identifier": "Angle-Reset-Metadata",
       "script": "./reset.js"
     }
   ],
@@ -32,8 +32,8 @@
     "items": [
       "Angle-Rotate-Flip",
       "Angle-Rotate-Mockup",
-      "Angle-4-Point-Shape",
-      "Reset-Metadata"
+      "Angle-Apply-Mockup",
+      "Angle-Reset-Metadata"
     ]
   },
   "description": "Apply perspective transforms on screen mockups. Auto-detect screens by resolution and works on shapes and symbols. Super fast.",
