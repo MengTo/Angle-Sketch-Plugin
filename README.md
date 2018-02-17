@@ -26,10 +26,10 @@ If you have a Symbol that contains your Mockup, make sure to have an **Image Fil
 ![](https://cl.ly/1L2Q3u1n0T33/download/Angle-Symbol.png)
 
 ## Pixel Density
-By default, it's set to Auto, which will detect the size of selected Shape and apply a 2X pixel density.
+By default, it's set to Auto, which will detect the size of selected shape and apply a 2X pixel density.
 
 ## Image Quality
-By default, it's set the Best. While you'll get the highest quality possible, this will increase your File size dramatically. By setting to lower quality, you will save a lot.
+By default, it's set the Best. While you'll get the highest quality possible, this will increase your filesize dramatically. By setting to Better, Good or Average, you will make the file smaller.
 
 ## Credit
-This plugin was made possible by awesome team at [Design+Code](https://designcode.io), including [Tiago](https://github.com/tmergulhao) and [Kwan Yip Yap](http://twitter.com/pizza0502) and [Meng To](https://twitter.com/mengto).
+This plugin was made by the team at [Design+Code](https://designcode.io), including [Tiago Mergulhao](https://github.com/tmergulhao) and [Kwan Yip Yap](http://twitter.com/pizza0502) and [Meng To](https://twitter.com/mengto).
