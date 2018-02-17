@@ -6,7 +6,7 @@ The only thing that Angle needs to work is an Artboard containing your Screen. T
 ![](https://cl.ly/0D1l3y2D453a/download/Angle-GIF.gif)
 
 ## Usage
-Select a shape layer and do **Apply Mockup**.
+Select a shape layer and do **Apply Mockup** `Command + \`.
 ![](https://cl.ly/2g133f1m1s0T/download/Angle-Usage.png)
 
 - Apply Mockup `Command + \`: this will apply an Artboard to your selected shape.
