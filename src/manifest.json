@@ -23,7 +23,7 @@
     },
     {
       "name": "Reset Mockup",
-      "identifier": "Reset-Metadata",
+      "identifier": "Angle-Reset-Metadata",
       "script": "./reset.js",
       "shortcut": "cmd control \\"
     }
