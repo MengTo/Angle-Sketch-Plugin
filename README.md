@@ -9,10 +9,10 @@ The only thing that Angle needs to work is an Artboard containing your Screen. T
 Select a shape layer and do **Apply Mockup** `Command + \`.
 ![](https://cl.ly/2g133f1m1s0T/download/Angle-Usage.png)
 
-- Apply Mockup `Command + \`: this will apply an Artboard to your selected shape.
-- Flip Mockup `Command + Shift + \`: once a mockup is applied, you can decide to **Flip** it.
-- Rotate Mockup `Control + \`.
-- Reset Mockup `Control + Command + \`: remove the metadata that was applied to your mockup.
+- **Apply Mockup** `Command + \`: this will apply an Artboard to your selected shape.
+- **Flip Mockup** `Command + Shift + \`: once a mockup is applied, you can decide to **Flip** it.
+- **Rotate Mockup** `Control + \`.
+- **Reset Mockup** `Control + Command + \`: remove the metadata that was applied to your mockup.
 
 ## Auto-Detect
 When applying a mockup, Angle automatically detects all the Artboards, except the current Artboard. No expensive operations while you're designing, as this only happens when you run one of Angle's commands.
