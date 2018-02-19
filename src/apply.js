@@ -63,10 +63,15 @@ function loadLocalImage(context, filePath) {
   return NSImage.alloc().initWithContentsOfFile(basePath + "/" + filePath);
 }
 
-function getSelectionAlertResponseAndSelectionFor(options) {
+function getSelectionAndOptions_forAngleInstances(artboards, angles) {
 
-  if (options === null || options.length < 1) {
-    return { alertOption: NSAlertFirstButtonReturn, artboardSelectionElement: { indexOfSelectedItem: () => 0 } };
+  if (artboards === null || artboards.length < 1) {
+    return {
+      alertOption: NSAlertFirstButtonReturn,
+      artboardSelections:     angles.map((a,i,as) => { indexOfSelectedItem: () => 0 }),
+      densitySelections:      angles.map((a,i,as) => { indexOfSelectedItem: () => 0 }),
+      compressionSelections:  angles.map((a,i,as) => { indexOfSelectedItem: () => 0 }),
+    };
   }
 
   //show a native popup box
@@ -92,18 +97,20 @@ function getSelectionAlertResponseAndSelectionFor(options) {
 
   // Artboard selection element
 
-  let optionNames = options.map((a) => a.name);
-
   rectangle = NSMakeRect(0, 0, fisrtColumnWidth, labelHeight);
   var artboardLabel = createLabel("Artboard", 12, rectangle);
   alertContent.addSubview(artboardLabel);
 
-  rectangle = NSMakeRect(0, labelHeight + 4, fisrtColumnWidth, 28);
-  var popUpButton = NSPopUpButton.alloc().initWithFrame(rectangle);
-  popUpButton.addItemsWithTitles(optionNames);
-  popUpButton.selectItemAtIndex(0);
+  rectangle = NSMakeRect(fisrtColumnWidth, 0, secondColumnWidth, labelHeight);
+  var densityLabel = createLabel("Pixel Density", 12, rectangle);
+  alertContent.addSubview(densityLabel);
 
-  let optionImages = options.map(function (a, i ,as) {
+  rectangle = NSMakeRect(fisrtColumnWidth + secondColumnWidth, 0, thirdColumnWidth, labelHeight);
+  var compressionLabel = createLabel("Quality", 12, rectangle);
+  alertContent.addSubview(compressionLabel);
+
+  let artboardNames = artboards.map((a) => a.name);
+  let artboardImages = artboards.map(function (a, i ,as) {
     let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(a.artboard);
     let artboardWidth = a.artboard.frame().width()
     let arboardHeight = a.artboard.frame().height();
@@ -115,38 +122,56 @@ function getSelectionAlertResponseAndSelectionFor(options) {
     let imageData = exporter.bitmapImageRep().TIFFRepresentation();
     let nsImage = NSImage.alloc().initWithData(imageData);
     return nsImage;
-  }).forEach(function (a, i, as){
-    let item = popUpButton.itemAtIndex(i);
-    item.image = a;
   });
 
-  alertContent.addSubview(popUpButton);
+  // Artboard Selection
 
-  // Pixel density selection element
-  
-  rectangle = NSMakeRect(fisrtColumnWidth, 0, secondColumnWidth, labelHeight);
-  var densityLabel = createLabel("Pixel Density", 12, rectangle);
-  alertContent.addSubview(densityLabel);
-
-  rectangle = NSMakeRect(fisrtColumnWidth, labelHeight + 4, secondColumnWidth, 28);
-  var resolutionPopUp = NSPopUpButton.alloc().initWithFrame(rectangle);
-  resolutionPopUp.addItemsWithTitles(PixelDensities.map((a) => a.selectionLabel));
-  resolutionPopUp.selectItemAtIndex(0);
-  alertContent.addSubview(resolutionPopUp);
-
-  // Compression ratio selection element
+  let artboardSelections = angles.map(function (a,i,as) {
     
-  rectangle = NSMakeRect(fisrtColumnWidth + secondColumnWidth, 0, thirdColumnWidth, labelHeight);
-  var compressionLabel = createLabel("Quality", 12, rectangle);
-  alertContent.addSubview(compressionLabel);
+    let rectangle = NSMakeRect(0, labelHeight + 4 + (28 * i), fisrtColumnWidth, 28);
+    let button = NSPopUpButton.alloc().initWithFrame(rectangle);
+    button.addItemsWithTitles(artboardNames);
+    button.selectItemAtIndex(0);
+    
+    artboardImages.forEach(function (a, i, as) {
+      let item = button.itemAtIndex(i);
+      item.image = a;
+    });
 
-  rectangle = NSMakeRect(fisrtColumnWidth + secondColumnWidth, labelHeight + 4, thirdColumnWidth, 28);
-  var compressionPopUp = NSPopUpButton.alloc().initWithFrame(rectangle);
-  compressionPopUp.addItemsWithTitles(Object.values(CompressionRatio).map((a) => a.selectionLabel));
-  compressionPopUp.selectItemAtIndex(0);
-  alertContent.addSubview(compressionPopUp);
+    alertContent.addSubview(button);
 
-  movingYPosition = CGRectGetMaxY(rectangle);
+    return button;
+  });
+
+  // Pixel Density Selection
+
+  let pixelDensitySelections = angles.map(function (a,i,as) {
+    
+    let rectangle = NSMakeRect(fisrtColumnWidth, labelHeight + 4 + (28 * i), secondColumnWidth, 28);
+    let button = NSPopUpButton.alloc().initWithFrame(rectangle);
+    button.addItemsWithTitles(PixelDensities.map((a) => a.selectionLabel));
+    button.selectItemAtIndex(0);
+
+    alertContent.addSubview(button);
+
+    return button;
+  });
+
+  // Compression Ratio Selection
+
+  let compressionDensitySelections = angles.map(function (a,i,as) {
+    
+    let rectangle = NSMakeRect(fisrtColumnWidth + secondColumnWidth, labelHeight + 4 + (28 * i), thirdColumnWidth, 28);
+    let button = NSPopUpButton.alloc().initWithFrame(rectangle);
+    button.addItemsWithTitles(Object.values(CompressionRatio).map((a) => a.selectionLabel));
+    button.selectItemAtIndex(0);
+
+    alertContent.addSubview(button);
+
+    return button;
+  });
+
+  movingYPosition = labelHeight + 4 + (28 * angles.length) + 28;
 
   // Render those label, dropdown etc into the Alert view
   alertContent.frame = NSMakeRect(0, 0, windowWidth, movingYPosition);
@@ -159,9 +184,9 @@ function getSelectionAlertResponseAndSelectionFor(options) {
   // With this will run the modal and return a reference to the selection element
   return {
     alertOption: alert.runModal(),
-    artboardSelectionElement: popUpButton,
-    densitySelectionElement: resolutionPopUp,
-    compressionSelectionElement: compressionPopUp,
+    artboardSelections: artboardSelections,
+    densitySelections: pixelDensitySelections,
+    compressionSelections: compressionDensitySelections,
   }
 }
 
@@ -176,38 +201,48 @@ const angleLogo = loadLocalImage(context, "/Contents/Resources/logo.png");
 
 export default function (context) {
 
-  let selectedLayers = context.selection;
+  let selectedLayersNSArray = context.selection;
 
-  if (selectedLayers == null) { return }
+  if (selectedLayersNSArray == null) { return }
 
-  if (selectedLayers.count() != 1) {
+  let selectedLayers = [];
 
-    context.document.showMessage("Select only 1 shape at a time.");
-    return
+  for (var i = 0; i < selectedLayersNSArray.count(); i++) {
+    selectedLayers.push({
+      name: selectedLayersNSArray[i].name(),
+      layer: selectedLayersNSArray[i]
+    });
   }
 
-  let layer = selectedLayers.firstObject();
+  let angles = selectedLayers.map(function (a, i, as) {
 
-  let angleInstance = Angle.angleFor({
-    selectedLayer: layer,
-    context: context,
-  });
+    let angleInstance = Angle.angleFor({
+      selectedLayer: a.layer,
+      context: context,
+    });
 
-  if (angleInstance == null) { return }
+    return angleInstance
+  }).filter( (a, i, as) => a != null );
+
+  if (angles.length == 0) {
+
+    // It was not possible to trigger angle for a single object
+    return
+  }
 
   // ---------------------------------
   // ARTBOARDS IN CONTEXT
   // ---------------------------------
 
-  let parentArtboard = layer.parentArtboard();
-  let allArtboards = context.document.artboards();
+  let parentArtboard = selectedLayers[0].layer.parentArtboard();
+  let artboardsNSArray = context.document.artboards();
   let artboards = [];
 
-  for (var i = 0; i < allArtboards.count(); i++) {
+  for (var i = 0; i < artboardsNSArray.count(); i++) {
 
     // Not list the parent artboard of the select symbol or shape
-    if (allArtboards[i] != parentArtboard) {
-      artboards.push({ name: allArtboards[i].name(), artboard: allArtboards[i] });
+    if (artboardsNSArray[i] != parentArtboard) {
+      artboards.push({ name: artboardsNSArray[i].name(), artboard: artboardsNSArray[i] });
     }
   }
 
@@ -251,43 +286,35 @@ export default function (context) {
     return
   }
 
-  // TODO: Sort and filter artboards by relevance
-
-  let selectedArtboard;
-  let selectedPixelDensity;
-  let selectedCompressionRatio;
-
   if (artboards.length == 1) {
 
-    selectedArtboard = artboards[0].artboard;
-    selectedPixelDensity = 0;
-    selectedCompressionRatio = 0;
+    angles.forEach(function (a, i, as) {
+      a.artboard = artboards[0].artboard;
+      a.pixelDensity = 0;
+      a.selectedCompressionRatio = 0;
+    });
   } else {
 
-    var resolutions = [];
-
     // In earlier versions of Sketch, the modal does not layout properly.
-    let response = getSelectionAlertResponseAndSelectionFor(artboards);
+    let response = getSelectionAndOptions_forAngleInstances(artboards, angles);
     // let response = { alertOption: NSAlertFirstButtonReturn, artboardSelectionElement: { indexOfSelectedItem : () => 0 }}
 
-    if (response.alertOption != NSAlertFirstButtonReturn) { print("Close"); return }
+    if (response.alertOption != NSAlertFirstButtonReturn) { return }
 
-    // Get the index of the selected option in dropdown
-    var artboardSelectionIndex = response.artboardSelectionElement.indexOfSelectedItem();
-    var densitySelectionIndex = response.densitySelectionElement.indexOfSelectedItem();
-    var compressionSelectionIndex = response.compressionSelectionElement.indexOfSelectedItem();
+    angles.forEach(function (a, i, as) {
+      let artboardSelectionIndex = response.artboardSelections[i].indexOfSelectedItem();
 
-    selectedArtboard = artboards[artboardSelectionIndex].artboard;
-    selectedPixelDensity = densitySelectionIndex;
-    selectedCompressionRatio = compressionSelectionIndex;
+      a.artboard = artboards[artboardSelectionIndex].artboard;
+      a.pixelDensity = response.densitySelections[i].indexOfSelectedItem();
+      a.selectedCompressionRatio = response.compressionSelections[i].indexOfSelectedItem();
+    });
   }
 
-  angleInstance.artboard = selectedArtboard;
-  angleInstance.pixelDensity = selectedPixelDensity;
-  angleInstance.compressionRatio = selectedCompressionRatio;
+  angles.forEach(function (a, i, as) {
 
-  angleInstance.guessRotationAndReversion();
-  angleInstance.applyImage();
+    a.guessRotationAndReversion();
+    a.applyImage();
+  });
 
   context.document.showMessage("You got Angled! 📱");
 }
