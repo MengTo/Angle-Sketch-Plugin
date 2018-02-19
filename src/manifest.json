@@ -17,7 +17,7 @@
     },
     {
       "name": "Apply Mockup",
-      "identifier": "Angle-4-Point-Shape",
+      "identifier": "Angle-Apply-Mockup",
       "script": "./apply.js",
       "shortcut": "cmd \\"
     },
@@ -31,9 +31,9 @@
   "menu": {
     "title": "Angle",
     "items": [
+      "Angle-Apply-Mockup",
       "Angle-Rotate-Flip",
       "Angle-Rotate-Mockup",
-      "Angle-Apply-Mockup",
       "Angle-Reset-Metadata"
     ]
   },
