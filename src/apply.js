@@ -92,14 +92,33 @@ function getSelectionAlertResponseAndSelectionFor(options) {
 
   // Artboard selection element
 
+  let optionNames = options.map((a) => a.name);
+
   rectangle = NSMakeRect(0, 0, fisrtColumnWidth, labelHeight);
   var artboardLabel = createLabel("Artboard", 12, rectangle);
   alertContent.addSubview(artboardLabel);
 
   rectangle = NSMakeRect(0, labelHeight + 4, fisrtColumnWidth, 28);
   var popUpButton = NSPopUpButton.alloc().initWithFrame(rectangle);
-  popUpButton.addItemsWithTitles(options);
+  popUpButton.addItemsWithTitles(optionNames);
   popUpButton.selectItemAtIndex(0);
+
+  let optionImages = options.map(function (a, i ,as) {
+    let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(a.artboard);
+    let artboardWidth = a.artboard.frame().width()
+    let arboardHeight = a.artboard.frame().height();
+    let biggerDimention = artboardWidth > arboardHeight ? artboardWidth : arboardHeight;
+    let exportScale = 32/biggerDimention;
+    let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(exportScale, "", "png");
+    let exportRequest = MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
+    let exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, NSColorSpace.sRGBColorSpace());
+    let imageData = exporter.bitmapImageRep().TIFFRepresentation();
+    let nsImage = NSImage.alloc().initWithData(imageData);
+    return nsImage;
+  }).forEach(function (a, i, as){
+    let item = popUpButton.itemAtIndex(i);
+    item.image = a;
+  });
 
   alertContent.addSubview(popUpButton);
 
@@ -192,6 +211,30 @@ export default function (context) {
     }
   }
 
+  artboards.sort(function (a, b) {
+
+    let reference = 3/4;
+
+    let artboardSizeA = a.artboard.frame();
+    let artboardSizeB = b.artboard.frame();
+    
+    let artboardARatio = artboardSizeA.width() / artboardSizeA.height();
+    if (artboardARatio > 1) { artboardARatio = 1/artboardARatio; }
+
+    let arboardARatioDifference = Math.abs(reference - artboardARatio);
+    
+    let artboardBRatio = artboardSizeB.width() / artboardSizeB.height();
+    if (artboardBRatio > 1) { artboardBRatio = 1/artboardBRatio; }
+
+    let arboardBRatioDifference = Math.abs(reference - artboardBRatio);
+
+    if (arboardARatioDifference == arboardBRatioDifference) {
+      return a.name > b.name
+    }
+
+    return arboardARatioDifference > arboardBRatioDifference;
+  });
+
   if (artboards.length == 0) {
     // There are no artboards
     // Explain that Angle leverages artboards
@@ -221,11 +264,10 @@ export default function (context) {
     selectedCompressionRatio = 0;
   } else {
 
-    var artboardNames = artboards.map((a) => a.name);
     var resolutions = [];
 
     // In earlier versions of Sketch, the modal does not layout properly.
-    let response = getSelectionAlertResponseAndSelectionFor(artboardNames);
+    let response = getSelectionAlertResponseAndSelectionFor(artboards);
     // let response = { alertOption: NSAlertFirstButtonReturn, artboardSelectionElement: { indexOfSelectedItem : () => 0 }}
 
     if (response.alertOption != NSAlertFirstButtonReturn) { print("Close"); return }
