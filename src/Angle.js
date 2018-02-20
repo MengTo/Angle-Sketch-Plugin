@@ -79,7 +79,7 @@ class Angle {
         }
 
         if (this._pixelDensity == 0) {
-            let roundedEstimate = Math.round(2 * this.estimatePixelDensity() + 0.25);
+            let roundedEstimate = Math.round(2 * this.estimatePixelDensity() + 0.5);
             return roundedEstimate == 0 ? 1 : roundedEstimate;
         }
 
