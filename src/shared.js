@@ -94,11 +94,12 @@ export function loadLocalImage (context, filePath) {
   }
 
 function popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaultSelected_onIndex (rectangle, titles, images, index) {
+
     let button = NSPopUpButton.alloc().initWithFrame(rectangle(index));
     button.addItemsWithTitles(titles);
+    button.imageScaling = NSImageScaleProportionallyUpOrDown;
 
     if (images != null) {
-        
         images.forEach(function (a, i, as) {
             let item = button.itemAtIndex(i);
             item.image = a;
@@ -111,10 +112,10 @@ function popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaul
 function smallImagesFromArtboard (artboard) {
 
     let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(artboard);
-    let artboardWidth = artboard.frame().width()
+    let artboardWidth = artboard.frame().width();
     let arboardHeight = artboard.frame().height();
     let biggerDimention = artboardWidth > arboardHeight ? artboardWidth : arboardHeight;
-    let exportScale = 32/biggerDimention;
+    let exportScale = 48/biggerDimention;
     let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(exportScale, "", "png");
     let exportRequest = MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
     let exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, NSColorSpace.sRGBColorSpace());
@@ -123,7 +124,9 @@ function smallImagesFromArtboard (artboard) {
     return nsImage;
 }
 
-export function getSelectionAndOptions_forAngleInstances(artboards, anglesCount) {
+export function getSelectionAndOptions_forAngleInstances(artboards, angles) {
+
+    let anglesCount = angles.length;
 
     let array = Array.from({ length: anglesCount }, (x, i) => i);
 
@@ -149,9 +152,9 @@ export function getSelectionAndOptions_forAngleInstances(artboards, anglesCount)
     var movingYPosition = 0;
     var labelHeight = 16;
 
-    var fisrtColumnWidth = 180;
-    var secondColumnWidth = 130;
-    var thirdColumnWidth = 130;
+    var fisrtColumnWidth = 260;
+    var secondColumnWidth = 90;
+    var thirdColumnWidth = 90;
 
     const windowWidth = fisrtColumnWidth + secondColumnWidth + thirdColumnWidth;
 
@@ -171,29 +174,41 @@ export function getSelectionAndOptions_forAngleInstances(artboards, anglesCount)
     var compressionLabel = createLabel("Quality", 12, rectangle);
     alertContent.addSubview(compressionLabel);
 
+    let spacing = array.length > 1 ? 50 : 28;
+
+    if (array.length > 1) {
+        let targetLabels = array.map( function (a, i, as) {
+            let rectangle = NSMakeRect(0, labelHeight + 4 + (spacing * i), fisrtColumnWidth, labelHeight);
+            let label = createLabel(angles[i].targetLayer.name(), 12, rectangle);
+    
+            return label
+        });
+        targetLabels.forEach( (a) => alertContent.addSubview(a));
+    }
+
     let artboardNames = artboards.map((a) => a.name());
-    let artboardImages = artboards.map(smallImagesFromArtboard);
+    let artboardImages = artboards.map((a) => smallImagesFromArtboard(a));
     let artboardSelections = array.map( (a,index,as) => popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaultSelected_onIndex (
-        ((i) => NSMakeRect(0, labelHeight + 4 + (28 * i), fisrtColumnWidth, 28)),
+        ((i) => NSMakeRect(0, labelHeight + 4 + (spacing * i) + 16, fisrtColumnWidth, 28)),
         artboardNames, artboardImages, index
     ));
     artboardSelections.forEach( (a) => alertContent.addSubview(a));
 
     let pixelDensityNames = PixelDensity.map((a) => a.selectionLabel);
     let pixelDensitySelections = array.map( (a,index,as) => popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaultSelected_onIndex (
-        ((i) => NSMakeRect(fisrtColumnWidth, labelHeight + 4 + (28 * i), secondColumnWidth, 28)),
+        ((i) => NSMakeRect(fisrtColumnWidth, labelHeight + 4 + (spacing * i) + 16, secondColumnWidth, 28)),
         pixelDensityNames, null, index
     ));
     pixelDensitySelections.forEach( (a) => alertContent.addSubview(a));
 
     let compressionRatioNames = Object.values(CompressionRatio).map((a) => a.selectionLabel);
     let compressionRatioSelections = array.map( (a,index,as) => popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaultSelected_onIndex (
-        ((i) => NSMakeRect(fisrtColumnWidth + secondColumnWidth, labelHeight + 4 + (28 * i), thirdColumnWidth, 28)),
+        ((i) => NSMakeRect(fisrtColumnWidth + secondColumnWidth, labelHeight + 4 + (spacing * i) + 16, thirdColumnWidth, 28)),
         compressionRatioNames, null, index
     ));
     compressionRatioSelections.forEach( (a) => alertContent.addSubview(a));
 
-    movingYPosition = labelHeight + 4 + (28 * anglesCount) + 28;
+    movingYPosition = labelHeight + 4 + (spacing * anglesCount) + 28;
 
     // Render those label, dropdown etc into the Alert view
     alertContent.frame = NSMakeRect(0, 0, windowWidth, movingYPosition);
