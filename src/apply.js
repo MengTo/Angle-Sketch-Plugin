@@ -63,14 +63,16 @@ function loadLocalImage(context, filePath) {
   return NSImage.alloc().initWithContentsOfFile(basePath + "/" + filePath);
 }
 
-function getSelectionAndOptions_forAngleInstances(artboards, angles) {
+function getSelectionAndOptions_forAngleInstances(artboards, anglesCount) {
 
+  let array = Array.from({ length: anglesCount }, (x, i) => i);
+  
   if (artboards === null || artboards.length < 1) {
     return {
       alertOption: NSAlertFirstButtonReturn,
-      artboardSelections:     angles.map((a,i,as) => { indexOfSelectedItem: () => 0 }),
-      densitySelections:      angles.map((a,i,as) => { indexOfSelectedItem: () => 0 }),
-      compressionSelections:  angles.map((a,i,as) => { indexOfSelectedItem: () => 0 }),
+      artboardSelections:     array.map((a,i,as) => { indexOfSelectedItem: () => 0 }),
+      densitySelections:      array.map((a,i,as) => { indexOfSelectedItem: () => 0 }),
+      compressionSelections:  array.map((a,i,as) => { indexOfSelectedItem: () => 0 }),
     };
   }
 
@@ -126,7 +128,7 @@ function getSelectionAndOptions_forAngleInstances(artboards, angles) {
 
   // Artboard Selection
 
-  let artboardSelections = angles.map(function (a,i,as) {
+  let artboardSelections = array.map(function (a,i,as) {
     
     let rectangle = NSMakeRect(0, labelHeight + 4 + (28 * i), fisrtColumnWidth, 28);
     let button = NSPopUpButton.alloc().initWithFrame(rectangle);
@@ -145,7 +147,7 @@ function getSelectionAndOptions_forAngleInstances(artboards, angles) {
 
   // Pixel Density Selection
 
-  let pixelDensitySelections = angles.map(function (a,i,as) {
+  let pixelDensitySelections = array.map(function (a,i,as) {
     
     let rectangle = NSMakeRect(fisrtColumnWidth, labelHeight + 4 + (28 * i), secondColumnWidth, 28);
     let button = NSPopUpButton.alloc().initWithFrame(rectangle);
@@ -159,7 +161,7 @@ function getSelectionAndOptions_forAngleInstances(artboards, angles) {
 
   // Compression Ratio Selection
 
-  let compressionDensitySelections = angles.map(function (a,i,as) {
+  let compressionDensitySelections = array.map(function (a,i,as) {
     
     let rectangle = NSMakeRect(fisrtColumnWidth + secondColumnWidth, labelHeight + 4 + (28 * i), thirdColumnWidth, 28);
     let button = NSPopUpButton.alloc().initWithFrame(rectangle);
@@ -171,7 +173,7 @@ function getSelectionAndOptions_forAngleInstances(artboards, angles) {
     return button;
   });
 
-  movingYPosition = labelHeight + 4 + (28 * angles.length) + 28;
+  movingYPosition = labelHeight + 4 + (28 * anglesCount) + 28;
 
   // Render those label, dropdown etc into the Alert view
   alertContent.frame = NSMakeRect(0, 0, windowWidth, movingYPosition);
@@ -296,7 +298,7 @@ export default function (context) {
   } else {
 
     // In earlier versions of Sketch, the modal does not layout properly.
-    let response = getSelectionAndOptions_forAngleInstances(artboards, angles);
+    let response = getSelectionAndOptions_forAngleInstances(artboards, angles.count);
     // let response = { alertOption: NSAlertFirstButtonReturn, artboardSelectionElement: { indexOfSelectedItem : () => 0 }}
 
     if (response.alertOption != NSAlertFirstButtonReturn) { return }
@@ -306,7 +308,7 @@ export default function (context) {
 
       a.artboard = artboards[artboardSelectionIndex].artboard;
       a.pixelDensity = response.densitySelections[i].indexOfSelectedItem();
-      a.selectedCompressionRatio = response.compressionSelections[i].indexOfSelectedItem();
+      a.compressionRatio = response.compressionSelections[i].indexOfSelectedItem();
     });
   }
 

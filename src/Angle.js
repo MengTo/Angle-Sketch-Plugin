@@ -126,8 +126,8 @@ class Angle {
 
         this.context.command.setValue_forKey_onLayer(value, key, this.selectedLayer);
 
-        print("☑️ Persistent data imprinted into layer: " + key);
-        print("Value: " + value);
+        // print("☑️ Persistent data imprinted into layer: " + key);
+        // print("Value: " + value);
     }
 
     imprintValues_forKeys(dictionary) {
@@ -137,9 +137,14 @@ class Angle {
     }
 
     loadValueForKey(key) {
+        if (this.selectedLayer == null) {
+            print("🛑 Loading value before selected layer assignment");
+            return null
+        }
+
         let value = this.context.command.valueForKey_onLayer(key, this.selectedLayer);
-        print("☑️ Persistent data loadad from layer: " + key);
-        print("Value: " + value);
+        // print("☑️ Persistent data loaded from layer: " + key);
+        // print("Value: " + value);
         return value
     }
 
@@ -149,6 +154,7 @@ class Angle {
 
     constructor (options = {}) {
 
+        this.targetLayer = options.targetLayer;
         this.context = options.context;
         this.selectedLayer = options.selectedLayer;
 
@@ -185,7 +191,10 @@ class Angle {
     // ---------------------------------
 
     get pointsAreValid () {
+        
         let points = this.pointsFromBezierPath;
+        if (points == null) { return false }
+        
         let length = points.length;
 
         if (length != 7) { // Not a quadrilater
@@ -291,6 +300,8 @@ class Angle {
         }
 
         let count = this.targetPath.elementCount();
+
+        if (count != 7) { return null }
 
         let array = Array.from({ length: count }, (x, i) => i);
 

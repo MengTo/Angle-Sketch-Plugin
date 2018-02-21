@@ -10,6 +10,12 @@
       "shortcut": "control \\"
     },
     {
+      "name": "Apply Composition",
+      "identifier": "Angle-Apply-Composition",
+      "script": "./composition.js",
+      "shortcut": "control option \\"
+    },
+    {
       "name": "Flip Mockup",
       "identifier": "Angle-Rotate-Flip",
       "script": "./simmetry.js",
@@ -32,6 +38,7 @@
     "title": "Angle",
     "items": [
       "Angle-Apply-Mockup",
+      "Angle-Apply-Composition",
       "Angle-Rotate-Flip",
       "Angle-Rotate-Mockup",
       "Angle-Reset-Metadata"
