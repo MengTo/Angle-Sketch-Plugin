@@ -41,7 +41,8 @@ Array.fromNSArray = function (NSArray) {
 }
 
 export function compareByRatioAndAlphabet (a, b) {
-    let reference = 3/4;
+    let upperMaring = 0.8;
+    let lowerMargin = 0.4
 
     let artboardSizeA = a.frame();
     let artboardSizeB = b.frame();
@@ -49,18 +50,26 @@ export function compareByRatioAndAlphabet (a, b) {
     let artboardARatio = artboardSizeA.width() / artboardSizeA.height();
     if (artboardARatio > 1) { artboardARatio = 1/artboardARatio; }
 
-    let arboardARatioDifference = Math.abs(reference - artboardARatio);
+    let artboardARatioInsideMargin = artboardARatio > lowerMargin && artboardARatio < upperMaring;
 
     let artboardBRatio = artboardSizeB.width() / artboardSizeB.height();
     if (artboardBRatio > 1) { artboardBRatio = 1/artboardBRatio; }
 
-    let arboardBRatioDifference = Math.abs(reference - artboardBRatio);
+    let artboardBRatioInsideMargin = artboardBRatio > lowerMargin && artboardBRatio < upperMaring;
 
-    if (arboardARatioDifference == arboardBRatioDifference) {
+    if (artboardARatioInsideMargin && !artboardBRatioInsideMargin) {
+        return false
+    }
+
+    if (artboardBRatioInsideMargin && !artboardARatioInsideMargin) {
+        return true
+    }
+
+    if (artboardARatio == artboardBRatio) {
         return a.name() > b.name()
     }
 
-    return arboardARatioDifference > arboardBRatioDifference;
+    return artboardARatio > artboardBRatio;
 }
 
 function createLabel(text, size, frame) {
@@ -111,16 +120,23 @@ function popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaul
 
 function smallImagesFromArtboard (artboard) {
 
-    let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(artboard);
     let artboardWidth = artboard.frame().width();
-    let arboardHeight = artboard.frame().height();
-    let biggerDimention = artboardWidth > arboardHeight ? artboardWidth : arboardHeight;
+    let artboardHeight = artboard.frame().height();
+    var artboardRatio = artboardWidth / artboardHeight;
+    if (artboardRatio > 1) { artboardRatio = 1/artboardRatio; }
+
+    if (artboardRatio > 0.8 || artboardRatio < 0.4) { return null }
+
+    let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(artboard);
+    
+    let biggerDimention = artboardWidth > artboardHeight ? artboardWidth : artboardHeight;
     let exportScale = 48/biggerDimention;
     let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(exportScale, "", "png");
     let exportRequest = MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
     let exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, NSColorSpace.sRGBColorSpace());
     let imageData = exporter.bitmapImageRep().TIFFRepresentation();
     let nsImage = NSImage.alloc().initWithData(imageData);
+    
     return nsImage;
 }
 
