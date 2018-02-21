@@ -1,312 +1,94 @@
-// ---------------------------------
-// CREATE LABEL ELEMENT
-// ---------------------------------
-
-function createLabel(text, size, frame) {
-  var label = NSTextField.alloc().initWithFrame(frame);
-
-  label.setStringValue(text);
-  label.setFont(NSFont.boldSystemFontOfSize(size));
-  label.setBezeled(false);
-  label.setDrawsBackground(false);
-  label.setEditable(false);
-  label.setSelectable(false);
-
-  return label;
-}
-
-// ---------------------------------
-// GET RESPONSE FOR OPTIONS
-// ---------------------------------
-
-const PixelDensities = [
-  { title: "Auto", selectionLabel: "Auto" },
-  { title: "1x", selectionLabel: "1x" },
-  { title: "2x", selectionLabel: "2x" },
-  { title: "3x", selectionLabel: "3x" },
-  { title: "4x", selectionLabel: "4x" },
-]
-
-const CompressionRatio = {
-  best: {
-    selectionLabel: "Best",
-    ratio: 1.0
-  },
-  better: {
-    selectionLabel: "Better",
-    ratio: 0.9
-  },
-  good: {
-    selectionLabel: "Good",
-    ratio: 0.8
-  },
-  average: {
-    selectionLabel: "Average",
-    ratio: 0.7
-  }
-}
-
-function loadLocalImage(context, filePath) {
-
-  let basePath = context.scriptPath
-    .stringByDeletingLastPathComponent()
-    .stringByDeletingLastPathComponent()
-    .stringByDeletingLastPathComponent();
-
-  if(!NSFileManager.defaultManager().fileExistsAtPath(basePath + "/" + filePath)) {
-      print("File does not exist at path");
-      return null;
-  }
-
-  print("Image loaded");
-
-  return NSImage.alloc().initWithContentsOfFile(basePath + "/" + filePath);
-}
-
-function getSelectionAndOptions_forAngleInstances(artboards, angles) {
-
-  if (artboards === null || artboards.length < 1) {
-    return {
-      alertOption: NSAlertFirstButtonReturn,
-      artboardSelections:     angles.map((a,i,as) => { indexOfSelectedItem: () => 0 }),
-      densitySelections:      angles.map((a,i,as) => { indexOfSelectedItem: () => 0 }),
-      compressionSelections:  angles.map((a,i,as) => { indexOfSelectedItem: () => 0 }),
-    };
-  }
-
-  //show a native popup box
-  var alert = NSAlert.alloc().init();
-  var alertContent = NSView.alloc().init();
-
-  alert.setMessageText("Apply Mockup");
-  alert.setInformativeText("Choose an Artboard to apply into the selected shape.");
-  alert.addButtonWithTitle("Apply");
-  alert.addButtonWithTitle("Cancel");
-  alert.icon = angleLogo;
-
-  var movingYPosition = 0;
-  var labelHeight = 16;
-
-  var fisrtColumnWidth = 180;
-  var secondColumnWidth = 130;
-  var thirdColumnWidth = 130;
-
-  const windowWidth = fisrtColumnWidth + secondColumnWidth + thirdColumnWidth;
-
-  var rectangle;
-
-  // Artboard selection element
-
-  rectangle = NSMakeRect(0, 0, fisrtColumnWidth, labelHeight);
-  var artboardLabel = createLabel("Artboard", 12, rectangle);
-  alertContent.addSubview(artboardLabel);
-
-  rectangle = NSMakeRect(fisrtColumnWidth, 0, secondColumnWidth, labelHeight);
-  var densityLabel = createLabel("Pixel Density", 12, rectangle);
-  alertContent.addSubview(densityLabel);
-
-  rectangle = NSMakeRect(fisrtColumnWidth + secondColumnWidth, 0, thirdColumnWidth, labelHeight);
-  var compressionLabel = createLabel("Quality", 12, rectangle);
-  alertContent.addSubview(compressionLabel);
-
-  let artboardNames = artboards.map((a) => a.name);
-  let artboardImages = artboards.map(function (a, i ,as) {
-    let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(a.artboard);
-    let artboardWidth = a.artboard.frame().width()
-    let arboardHeight = a.artboard.frame().height();
-    let biggerDimention = artboardWidth > arboardHeight ? artboardWidth : arboardHeight;
-    let exportScale = 32/biggerDimention;
-    let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(exportScale, "", "png");
-    let exportRequest = MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
-    let exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, NSColorSpace.sRGBColorSpace());
-    let imageData = exporter.bitmapImageRep().TIFFRepresentation();
-    let nsImage = NSImage.alloc().initWithData(imageData);
-    return nsImage;
-  });
-
-  // Artboard Selection
-
-  let artboardSelections = angles.map(function (a,i,as) {
-    
-    let rectangle = NSMakeRect(0, labelHeight + 4 + (28 * i), fisrtColumnWidth, 28);
-    let button = NSPopUpButton.alloc().initWithFrame(rectangle);
-    button.addItemsWithTitles(artboardNames);
-    button.selectItemAtIndex(0);
-    
-    artboardImages.forEach(function (a, i, as) {
-      let item = button.itemAtIndex(i);
-      item.image = a;
-    });
-
-    alertContent.addSubview(button);
-
-    return button;
-  });
-
-  // Pixel Density Selection
-
-  let pixelDensitySelections = angles.map(function (a,i,as) {
-    
-    let rectangle = NSMakeRect(fisrtColumnWidth, labelHeight + 4 + (28 * i), secondColumnWidth, 28);
-    let button = NSPopUpButton.alloc().initWithFrame(rectangle);
-    button.addItemsWithTitles(PixelDensities.map((a) => a.selectionLabel));
-    button.selectItemAtIndex(0);
-
-    alertContent.addSubview(button);
-
-    return button;
-  });
-
-  // Compression Ratio Selection
-
-  let compressionDensitySelections = angles.map(function (a,i,as) {
-    
-    let rectangle = NSMakeRect(fisrtColumnWidth + secondColumnWidth, labelHeight + 4 + (28 * i), thirdColumnWidth, 28);
-    let button = NSPopUpButton.alloc().initWithFrame(rectangle);
-    button.addItemsWithTitles(Object.values(CompressionRatio).map((a) => a.selectionLabel));
-    button.selectItemAtIndex(0);
-
-    alertContent.addSubview(button);
-
-    return button;
-  });
-
-  movingYPosition = labelHeight + 4 + (28 * angles.length) + 28;
-
-  // Render those label, dropdown etc into the Alert view
-  alertContent.frame = NSMakeRect(0, 0, windowWidth, movingYPosition);
-
-  // Reverse order of the content elements
-  alertContent.setFlipped(true);
-
-  alert.accessoryView = alertContent;
-
-  // With this will run the modal and return a reference to the selection element
-  return {
-    alertOption: alert.runModal(),
-    artboardSelections: artboardSelections,
-    densitySelections: pixelDensitySelections,
-    compressionSelections: compressionDensitySelections,
-  }
-}
-
-// ---------------------------------
-// MAIN FUNCTION
-// ---------------------------------
-
 const Angle = require('./Angle');
-require('./shared');
+const CompositionAngle = require('./CompositionAngle');
+const PixelDensity = require('./PixelDensity');
+const CompressionRatio = require('./CompressionRatio');
 
-const angleLogo = loadLocalImage(context, "/Contents/Resources/logo.png");
+import * as Shared from './Shared';
+import * as Alert from './Alert';
 
-export default function (context) {
+require('./Shared');
 
-  let selectedLayersNSArray = context.selection;
+const angleLogo = Shared.loadLocalImage(context, "/Contents/Resources/logo.png");
 
-  if (selectedLayersNSArray == null) { return }
+function applyAngleComposition_onSelectedLayer_withArtboards_forContext (composition, selectedLayers, artboards, context) {
 
-  let selectedLayers = [];
+  let selectedLayer = selectedLayers[0];
 
-  for (var i = 0; i < selectedLayersNSArray.count(); i++) {
-    selectedLayers.push({
-      name: selectedLayersNSArray[i].name(),
-      layer: selectedLayersNSArray[i]
-    });
-  }
-
-  let angles = selectedLayers.map(function (a, i, as) {
-
-    let angleInstance = Angle.angleFor({
-      selectedLayer: a.layer,
-      context: context,
-    });
-
-    return angleInstance
-  }).filter( (a, i, as) => a != null );
-
-  if (angles.length == 0) {
-
-    // It was not possible to trigger angle for a single object
+  if (selectedLayer.class() != MSSymbolInstance) {
+    context.document.showMessage("Please, select an Angle Composition.");
     return
   }
 
-  // ---------------------------------
-  // ARTBOARDS IN CONTEXT
-  // ---------------------------------
+  let allAvailableOverridesNSArray = selectedLayer.availableOverrides();
+  let allAvailableOverrides = Array.fromNSArray(allAvailableOverridesNSArray);
 
-  let parentArtboard = selectedLayers[0].layer.parentArtboard();
-  let artboardsNSArray = context.document.artboards();
-  let artboards = [];
+  let angles = allAvailableOverrides
+      .map ( a => a.children() )
+      .map ( Array.fromNSArray )
+      .reduce ( (p, a) => p.concat(a), [] )
+      .filter ( function (a) { return a.class() == MSAvailableOverride } )
+      .map ( function (a) {
 
-  for (var i = 0; i < artboardsNSArray.count(); i++) {
+          let angleInstance = new CompositionAngle ({
+              overrideLayer: a.overridePoint().parent(),
+              targetLayer: a.affectedLayer(),
+              selectedLayer: selectedLayer,
+              context: context
+          });
 
-    // Not list the parent artboard of the select symbol or shape
-    if (artboardsNSArray[i] != parentArtboard) {
-      artboards.push({ name: artboardsNSArray[i].name(), artboard: artboardsNSArray[i] });
-    }
-  }
-
-  artboards.sort(function (a, b) {
-
-    let reference = 3/4;
-
-    let artboardSizeA = a.artboard.frame();
-    let artboardSizeB = b.artboard.frame();
-    
-    let artboardARatio = artboardSizeA.width() / artboardSizeA.height();
-    if (artboardARatio > 1) { artboardARatio = 1/artboardARatio; }
-
-    let arboardARatioDifference = Math.abs(reference - artboardARatio);
-    
-    let artboardBRatio = artboardSizeB.width() / artboardSizeB.height();
-    if (artboardBRatio > 1) { artboardBRatio = 1/artboardBRatio; }
-
-    let arboardBRatioDifference = Math.abs(reference - artboardBRatio);
-
-    if (arboardARatioDifference == arboardBRatioDifference) {
-      return a.name > b.name
-    }
-
-    return arboardARatioDifference > arboardBRatioDifference;
-  });
-
-  if (artboards.length == 0) {
-    // There are no artboards
-    // Explain that Angle leverages artboards
-    var alert = NSAlert.alloc().init();
-
-    // alert.showsHelp = true;
-    alert.setMessageText("Angle needs an Artboard");
-    alert.setInformativeText("To start using Angle, create a new Artboard that contains your screen.");
-    alert.addButtonWithTitle("OK");
-    alert.icon = angleLogo;
-
-    alert.runModal();
-
-    return
-  }
+          if (!angleInstance.pointsAreValid) { return null }
+          return angleInstance
+      })
+      .filter ( a => a != null );
 
   if (artboards.length == 1) {
+      angles.forEach(function (a, i, as) {
+          a.artboard = artboards[0];
+          a.pixelDensity = 0;
+          a.compressionRatio = 0;
+      });
+  } else {
+      let response = Shared.getSelectionAndOptions_forAngleInstances(artboards, angles);
+      
+      if (response.alertOption != NSAlertFirstButtonReturn) { return }
 
+      angles.forEach(function (a, i, as) {
+          let artboardSelectionIndex = response.artboardSelections[i].indexOfSelectedItem();
+
+          a.artboard = artboards[artboardSelectionIndex];
+          a.pixelDensity = response.densitySelections[i].indexOfSelectedItem();
+          a.compressionRatio = response.compressionSelections[i].indexOfSelectedItem();
+      });
+  }
+
+  angles.forEach(function (a, i, as) {
+      a.guessRotationAndReversion();
+      a.applyImage();
+  });
+
+  context.document.showMessage("You got Angled! 📱");
+}
+
+function applyAngles_onSelectedLayers_withArtboards_forContext (angles, selectedLayers, artboards, context) {
+
+  if (artboards.length == 1) {
     angles.forEach(function (a, i, as) {
-      a.artboard = artboards[0].artboard;
+      a.artboard = artboards[0];
       a.pixelDensity = 0;
       a.selectedCompressionRatio = 0;
     });
   } else {
 
-    // In earlier versions of Sketch, the modal does not layout properly.
-    let response = getSelectionAndOptions_forAngleInstances(artboards, angles);
-    // let response = { alertOption: NSAlertFirstButtonReturn, artboardSelectionElement: { indexOfSelectedItem : () => 0 }}
+    let response = Shared.getSelectionAndOptions_forAngleInstances(artboards, angles);
 
     if (response.alertOption != NSAlertFirstButtonReturn) { return }
 
     angles.forEach(function (a, i, as) {
       let artboardSelectionIndex = response.artboardSelections[i].indexOfSelectedItem();
 
-      a.artboard = artboards[artboardSelectionIndex].artboard;
+      a.artboard = artboards[artboardSelectionIndex];
       a.pixelDensity = response.densitySelections[i].indexOfSelectedItem();
-      a.selectedCompressionRatio = response.compressionSelections[i].indexOfSelectedItem();
+      a.compressionRatio = response.compressionSelections[i].indexOfSelectedItem();
     });
   }
 
@@ -317,4 +99,50 @@ export default function (context) {
   });
 
   context.document.showMessage("You got Angled! 📱");
+}
+
+export default function (context) {
+
+  let selectedLayersNSArray = context.selection;
+
+  if (selectedLayersNSArray == null) {
+    context.document.showMessage("Select a shape layer, an Angle Mockup, or an Angle Composition.");
+    return
+  }
+
+  let selectedLayers = Array.fromNSArray(selectedLayersNSArray);
+
+  let angles = selectedLayers.map(function (a, i, as) {
+
+    let angleInstance = Angle.angleFor({
+      selectedLayer: a,
+      context: context,
+    });
+
+    return angleInstance
+  }).filter( (a, i, as) => a != null );
+
+  let parentArtboard = selectedLayers[0].parentArtboard();
+  let artboardsNSArray = context.document.artboards();
+  let artboards = Array.fromNSArray(artboardsNSArray)
+    .filter( a => a != parentArtboard );
+
+  artboards.sort(Shared.compareByRatioAndAlphabet);
+
+  if (artboards.length == 0) {
+    Alert.noArtboards(angleLogo);
+    return
+  }
+
+  if (angles.length != 0) {
+    applyAngles_onSelectedLayers_withArtboards_forContext(angles, selectedLayers, artboards, context);
+    return
+  }
+
+  if (selectedLayersNSArray.count() != 1) {
+    context.document.showMessage("Select only one Angle Composition.");
+    return
+  }
+
+  applyAngleComposition_onSelectedLayer_withArtboards_forContext(null, selectedLayers, artboards, context);
 }

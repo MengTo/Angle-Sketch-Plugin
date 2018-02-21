@@ -2,6 +2,7 @@ const Angle = require('./Angle');
 
 class SymbolicAngle extends Angle {
     constructor (options = {}) {
+        
         super(options);
   
         const existingOverrides = this.selectedLayer.overrides() || NSDictionary.dictionary();

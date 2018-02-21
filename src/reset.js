@@ -1,7 +1,3 @@
-// ---------------------------------
-// MAIN FUNCTION
-// ---------------------------------
-
 export default function (context) {
 
     let selectedLayers = context.selection;
@@ -9,7 +5,6 @@ export default function (context) {
     if (selectedLayers == null) { return }
 
     if (selectedLayers.count() != 1) {
-  
         context.document.showMessage("Please, select only 1️⃣ element at a time");
         return
     }
