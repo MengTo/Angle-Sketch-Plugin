@@ -1,9 +1,5 @@
-// ---------------------------------
-// MAIN FUNCTION
-// ---------------------------------
-
 const Angle = require('./Angle');
-require('./shared');
+require('./Shared');
 
 export default function (context) {
 
@@ -12,7 +8,6 @@ export default function (context) {
     if (selectedLayers == null) { return }
 
     if (selectedLayers.count() != 1) {
-  
       context.document.showMessage("Please, select only 1️⃣ element at a time");
       return
     }
