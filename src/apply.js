@@ -1,4 +1,5 @@
 const Angle = require('./Angle');
+const CardAngle = require('./CardAngle');
 const CompositionAngle = require('./CompositionAngle');
 const PixelDensity = require('./PixelDensity');
 const CompressionRatio = require('./CompressionRatio');
@@ -10,13 +11,14 @@ require('./Shared');
 
 const angleLogo = Shared.loadLocalImage(context, "/Contents/Resources/logo.png");
 
-function applyAngleComposition_onSelectedLayer_withArtboards_forContext (composition, selectedLayers, artboards, context) {
-
-  let selectedLayer = selectedLayers[0];
+function getCompositionAngles (options) {
+  
+  let selectedLayer = options.selectedLayer;
+  let context = options.context;
 
   if (selectedLayer.class() != MSSymbolInstance) {
     context.document.showMessage("Please, select an Angle Composition.");
-    return
+    return null
   }
 
   let allAvailableOverridesNSArray = selectedLayer.availableOverrides();
@@ -40,6 +42,17 @@ function applyAngleComposition_onSelectedLayer_withArtboards_forContext (composi
           return angleInstance
       })
       .filter ( a => a != null );
+
+    if (angles.length == 0) { return null }
+
+    return angles
+}
+
+function applyCompositionAngles (options) {
+
+  let angles = options.angles;
+  let artboards = options.artboards;
+  let context = options.context;
 
   if (artboards.length == 1) {
       angles.forEach(function (a, i, as) {
@@ -69,19 +82,26 @@ function applyAngleComposition_onSelectedLayer_withArtboards_forContext (composi
   context.document.showMessage("You got Angled! 📱");
 }
 
-function applyAngles_onSelectedLayers_withArtboards_forContext (angles, selectedLayers, artboards, context) {
+function applyAngles (options) {
+
+  let angles = options.angles;
+  let selectedLayers = options.selectedLayers;
+  let artboards = options.artboards;
+  let context = options.context;
 
   if (artboards.length == 1) {
-    angles.forEach(function (a, i, as) {
+    
+    angles.forEach(function (a) {
       a.artboard = artboards[0];
       a.pixelDensity = 0;
       a.selectedCompressionRatio = 0;
     });
+  
   } else {
 
     let response = Shared.getSelectionAndOptions_forAngleInstances(artboards, angles);
 
-    if (response.alertOption != NSAlertFirstButtonReturn) { return }
+    if (response.alertOption != NSAlertFirstButtonReturn) { return true }
 
     angles.forEach(function (a, i, as) {
       let artboardSelectionIndex = response.artboardSelections[i].indexOfSelectedItem();
@@ -98,7 +118,81 @@ function applyAngles_onSelectedLayers_withArtboards_forContext (angles, selected
     a.applyImage();
   });
 
-  context.document.showMessage("You got Angled! 📱");
+  return true
+}
+
+function getCardAngles (options) {
+
+  let context = options.context;
+
+  let selectedLayer = options.selectedLayer;
+  if (selectedLayer.class() != MSSymbolInstance) { return null }
+
+  let availableOverridesNSArray = selectedLayer.availableOverrides();
+  if (availableOverridesNSArray == null) { return null }
+  let availableOverrides = Array.fromNSArray(availableOverridesNSArray);
+  if (availableOverrides.length == 0) { return null }
+
+  let imageOverrides = availableOverrides.filter( (a) => a.currentValue().class() == MSImageData);
+  if (imageOverrides == null || imageOverrides.length == 0) { return null }
+
+  let angles = imageOverrides
+    .map(function (a, i, as) {
+      
+      let angleInstance = new CardAngle ({
+        selectedLayer: selectedLayer,
+        targetLayer: a.affectedLayer(),
+        targetPath: a.affectedLayer().bezierPath(),
+        context: context
+      });
+
+      if (!angleInstance.pointsAreValid) { return null }
+      return angleInstance
+    })
+    .filter( a => a != null)
+
+  if (angles.length == 0) { return null }
+
+  return angles
+}
+
+function applyCardAngles (options) {
+
+  let angles = options.angles;
+  let selectedLayers = options.selectedLayers;
+  let artboards = options.artboards;
+  let context = options.context;
+
+  if (artboards.length == 1) {
+    
+    angles.forEach(function (a) {
+      a.artboard = artboards[0];
+      a.pixelDensity = 0;
+      a.selectedCompressionRatio = 0;
+    });
+  
+  } else {
+
+    let response = Shared.getSelectionAndOptions_forAngleInstances(artboards, angles);
+
+    if (response.alertOption != NSAlertFirstButtonReturn) { return true }
+
+    angles.forEach(function (a, i, as) {
+      let artboardSelectionIndex = response.artboardSelections[i].indexOfSelectedItem();
+
+      a.artboard = artboards[artboardSelectionIndex];
+      a.pixelDensity = response.densitySelections[i].indexOfSelectedItem();
+      a.compressionRatio = response.compressionSelections[i].indexOfSelectedItem();
+    });
+  }
+
+  angles.forEach(function (a, i, as) {
+
+    a.guessRotationAndReversion();
+    a.applyImage();
+  });
+
+  return true
 }
 
 export default function (context) {
@@ -112,37 +206,83 @@ export default function (context) {
 
   let selectedLayers = Array.fromNSArray(selectedLayersNSArray);
 
-  let angles = selectedLayers.map(function (a, i, as) {
-
-    let angleInstance = Angle.angleFor({
-      selectedLayer: a,
-      context: context,
-    });
-
-    return angleInstance
-  }).filter( (a, i, as) => a != null );
+  if (selectedLayers.length == 0) { return }
 
   let parentArtboard = selectedLayers[0].parentArtboard();
   let artboardsNSArray = context.document.artboards();
-  let artboards = Array.fromNSArray(artboardsNSArray)
-    .filter( a => a != parentArtboard );
-
-  artboards.sort(Shared.compareByRatioAndAlphabet);
+  let artboards = Array
+    .fromNSArray( artboardsNSArray )
+    .filter( a => a != parentArtboard )
+    .sort(Shared.compareByRatioAndAlphabet);
 
   if (artboards.length == 0) {
     Alert.noArtboards(angleLogo);
     return
   }
 
+  if (selectedLayers.length == 1) {
+
+    let selectedLayer = selectedLayers[0]
+
+    let cardAngles = getCardAngles({
+      selectedLayer: selectedLayer,
+      context: context
+    });
+
+    if (cardAngles != null) {
+      
+      let appliedCardAngles = applyCardAngles({
+        angles: cardAngles,
+        selectedLayer: selectedLayer,
+        artboards: artboards,
+        context: context
+      });
+
+      if (appliedCardAngles) {
+        context.document.showMessage("You got Angled! 📱");
+      }
+
+      return
+    }
+
+    let compositionAngles = getCompositionAngles({
+      selectedLayer: selectedLayer,
+      context: context
+    });
+
+    if (compositionAngles != null) {
+
+      let appliedCompositionAngles = applyCompositionAngles({
+        angles: compositionAngles,
+        artboards: artboards,
+        context: context
+      });
+
+      if (appliedCompositionAngles) {
+        context.document.showMessage("You got Angled! 📱");
+      }
+
+      return
+    }
+  }
+
+  let angles = selectedLayers
+    .map( a => { return Angle.angleFor({ selectedLayer: a, context: context }) })
+    .filter( a => a != null );
+
   if (angles.length != 0) {
-    applyAngles_onSelectedLayers_withArtboards_forContext(angles, selectedLayers, artboards, context);
+
+    let applyedShapeAngles = applyAngles({
+      angles: angles,
+      selectedLayers: selectedLayers,
+      artboards: artboards,
+      context: context
+    });
+
+    if (applyedShapeAngles) {
+      context.document.showMessage("You got Angled! 📱");
+    }
+
     return
   }
-
-  if (selectedLayersNSArray.count() != 1) {
-    context.document.showMessage("Select only one Angle Composition.");
-    return
-  }
-
-  applyAngleComposition_onSelectedLayer_withArtboards_forContext(null, selectedLayers, artboards, context);
 }
