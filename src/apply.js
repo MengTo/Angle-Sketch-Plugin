@@ -1,11 +1,14 @@
 const Angle = require('./Angle');
 const CardAngle = require('./CardAngle');
 const CompositionAngle = require('./CompositionAngle');
+const SymbolicAngle = require('./SymbolicAngle');
+const ShapeAngle = require('./ShapeAngle');
 const PixelDensity = require('./PixelDensity');
 const CompressionRatio = require('./CompressionRatio');
 
 import * as Shared from './Shared';
 import * as Alert from './Alert';
+import { Error } from './Error'
 
 require('./Shared');
 
@@ -16,10 +19,7 @@ function getCompositionAngles (options) {
   let selectedLayer = options.selectedLayer;
   let context = options.context;
 
-  if (selectedLayer.class() != MSSymbolInstance) {
-    context.document.showMessage("Please, select an Angle Composition.");
-    return null
-  }
+  if (selectedLayer.class() != MSSymbolInstance) { return null }
 
   let allAvailableOverridesNSArray = selectedLayer.availableOverrides();
   let allAvailableOverrides = Array.fromNSArray(allAvailableOverridesNSArray);
@@ -101,7 +101,7 @@ function applyAngles (options) {
 
     let response = Shared.getSelectionAndOptions_forAngleInstances(artboards, angles);
 
-    if (response.alertOption != NSAlertFirstButtonReturn) { return true }
+    if (response.alertOption != NSAlertFirstButtonReturn) { return false }
 
     angles.forEach(function (a, i, as) {
       let artboardSelectionIndex = response.artboardSelections[i].indexOfSelectedItem();
@@ -266,23 +266,36 @@ export default function (context) {
     }
   }
 
-  let angles = selectedLayers
-    .map( a => { return Angle.angleFor({ selectedLayer: a, context: context }) })
-    .filter( a => a != null );
-
-  if (angles.length != 0) {
-
-    let applyedShapeAngles = applyAngles({
-      angles: angles,
-      selectedLayers: selectedLayers,
-      artboards: artboards,
-      context: context
+  let possibleAngles = selectedLayers
+    .map( a => {
+      let options = { selectedLayer: a, context: context};
+      switch (a.class()) {
+        case MSSymbolInstance:
+          return new SymbolicAngle(options);
+        case MSShapeGroup:
+          return new ShapeAngle(options);
+        default:
+          return Error.unsupportedElement
+      }
     });
 
-    if (applyedShapeAngles) {
-      context.document.showMessage("You got Angled! 📱");
-    }
+  let angles = possibleAngles.filter( a => a instanceof Angle );
+  let errors = possibleAngles.filter( a => !(a instanceof Angle) );
 
+  if (angles.length == 0) {
+    let error = errors[0];
+    context.document.showMessage(error.message);
     return
+  }
+
+  let appliedShapeAngles = applyAngles({
+    angles: angles,
+    selectedLayers: selectedLayers,
+    artboards: artboards,
+    context: context
+  });
+
+  if (appliedShapeAngles) {
+    context.document.showMessage("You got Angled! 📱");
   }
 }

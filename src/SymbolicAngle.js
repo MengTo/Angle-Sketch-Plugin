@@ -1,4 +1,5 @@
 const Angle = require('./Angle');
+import { Error } from './Error'
 
 class SymbolicAngle extends Angle {
     constructor (options = {}) {
@@ -14,10 +15,16 @@ class SymbolicAngle extends Angle {
             return p
         }, null);
 
-        if (imageOverride == undefined) { return }
+        if (imageOverride == undefined) {
+            return Error.noImageOverrideOnSymbol
+        }
 
         this.targetLayer = imageOverride.affectedLayer();
         this.targetPath = imageOverride.affectedLayer().bezierPath();
+
+        if (!this.pointsAreValid) {
+            return Error.unsupportedShapePath
+        }
     }
 
     applyImage () {

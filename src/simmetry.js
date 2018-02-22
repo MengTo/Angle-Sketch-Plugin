@@ -1,27 +1,56 @@
 const Angle = require('./Angle');
-require('./shared');
+const SymbolicAngle = require('./SymbolicAngle');
+const ShapeAngle = require('./ShapeAngle');
+require('./Shared');
+
+import { Error } from './Error'
 
 export default function (context) {
 
-    let selectedLayers = context.selection;
+    let selectedLayersNSArray = context.selection;
+    
+    if (selectedLayersNSArray == null) {
+        let error = Error.emptySelection
+        context.document.showMessage(error.message);
+        return
+    }
+    
+    let selectedLayers = Array.fromNSArray(selectedLayersNSArray);
 
-    if (selectedLayers == null) { return }
-
-    if (selectedLayers.count() != 1) {
-      context.document.showMessage("Please, select only 1️⃣ element at a time");
-      return
+    if (selectedLayers.length == 0) {
+        let error = Error.emptySelection
+        context.document.showMessage(error.message);
+        return
     }
 
-    let angleInstance = Angle.angleFor({
-        selectedLayer: selectedLayers.firstObject(),
-        context: context,
+    let possibleAngles = selectedLayers
+        .map( a => {
+
+            switch (a.class()) {
+                case MSSymbolInstance:
+                    return new SymbolicAngle({ selectedLayer: a, context: context});
+                    break
+                case MSShapeGroup:
+                    return new ShapeAngle({ selectedLayer: a, context: context});
+                    break
+                default:
+                    return Error.unsupportedElement
+            }
+        });
+
+    let angles = possibleAngles.filter( a => a instanceof Angle );
+    let errors = possibleAngles.filter( a => !(a instanceof Angle) );
+
+    if (angles.length == 0) {
+        let error = errors[0];
+        context.document.showMessage(error.message);
+        return
+    }
+
+    angles.forEach( a => {
+        a.reverseSimmetry();
+        a.applyImage();
     });
-
-    if (angleInstance == null) { return }
-
-    angleInstance.reverseSimmetry();
-
-    angleInstance.applyImage();
 
     context.document.showMessage("Angle flipped! ↔️");
 

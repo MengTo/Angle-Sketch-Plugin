@@ -1,8 +1,5 @@
 const Angle = require('./Angle');
-
-// ---------------------------------
-// SKETCH MNEMONIC ENUMS
-// ---------------------------------
+import { Error } from './Error'
 
 const StyleFillType = { solid: 0, gradient: 1, pattern: 4, noise: 5 };
 
@@ -11,8 +8,11 @@ class ShapeAngle extends Angle {
         super(options);
 
         this.targetLayer = this.selectedLayer;
-
         this.targetPath = this.selectedLayer.bezierPath();
+
+        if (!this.pointsAreValid) {
+            return Error.unsupportedShapePath
+        }
     }
 
     applyImage () {
