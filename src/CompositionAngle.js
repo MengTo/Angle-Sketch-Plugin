@@ -25,11 +25,12 @@ class CompositionAngle extends SymbolicAngle {
 
         const overrideBranchAddress = (this.overrideLayer + "").replace("_symbolID", "");
         
-        let overrideBranch = NSMutableDictionary.dictionary();
+        const existingOverrideBranch = topOverrides.objectForKey(overrideBranchAddress) || NSMutableDictionary.dictionary();
+        let overrideBranch = NSMutableDictionary.dictionaryWithDictionary(existingOverrideBranch);
 
         const objectID = this.targetLayer.objectID();
-        overrideBranch.setObject_forKey(this.transformedImage, objectID)
-        topOverrides.setObject_forKey(overrideBranch, overrideBranchAddress)
+        overrideBranch.setObject_forKey(this.transformedImage, objectID);
+        topOverrides.setObject_forKey(overrideBranch, overrideBranchAddress);
 
         this.selectedLayer.overrides = topOverrides;
     }
