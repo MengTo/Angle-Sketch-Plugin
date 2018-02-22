@@ -137,15 +137,8 @@ class Angle {
 
     constructor (options = {}) {
 
-        this.targetLayer = options.targetLayer;
         this.context = options.context;
         this.selectedLayer = options.selectedLayer;
-
-        options.rotation = options.rotation || 0;
-        options.reversed = options.reversed || false;
-        
-        this.rotation = this.rotation || options.rotation;
-        this.reversed = this.reversed || options.reversed;
     }
 
     // ---------------------------------

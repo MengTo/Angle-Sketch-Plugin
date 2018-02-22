@@ -1,27 +1,11 @@
-const Angle = require('./Angle');
+const SymbolicAngle = require('./SymbolicAngle');
+import { Error } from './Error'
 
-class CompositionAngle extends Angle {
+class CompositionAngle extends SymbolicAngle {
     
     constructor (options = {}) {
         
         super(options);
-
-        this.targetPath = this.targetLayer.bezierPath();
-        this.overrideLayer = options.overrideLayer;
-    }
-
-    estimatePixelDensity () {
-
-        // Best guess of a 2x sampling of the image if the mockup is in it's original scale
-
-        let [layerWidth, layerHeight] = this.maximumVerticesWidthAndHeight();
-        
-        let widthRatio = this.selectedLayer.rect().size.width * layerWidth / (this.selectedLayer.naturalSize().width * this.artboard.rect().size.width);
-        let heightRatio = this.selectedLayer.rect().size.height * layerHeight / (this.selectedLayer.naturalSize().height * this.artboard.rect().size.height);
-        
-        let estimate = widthRatio > heightRatio ? widthRatio : heightRatio;
-        
-        return estimate;
     }
 
     loadValueForKey (key) {

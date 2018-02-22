@@ -1,6 +1,4 @@
 const Angle = require('./Angle');
-const SymbolicAngle = require('./SymbolicAngle');
-const ShapeAngle = require('./ShapeAngle');
 require('./Shared');
 
 import { Error } from './Error'
@@ -23,20 +21,7 @@ export default function (context) {
         return
     }
 
-    let possibleAngles = selectedLayers
-        .map( a => {
-
-            switch (a.class()) {
-                case MSSymbolInstance:
-                    return new SymbolicAngle({ selectedLayer: a, context: context});
-                    break
-                case MSShapeGroup:
-                    return new ShapeAngle({ selectedLayer: a, context: context});
-                    break
-                default:
-                    return Error.unsupportedElement
-            }
-        });
+    let possibleAngles = Angle.forSelectedLayers_inContext(selectedLayers,context);
 
     let angles = possibleAngles.filter( a => a instanceof Angle );
     let errors = possibleAngles.filter( a => !(a instanceof Angle) );

@@ -1,10 +1,66 @@
+const Angle = require('./Angle');
+const CompositionAngle = require('./CompositionAngle');
+const SymbolicAngle = require('./SymbolicAngle');
+const ShapeAngle = require('./ShapeAngle');
 const PixelDensity = require('./PixelDensity');
 const CompressionRatio = require('./CompressionRatio');
+
+import { Error } from './Error'
+
+Angle.forSelectedLayers_inContext = function (selectedLayers, context) {
+
+    return selectedLayers
+        .map ( layer => {
+        switch (layer.class()) {
+            case MSSymbolInstance:
+            
+                let overrides = Array.fromNSArray(layer.availableOverrides()) || [];
+                
+                let symbolAngles = overrides
+                    .filter ( override => override.currentValue().class() == MSImageData )
+                    .map ( override => {
+                        return new SymbolicAngle ({
+                            selectedLayer: layer,
+                            context: context,
+                            override: override
+                        })
+                    })
+                
+                let nestedAngles = overrides
+                    .map ( a => a.children() )
+                    .filter ( a => a != null )
+                    .map ( Array.fromNSArray )
+                    .reduce ( (p, a) => p.concat(a), [] )
+                    .filter ( function (a) { return a.class() == MSAvailableOverride } )
+                    .map ( function (a) {
+                        return new CompositionAngle ({
+                            override: a,
+                            selectedLayer: layer,
+                            context: context
+                        });
+                    });
+
+                return symbolAngles.concat(nestedAngles)
+            case MSShapeGroup:
+                return new ShapeAngle ({
+                    selectedLayer: layer,
+                    context: context
+                })
+            default:
+                return [ Error.unsupportedElement ]
+        }
+        })
+        .reduce ( ((p, a, i, as) => p.concat(a)), []);
+}
 
 Array.fromNSArray = function (NSArray) {
     let array = []
     for (var i = 0; i < NSArray.count(); i++) { array.push(NSArray[i]) }
     return array
+}
+
+Array.prototype.print = function () {
+    return this.map ( a => { print(a); return a } )
 }
 
 export function compareByRatioAndAlphabet (a, b) {
