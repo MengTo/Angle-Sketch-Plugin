@@ -1,7 +1,7 @@
-const SymbolicAngle = require('./SymbolicAngle');
+import SymbolicAngle from './SymbolicAngle'
 import { Error } from './Error'
 
-class CompositionAngle extends SymbolicAngle {
+export default class CompositionAngle extends SymbolicAngle {
     
     constructor (options = {}) {
         
@@ -39,5 +39,3 @@ class CompositionAngle extends SymbolicAngle {
         return this.override.parent().affectedLayer().name() + " " + this.targetLayer.name();
     }
 }
-
-module.exports = CompositionAngle

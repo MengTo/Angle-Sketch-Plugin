@@ -1,11 +1,11 @@
-const Angle = require('./Angle');
-const CompositionAngle = require('./CompositionAngle');
-const SymbolicAngle = require('./SymbolicAngle');
-const ShapeAngle = require('./ShapeAngle');
-const PixelDensity = require('./PixelDensity');
-const CompressionRatio = require('./CompressionRatio');
+import Angle from './Angle'
+import CompositionAngle from './CompositionAngle'
+import SymbolicAngle from './SymbolicAngle'
+import ShapeAngle from './ShapeAngle'
 
 import { Error } from './Error'
+import { PixelDensity } from './PixelDensity'
+import { CompressionRatio } from './CompressionRatio'
 
 Angle.forSelectedLayers_inContext = function (selectedLayers, context) {
 

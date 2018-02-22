@@ -1,5 +1,3 @@
-export var context = null;
-
 export function noArtboards (logo) {
     // There are no artboards
     // Explain that Angle leverages artboards

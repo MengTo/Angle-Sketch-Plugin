@@ -1,6 +1,6 @@
-const CompressionRatio = require('./CompressionRatio');
+import { CompressionRatio } from './CompressionRatio'
 
-class Angle {
+export default class Angle {
 
     // ---------------------------------
     // PERSISTENT PROPERTIES
@@ -443,5 +443,3 @@ class Angle {
         return MSImageData.alloc().initWithImage_(ouputNSImage)
     }
 }
-
-module.exports = Angle

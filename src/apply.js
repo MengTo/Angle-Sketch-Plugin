@@ -1,10 +1,10 @@
-const Angle = require('./Angle');
-const PixelDensity = require('./PixelDensity');
-const CompressionRatio = require('./CompressionRatio');
+import Angle from './Angle'
+import * as Shared from './Shared'
+import * as Alert from './Alert'
 
-import * as Shared from './Shared';
-import * as Alert from './Alert';
 import { Error } from './Error'
+import { PixelDensity } from './PixelDensity'
+import { CompressionRatio } from './CompressionRatio'
 
 require('./Shared');
 

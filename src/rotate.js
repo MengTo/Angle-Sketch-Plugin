@@ -1,4 +1,4 @@
-const Angle = require('./Angle');
+import Angle from './Angle'
 require('./Shared');
 
 import { Error } from './Error'

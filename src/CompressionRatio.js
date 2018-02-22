@@ -1,4 +1,4 @@
-module.exports = {
+export const CompressionRatio = {
     best: {
         selectionLabel: "Best",
         ratio: 1.0

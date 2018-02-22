@@ -1,9 +1,9 @@
-const Angle = require('./Angle');
+import Angle from './Angle'
 import { Error } from './Error'
 
 const StyleFillType = { solid: 0, gradient: 1, pattern: 4, noise: 5 };
 
-class ShapeAngle extends Angle {
+export default class ShapeAngle extends Angle {
     constructor (options = {}) {
         super(options);
 
@@ -43,5 +43,3 @@ class ShapeAngle extends Angle {
         return this.targetLayer.name();
     }
 }
-
-module.exports = ShapeAngle

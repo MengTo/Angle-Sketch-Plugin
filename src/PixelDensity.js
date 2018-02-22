@@ -1,4 +1,4 @@
-module.exports = [
+export const PixelDensity = [
     { title: "Auto", selectionLabel: "Auto" },
     { title: "1x", selectionLabel: "1x" },
     { title: "2x", selectionLabel: "2x" },
