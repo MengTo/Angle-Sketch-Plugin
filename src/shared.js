@@ -218,7 +218,7 @@ export function getSelectionAndOptions_forAngleInstances(artboards, angles) {
     if (array.length > 1) {
         let targetLabels = array.map( function (a, i, as) {
             let rectangle = NSMakeRect(0, labelHeight + 4 + (spacing * i), fisrtColumnWidth, labelHeight);
-            let label = createLabel(angles[i].targetLayer.name(), 12, rectangle);
+            let label = createLabel(angles[i].description(), 12, rectangle);
     
             return label
         });

@@ -38,6 +38,10 @@ class ShapeAngle extends Angle {
         
         return estimate;
     }
+
+    description () {
+        return this.targetLayer.name();
+    }
 }
 
 module.exports = ShapeAngle

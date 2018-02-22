@@ -44,6 +44,10 @@ class SymbolicAngle extends Angle {
         
         return estimate;
     }
+
+    description () {
+        return this.selectedLayer.name() + " " + this.targetLayer.name();
+    }
 }
 
 module.exports = SymbolicAngle

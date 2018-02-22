@@ -6,6 +6,8 @@ class CompositionAngle extends SymbolicAngle {
     constructor (options = {}) {
         
         super(options);
+
+        this.override = options.override;
     }
 
     loadValueForKey (key) {
@@ -30,6 +32,10 @@ class CompositionAngle extends SymbolicAngle {
         topOverrides.setObject_forKey(overrideBranch, overrideBranchAddress)
 
         this.selectedLayer.overrides = topOverrides;
+    }
+
+    description () {
+        return this.override.parent().affectedLayer().name() + " " + this.targetLayer.name();
     }
 }
 
