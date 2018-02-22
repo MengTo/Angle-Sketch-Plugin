@@ -163,7 +163,7 @@ function smallImagesFromArtboard (artboard) {
     return nsImage;
 }
 
-export function getSelectionAndOptions_forAngleInstances(artboards, angles) {
+export function getSelectionAndOptions_forAngleInstances(artboards, angles, alertImage) {
 
     let anglesCount = angles.length;
 
@@ -186,7 +186,7 @@ export function getSelectionAndOptions_forAngleInstances(artboards, angles) {
     alert.setInformativeText("Choose an Artboard to apply into the selected shape.");
     alert.addButtonWithTitle("Apply");
     alert.addButtonWithTitle("Cancel");
-    // alert.icon = angleLogo;
+    alert.icon = alertImage;
 
     var movingYPosition = 0;
     var labelHeight = 16;

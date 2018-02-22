@@ -26,7 +26,7 @@ function applyAngles (options) {
   
   } else {
 
-    let response = Shared.getSelectionAndOptions_forAngleInstances(artboards, angles);
+    let response = Shared.getSelectionAndOptions_forAngleInstances(artboards, angles, angleLogo);
 
     if (response.alertOption != NSAlertFirstButtonReturn) { return false }
 
