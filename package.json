@@ -1,6 +1,8 @@
 {
   "name": "angle",
   "version": "0.1.0",
+  "repository": "https://github.com/MengTo/Angle-Sketch-Plugin",
+  "description": "Apply perspective transforms on screen mockups. Auto-detect screens by resolution and works on shapes and symbols. Super fast.",
   "engines": {
     "sketch": ">=3.0"
   },
