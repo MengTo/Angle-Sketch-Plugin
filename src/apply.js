@@ -8,8 +8,6 @@ import { CompressionRatio } from './CompressionRatio'
 
 require('./Shared');
 
-const angleLogo = Shared.loadLocalImage(context, "/Contents/Resources/logo.png");
-
 function applyAngles (options) {
 
   let angles = options.angles;
@@ -26,8 +24,10 @@ function applyAngles (options) {
   
   } else {
 
-    let response = Shared.getSelectionAndOptions_forAngleInstances(artboards, angles, angleLogo);
+    const angleLogo = Shared.loadLocalImage(context, "Contents/Resources/logo.png");
 
+    let response = Shared.getSelectionAndOptions_forAngleInstances(artboards, angles, angleLogo);
+    
     if (response.alertOption != NSAlertFirstButtonReturn) { return false }
 
     angles.forEach(function (a, i, as) {
@@ -53,27 +53,30 @@ export default function (context) {
   let selectedLayersNSArray = context.selection;
 
   if (selectedLayersNSArray == null) {
-    context.document.showMessage("Select a shape layer, an Angle Mockup, or an Angle Composition.");
+    context.document.showMessage(Error.emptySelection.message);
     return
   }
 
   let selectedLayers = Array.fromNSArray(selectedLayersNSArray);
 
-  if (selectedLayers.length == 0) { return }
+  if (selectedLayers.length == 0) {
+    context.document.showMessage(Error.emptySelection.message);
+    return
+  }
 
   let parentArtboard = selectedLayers[0].parentArtboard();
   let artboardsNSArray = context.document.artboards();
   let artboards = Array
-    .fromNSArray( artboardsNSArray )
-    .filter( a => a != parentArtboard )
-    .sort(Shared.compareByRatioAndAlphabet);
+     .fromNSArray( artboardsNSArray )
+     .filter( a => a != parentArtboard )
+     .sort(Shared.compareByRatioAndAlphabet);
 
   if (artboards.length == 0) {
     Alert.noArtboards(angleLogo);
     return
   }
 
-  let possibleAngles = Angle.forSelectedLayers_inContext(selectedLayers,context);
+  let possibleAngles = Angle.forSelectedLayers_inContext(selectedLayers, context);
 
   let angles = possibleAngles.filter( a => a instanceof Angle );
   let errors = possibleAngles.filter( a => !(a instanceof Angle) );

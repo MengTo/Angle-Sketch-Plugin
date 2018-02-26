@@ -439,6 +439,10 @@ export default class Angle {
         } else {
             ouputNSImage = this.pixelAccurateRepresentationOfImage(perspectiveImage);
         }
+
+        if (MSApplicationMetadata.metadata().appVersion < 47) {
+            return MSImageData.alloc().initWithImage_convertColorSpace(ouputNSImage, false)
+        }
     
         return MSImageData.alloc().initWithImage_(ouputNSImage)
     }

@@ -53,9 +53,9 @@ Angle.forSelectedLayers_inContext = function (selectedLayers, context) {
         .reduce ( ((p, a, i, as) => p.concat(a)), []);
 }
 
-Array.fromNSArray = function (NSArray) {
-    let array = []
-    for (var i = 0; i < NSArray.count(); i++) { array.push(NSArray[i]) }
+Array.fromNSArray = function (nsArray) {
+    let array = [];
+    for (var i = 0; i < nsArray.count(); i++) { array.push(nsArray[i]) }
     return array
 }
 
@@ -115,12 +115,10 @@ export function loadLocalImage (context, filePath) {
       .stringByDeletingLastPathComponent()
       .stringByDeletingLastPathComponent();
   
-    if(!NSFileManager.defaultManager().fileExistsAtPath(basePath + "/" + filePath)) {
+    if (!NSFileManager.defaultManager().fileExistsAtPath(basePath + "/" + filePath)) {
         print("File does not exist at path");
         return null;
     }
-  
-    print("Image loaded");
   
     return NSImage.alloc().initWithContentsOfFile(basePath + "/" + filePath);
   }
@@ -129,13 +127,14 @@ function popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaul
 
     let button = NSPopUpButton.alloc().initWithFrame(rectangle(index));
     button.addItemsWithTitles(titles);
-    button.imageScaling = NSImageScaleProportionallyUpOrDown;
 
     if (images != null) {
-        images.forEach(function (a, i, as) {
-            let item = button.itemAtIndex(i);
-            item.image = a;
-        });
+
+        button.imageScaling = NSImageScaleProportionallyUpOrDown;
+
+        Array
+            .fromNSArray(button.itemArray())
+            .forEach( (a, i, as) => { a.image = images[i] });
     }
 
     return button
@@ -165,9 +164,7 @@ function smallImagesFromArtboard (artboard) {
 
 export function getSelectionAndOptions_forAngleInstances(artboards, angles, alertImage) {
 
-    let anglesCount = angles.length;
-
-    let array = Array.from({ length: anglesCount }, (x, i) => i);
+    let array = Array.from({ length: angles.length }, (x, i) => i);
 
     if (artboards === null || artboards.length < 1) {
         return {
@@ -247,7 +244,7 @@ export function getSelectionAndOptions_forAngleInstances(artboards, angles, aler
     ));
     compressionRatioSelections.forEach( (a) => alertContent.addSubview(a));
 
-    movingYPosition = labelHeight + 4 + (spacing * anglesCount) + 28;
+    movingYPosition = labelHeight + 4 + (spacing * angles.length) + 28;
 
     // Render those label, dropdown etc into the Alert view
     alertContent.frame = NSMakeRect(0, 0, windowWidth, movingYPosition);
