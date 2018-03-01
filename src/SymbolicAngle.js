@@ -7,6 +7,11 @@ export default class SymbolicAngle extends Angle {
         super(options);
 
         this.targetLayer = options.override.affectedLayer();
+
+        if (this.targetLayer.class() == MSImmutableBitmapLayer) {
+            return Error.symbolWithBitMapLayer
+        }
+
         this.targetPath = options.override.affectedLayer().bezierPath();
 
         let parentSymbolIdentifier;

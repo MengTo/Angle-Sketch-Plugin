@@ -13,5 +13,8 @@ export const Error = {
     },
     noImageOverrideOnSymbol : {
         message : "There is no image override for the selected symbol"
+    },
+    symbolWithBitMapLayer : {
+        message : "Bitmat overrides are not supported"
     }
 }
