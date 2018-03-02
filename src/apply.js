@@ -53,14 +53,14 @@ export default function (context) {
   let selectedLayersNSArray = context.selection;
 
   if (selectedLayersNSArray == null) {
-    context.document.showMessage(Error.emptySelection.message);
+    Shared.showMessage_inContext(Error.emptySelection.message, context);
     return
   }
 
   let selectedLayers = Array.fromNSArray(selectedLayersNSArray);
 
   if (selectedLayers.length == 0) {
-    context.document.showMessage(Error.emptySelection.message);
+    Shared.showMessage_inContext(Error.emptySelection.message, context);
     return
   }
 
@@ -89,16 +89,16 @@ export default function (context) {
     });
   
     if (appliedShapeAngles) {
-      context.document.showMessage("You got Angled! 📱");
+      Shared.showMessage_inContext("You got Angled! 📱");
     }
 
     return
   }
 
   if (errors.length == 0) {
-    context.document.showMessage(Error.unsupportedElement.message);
+    Shared.showMessage_inContext(Error.unsupportedElement.message, context);
   } else {
-    context.document.showMessage(errors[0].message);
+    Shared.showMessage_inContext(errors[0].message, context);
   }
   
 }

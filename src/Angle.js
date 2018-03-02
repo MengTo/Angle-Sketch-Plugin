@@ -173,18 +173,7 @@ export default class Angle {
         
         let length = points.length;
 
-        if (length != 7) { // Not a quadrilater
-
-            if (length > 7) {
-            context.document.showMessage("Maybe your shape has too many sides.");
-            return false
-            }
-        
-            if (length < 7) {
-            context.document.showMessage("Maybe your shape does not have enought sides.");
-            return false
-            }
-        }
+        if (length != 7) { return false }
 
         // If the shape is an X crossing shape, fail
         // If two or more points coincide, fail

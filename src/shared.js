@@ -63,6 +63,14 @@ Array.prototype.print = function () {
     return this.map ( a => { print(a); return a } )
 }
 
+export function showMessage_inContext(message, context) {
+    if (context.document.showMessage != undefined) {
+        context.document.showMessage(message);
+    }
+
+    print(message);
+}
+
 export function compareByRatioAndAlphabet (a, b) {
     let upperMaring = 0.8;
     let lowerMargin = 0.4
