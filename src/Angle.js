@@ -199,9 +199,15 @@ export default class Angle {
 
         let verticesLengths = this.verticesLengths;
 
-        //introspect(MSSymbolMaster);
+        let artboardSize;
 
-        let artboardSize = this.artboard.frame();
+        if (this.artboard.class() == MSSymbolMaster) {
+            // artboard.frame == undefined
+            return
+            artboardSize = this.artboard.optimalBoundingBox();
+        } else {
+            artboardSize = this.artboard.frame();
+        }
 
         let firstVerticeLength = verticesLengths[0];
         let secondVerticeLength = verticesLengths[1];

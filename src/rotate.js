@@ -1,5 +1,5 @@
 import Angle from './Angle'
-require('./Shared');
+import * as Shared from './Shared'
 
 import { Error } from './Error'
 
@@ -38,7 +38,7 @@ export default function (context) {
         a.applyImage();
     });
 
-    Shared.showMessage_inContext("Angle rotated! 🔄");
+    Shared.showMessage_inContext("Angle rotated! 🔄", context);
 
     return
 }

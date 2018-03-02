@@ -71,9 +71,44 @@ export function showMessage_inContext(message, context) {
     print(message);
 }
 
+export function filterPossibleArtboards (artboardOrSymbol) {
+
+    let upperMaring = 0.8;
+    let lowerMargin = 0.4;
+    let minimumDimention = 250;
+
+    let elementClass = artboardOrSymbol.class();
+
+    switch (elementClass) {
+      case MSArtboardGroup:
+        
+
+        let artboard = artboardOrSymbol;
+        let frame = artboard.frame();
+
+        if (frame.width() < minimumDimention ||
+            frame.height() < minimumDimention) { return false }
+
+        let ratio = frame.width() / frame.height();
+        if (ratio > 1) { ratio = 1/ratio; } 
+
+        if (ratio > lowerMargin) { return false }
+        break
+      case MSSymbolMaster:
+        // Traversion of symbols does not work properly yet.
+        return false
+
+      default:
+        print(elementClass)
+        return false
+    }
+
+    return true
+}
+
 export function compareByRatioAndAlphabet (a, b) {
     let upperMaring = 0.8;
-    let lowerMargin = 0.4
+    let lowerMargin = 0.4;
 
     let artboardSizeA = a.frame();
     let artboardSizeB = b.frame();
@@ -103,7 +138,7 @@ export function compareByRatioAndAlphabet (a, b) {
     return artboardARatio > artboardBRatio;
 }
 
-function createLabel(text, size, frame) {
+export function createLabel(text, size, frame) {
     var label = NSTextField.alloc().initWithFrame(frame);
 
     label.setStringValue(text);
@@ -131,7 +166,7 @@ export function loadLocalImage (context, filePath) {
     return NSImage.alloc().initWithContentsOfFile(basePath + "/" + filePath);
   }
 
-function popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaultSelected_onIndex (rectangle, titles, images, index) {
+export function popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaultSelected_onIndex (rectangle, titles, images, index) {
 
     let button = NSPopUpButton.alloc().initWithFrame(rectangle(index));
     button.addItemsWithTitles(titles);
@@ -148,7 +183,25 @@ function popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaul
     return button
 }
 
-function smallImagesFromArtboard (artboard) {
+export function smallImagesFromArtboard (artboard) {
+
+    // var sketch = require('sketch/dom');
+    // var artboard = sketch.fromNative(msartboard);
+
+    // //let image = sketch.export(artboard);
+
+    // print(msartboard.unselectedPreviewImage());
+
+    // return nil
+
+    if (artboard.class() == MSSymbolMaster) {
+        print(artboard);
+        return null
+    }
+
+    if (artboard.frame == undefined) {
+        print(artboard);
+    }
 
     let artboardWidth = artboard.frame().width();
     let artboardHeight = artboard.frame().height();
@@ -164,109 +217,6 @@ function smallImagesFromArtboard (artboard) {
     let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(exportScale, "", "png");
     let exportRequest = MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
     let exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, NSColorSpace.sRGBColorSpace());
-    let imageData = exporter.bitmapImageRep().TIFFRepresentation();
-    let nsImage = NSImage.alloc().initWithData(imageData);
     
-    return nsImage;
-}
-
-export function getSelectionAndOptions_forAngleInstances(artboards, angles, alertImage) {
-
-    let array = Array.from({ length: angles.length }, (x, i) => i);
-
-    if (artboards === null || artboards.length < 1) {
-        return {
-        alertOption: NSAlertFirstButtonReturn,
-        artboardSelections:     array.map((a,i,as) => { indexOfSelectedItem: () => 0 }),
-        densitySelections:      array.map((a,i,as) => { indexOfSelectedItem: () => 0 }),
-        compressionSelections:  array.map((a,i,as) => { indexOfSelectedItem: () => 0 }),
-        };
-    }
-
-    //show a native popup box
-    var alert = NSAlert.alloc().init();
-    var alertContent = NSView.alloc().init();
-
-    alert.setMessageText("Apply Mockup");
-    alert.setInformativeText("Choose an Artboard to apply into the selected shape.");
-    alert.addButtonWithTitle("Apply");
-    alert.addButtonWithTitle("Cancel");
-    alert.icon = alertImage;
-
-    var movingYPosition = 0;
-    var labelHeight = 16;
-
-    var fisrtColumnWidth = 260;
-    var secondColumnWidth = 90;
-    var thirdColumnWidth = 90;
-
-    const windowWidth = fisrtColumnWidth + secondColumnWidth + thirdColumnWidth;
-
-    var rectangle;
-
-    // Artboard selection element
-
-    rectangle = NSMakeRect(0, 0, fisrtColumnWidth, labelHeight);
-    var artboardLabel = createLabel("Artboard", 12, rectangle);
-    alertContent.addSubview(artboardLabel);
-
-    rectangle = NSMakeRect(fisrtColumnWidth, 0, secondColumnWidth, labelHeight);
-    var densityLabel = createLabel("Pixel Density", 12, rectangle);
-    alertContent.addSubview(densityLabel);
-
-    rectangle = NSMakeRect(fisrtColumnWidth + secondColumnWidth, 0, thirdColumnWidth, labelHeight);
-    var compressionLabel = createLabel("Quality", 12, rectangle);
-    alertContent.addSubview(compressionLabel);
-
-    let spacing = array.length > 1 ? 50 : 28;
-
-    if (array.length > 1) {
-        let targetLabels = array.map( function (a, i, as) {
-            let rectangle = NSMakeRect(0, labelHeight + 4 + (spacing * i), fisrtColumnWidth, labelHeight);
-            let label = createLabel(angles[i].description(), 12, rectangle);
-    
-            return label
-        });
-        targetLabels.forEach( (a) => alertContent.addSubview(a));
-    }
-
-    let artboardNames = artboards.map((a) => a.name());
-    let artboardImages = artboards.map((a) => smallImagesFromArtboard(a));
-    let artboardSelections = array.map( (a,index,as) => popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaultSelected_onIndex (
-        ((i) => NSMakeRect(0, labelHeight + 4 + (spacing * i) + 16, fisrtColumnWidth, 28)),
-        artboardNames, artboardImages, index
-    ));
-    artboardSelections.forEach( (a) => alertContent.addSubview(a));
-
-    let pixelDensityNames = PixelDensity.map((a) => a.selectionLabel);
-    let pixelDensitySelections = array.map( (a,index,as) => popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaultSelected_onIndex (
-        ((i) => NSMakeRect(fisrtColumnWidth, labelHeight + 4 + (spacing * i) + 16, secondColumnWidth, 28)),
-        pixelDensityNames, null, index
-    ));
-    pixelDensitySelections.forEach( (a) => alertContent.addSubview(a));
-
-    let compressionRatioNames = Object.values(CompressionRatio).map((a) => a.selectionLabel);
-    let compressionRatioSelections = array.map( (a,index,as) => popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaultSelected_onIndex (
-        ((i) => NSMakeRect(fisrtColumnWidth + secondColumnWidth, labelHeight + 4 + (spacing * i) + 16, thirdColumnWidth, 28)),
-        compressionRatioNames, null, index
-    ));
-    compressionRatioSelections.forEach( (a) => alertContent.addSubview(a));
-
-    movingYPosition = labelHeight + 4 + (spacing * angles.length) + 28;
-
-    // Render those label, dropdown etc into the Alert view
-    alertContent.frame = NSMakeRect(0, 0, windowWidth, movingYPosition);
-
-    // Reverse order of the content elements
-    alertContent.setFlipped(true);
-
-    alert.accessoryView = alertContent;
-
-    // With this will run the modal and return a reference to the selection element
-    return {
-        alertOption: alert.runModal(),
-        artboardSelections: artboardSelections,
-        densitySelections: pixelDensitySelections,
-        compressionSelections: compressionRatioSelections,
-    }
+    return exporter.previewImage();
 }

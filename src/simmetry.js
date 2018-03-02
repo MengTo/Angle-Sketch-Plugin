@@ -1,5 +1,5 @@
 import Angle from './Angle'
-require('./Shared');
+import * as Shared from './Shared'
 
 import { Error } from './Error'
 
