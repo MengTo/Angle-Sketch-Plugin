@@ -81,7 +81,6 @@ export function filterPossibleArtboards (artboardOrSymbol) {
 
     switch (elementClass) {
       case MSArtboardGroup:
-        
 
         let artboard = artboardOrSymbol;
         let frame = artboard.frame();
@@ -92,7 +91,7 @@ export function filterPossibleArtboards (artboardOrSymbol) {
         let ratio = frame.width() / frame.height();
         if (ratio > 1) { ratio = 1/ratio; } 
 
-        if (ratio > lowerMargin) { return false }
+        if (ratio < lowerMargin) { return false }
         break
       case MSSymbolMaster:
         // Traversion of symbols does not work properly yet.
