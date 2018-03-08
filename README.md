@@ -7,8 +7,8 @@ The only thing that Angle needs to work is an Artboard containing your Screen. T
 
 ## Installation
 Make sure you have the latest version of Sketch (48+) running on Sierra or High Sierra.
-- Download the ZIP file of this repository
-- Double click on [Angle.sketchplugin](https://github.com/MengTo/Angle-Sketch-Plugin/archive/master.zip)
+- [Download the zip file](https://github.com/MengTo/Angle-Sketch-Plugin/archive/master.zip).
+- Double-click on Angle.sketchplugin
 
 ## Usage
 Select a shape layer and do **Apply Mockup** `Command + \`.
