@@ -1,5 +1,5 @@
 ![](https://cl.ly/2g211R2e2U3B/download/Angle-Logo.png)
-Angle is a free and lightweight Sketch plugin for applying perspective transforms for your mockups. You can get the **[starting template](https://designcode.io/angle)** to help you design beautiful mockups from scratch.
+Angle is a free and lightweight Sketch plugin for applying perspective transforms for your mockups. You can get the **[starting template](https://designcode.io/angle)** to help you design beautiful mockups from scratch. Check out the [full tutorial](https://www.youtube.com/watch?v=Dps7vBlWMTc&t=1s).
 
 # Getting Started
 The only thing that Angle needs to work is an Artboard containing your Screen. That's it!
@@ -24,6 +24,9 @@ If you have a single Artboard with your screen, Angle will skip the modal and ap
 ## Working with Symbols
 If you have a Symbol that contains your Mockup, make sure to have an **Image Fill**. That's how Angle knows that your Symbol contains a mockup.
 ![](https://cl.ly/1L2Q3u1n0T33/download/Angle-Symbol.png)
+
+## Multiple Shapes and Nested Symbols
+If you have multiple shapes or a Nested Symbols, you can apply the mockups to multiple destinations.
 
 ## Pixel Density
 By default, it's set to **Auto**, which will detect the size of selected shape and apply a **2x** pixel density. You can set to **1x**, **2x**, **3x** or **4x**.
