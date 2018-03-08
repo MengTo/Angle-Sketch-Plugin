@@ -5,6 +5,11 @@ Angle is a free and lightweight Sketch plugin for applying perspective transform
 The only thing that Angle needs to work is an Artboard containing your Screen. That's it!
 ![](https://cl.ly/0D1l3y2D453a/download/Angle-GIF.gif)
 
+## Installation
+Make sure you have the latest version of Sketch (48+) running on Sierra or High Sierra.
+- Download the ZIP file of this repository
+- Double click on [Angle.sketchplugin](https://github.com/MengTo/Angle-Sketch-Plugin/archive/master.zip)
+
 ## Usage
 Select a shape layer and do **Apply Mockup** `Command + \`.
 ![](https://cl.ly/2g133f1m1s0T/download/Angle-Usage.png)
