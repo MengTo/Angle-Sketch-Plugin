@@ -35,4 +35,4 @@ By default, it's set to **Auto**, which will detect the size of selected shape a
 By default, it's set the **Best**. While you'll get the highest quality possible, this will increase your filesize dramatically. By setting to **Better**, **Good** or **Average**, you will make the file smaller.
 
 ## Credit
-This plugin was made by the team at [Design+Code](https://designcode.io), including [Tiago Mergulhao](https://github.com/tmergulhao) and [Kwan Yip Yap](http://twitter.com/pizza0502) and [Meng To](https://twitter.com/mengto).
+This plugin was made by the team at [Design+Code](https://designcode.io), including [Tiago Mergulhao](https://github.com/tmergulhao), [Meng To](https://twitter.com/mengto) and [Kwan Yip Yap](http://twitter.com/pizza0502).
