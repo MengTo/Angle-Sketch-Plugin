@@ -1,5 +1,5 @@
 ![](https://cl.ly/2g211R2e2U3B/download/Angle-Logo.png)
-Angle is a free and lightweight Sketch plugin for applying perspective transforms for your mockups. You can get the **[starting template](https://designcode.io/angle)** to help you design beautiful mockups from scratch. Check out the [full tutorial](https://www.youtube.com/watch?v=Dps7vBlWMTc&t=1s).
+Angle is a free and lightweight Sketch plugin for applying perspective transforms for your mockups. You can get the **[starting template](https://designcode.io/angle)** to help you design beautiful mockups from scratch. Check out the **[full tutorial](https://www.youtube.com/watch?v=Dps7vBlWMTc&t=1s)**.
 
 # Getting Started
 The only thing that Angle needs to work is an Artboard containing your Screen. That's it!
