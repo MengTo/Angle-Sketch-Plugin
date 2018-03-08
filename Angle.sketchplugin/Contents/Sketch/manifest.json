@@ -1,0 +1,49 @@
+{
+  "compatibleVersion": 3,
+  "bundleVersion": 1,
+  "version": "1.0.3",
+  "icon": "icon.png",
+  "identifier": "io.designcode.Angle",
+  "description": "Apply perspective transforms on screen mockups. Auto-detect screens by resolution and works on shapes and symbols. Super fast.",
+  "homepage": "https://designcode.io/angle",
+  "author": "Design+Code",
+  "authorEmail": "support@designcode.io",
+  "commands": [
+    {
+      "name": "Rotate Mockup",
+      "identifier": "Angle-Rotate-Mockup",
+      "script": "rotate.js",
+      "shortcut": "control \\"
+    },
+    {
+      "name": "Flip Mockup",
+      "identifier": "Angle-Rotate-Flip",
+      "script": "simmetry.js",
+      "shortcut": "cmd shift \\"
+    },
+    {
+      "name": "Apply Mockup",
+      "identifier": "Angle-Apply-Mockup",
+      "script": "apply.js",
+      "shortcut": "cmd \\"
+    },
+    {
+      "name": "Reset Mockup",
+      "identifier": "Angle-Reset-Metadata",
+      "script": "reset.js",
+      "shortcut": "cmd control \\"
+    }
+  ],
+  "menu": {
+    "title": "Angle",
+    "items": [
+      "Angle-Apply-Mockup",
+      "Angle-Rotate-Flip",
+      "Angle-Rotate-Mockup",
+      "Angle-Reset-Metadata"
+    ]
+  },
+  "name": "Angle",
+  "disableCocoaScriptPreprocessor": true,
+  "appcast": "https://raw.githubusercontent.com/MengTo/Angle-Sketch-Plugin/master/.appcast.xml"
+}
