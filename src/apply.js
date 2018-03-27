@@ -6,6 +6,8 @@ import { Error } from './Error'
 import { PixelDensity } from './PixelDensity'
 import { CompressionRatio } from './CompressionRatio'
 
+String.prototype.repeat = ((i) => (new Array(i + 1).join(this)));
+
 export function getSelectionAndOptions_forAngleInstances(options) {
 
   let artboards = options.artboards;
@@ -70,16 +72,29 @@ export function getSelectionAndOptions_forAngleInstances(options) {
 
   let allArtboards = artboards.concat(otherArtboards);
 
-  let artboardNames = allArtboards.map(function (a) {
+  let artboardNames = allArtboards
+  .map(function (a) {
     if (a.name != undefined) {
       if (a.name instanceof String) {
         return a.name;
       }
       return a.name();
     }
+  })
+  .map(function (a, i, as) {
+    let indexesWithSameName = as
+      .map( (b, j, bs) => a == b ? j : -1 )
+      .filter( (a, i, as) => a != -1 );
+
+    if (indexesWithSameName.length > 1) {
+      let indexOfIndex = indexesWithSameName.indexOf(i);
+      return a + " ".repeat(indexOfIndex);
+    }
+
+    return a
   });
-  let artboardImages = allArtboards.map((a) => Shared.smallImagesFromArtboard(a))
-    // .concat(Array.from({ length: otherArtboards.length }, (x, i) => null));
+
+  let artboardImages = allArtboards.map((a) => Shared.smallImagesFromArtboard(a));
 
   let artboardSelections = array.map( (a,index,as) => Shared.popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaultSelected_onIndex (
       ((i) => NSMakeRect(0, labelHeight + 4 + (spacing * i) + 16, fisrtColumnWidth, 28)),
@@ -206,8 +221,6 @@ export default function (context) {
     .reduce ( (p, a) => { return p.concat(a) }, new Array )
     .filter(Shared.filterPossibleArtboards)
     .sort(Shared.compareByRatioAndAlphabet)
-
-  print(otherArtboards.length);
 
   let possibleAngles = Angle.forSelectedLayers_inContext(selectedLayers, context);
 
