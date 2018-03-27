@@ -1,7 +1,7 @@
 {
   "compatibleVersion": 3,
   "bundleVersion": 1,
-  "version": "1.0.3",
+  "version": "1.0.4",
   "icon": "icon.png",
   "identifier": "io.designcode.Angle",
   "description": "Apply perspective transforms on screen mockups. Auto-detect screens by resolution and works on shapes and symbols. Super fast.",

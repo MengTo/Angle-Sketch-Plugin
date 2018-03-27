@@ -958,8 +958,6 @@ exports['default'] = function (context) {
     return p.concat(a);
   }, new Array()).filter(Shared.filterPossibleArtboards).sort(Shared.compareByRatioAndAlphabet);
 
-  print(otherArtboards.length);
-
   var possibleAngles = _Angle2['default'].forSelectedLayers_inContext(selectedLayers, context);
 
   var angles = possibleAngles.filter(function (a) {
@@ -1012,6 +1010,10 @@ var _CompressionRatio = __webpack_require__(2);
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+String.prototype.repeat = function (i) {
+  return new Array(i + 1).join(undefined);
+};
 
 function getSelectionAndOptions_forAngleInstances(options) {
 
@@ -1100,11 +1102,24 @@ function getSelectionAndOptions_forAngleInstances(options) {
       }
       return a.name();
     }
+  }).map(function (a, i, as) {
+    var indexesWithSameName = as.map(function (b, j, bs) {
+      return a == b ? j : -1;
+    }).filter(function (a, i, as) {
+      return a != -1;
+    });
+
+    if (indexesWithSameName.length > 1) {
+      var indexOfIndex = indexesWithSameName.indexOf(i);
+      return a + " ".repeat(indexOfIndex);
+    }
+
+    return a;
   });
+
   var artboardImages = allArtboards.map(function (a) {
     return Shared.smallImagesFromArtboard(a);
   });
-  // .concat(Array.from({ length: otherArtboards.length }, (x, i) => null));
 
   var artboardSelections = array.map(function (a, index, as) {
     return Shared.popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaultSelected_onIndex(function (i) {
