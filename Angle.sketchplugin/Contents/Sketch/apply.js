@@ -922,6 +922,7 @@ exports.getSelectionAndOptions_forAngleInstances = getSelectionAndOptions_forAng
 exports['default'] = function (context) {
 
   var selectedLayersNSArray = context.selection;
+  var angleLogo = Shared.loadLocalImage(context, "Contents/Resources/logo.png");
 
   if (selectedLayersNSArray == null) {
     Shared.showMessage_inContext(_Error.Error.emptySelection.message, context);
@@ -943,11 +944,6 @@ exports['default'] = function (context) {
     return a != parentArtboard;
   }).sort(Shared.compareByRatioAndAlphabet);
 
-  if (artboards.length == 0) {
-    Alert.noArtboards(angleLogo);
-    return;
-  }
-
   var otherArtboards = Array.fromNSArray(document.pages()).filter(function (a) {
     return a != document.currentPage();
   }).map(function (a) {
@@ -957,6 +953,11 @@ exports['default'] = function (context) {
   }).reduce(function (p, a) {
     return p.concat(a);
   }, new Array()).filter(Shared.filterPossibleArtboards).sort(Shared.compareByRatioAndAlphabet);
+
+  if (artboards.length + otherArtboards.length == 0) {
+    noArtboards(angleLogo);
+    return;
+  }
 
   var possibleAngles = _Angle2['default'].forSelectedLayers_inContext(selectedLayers, context);
 
@@ -997,10 +998,6 @@ var _Shared = __webpack_require__(6);
 
 var Shared = _interopRequireWildcard(_Shared);
 
-var _Alert = __webpack_require__(9);
-
-var Alert = _interopRequireWildcard(_Alert);
-
 var _Error = __webpack_require__(0);
 
 var _PixelDensity = __webpack_require__(4);
@@ -1014,6 +1011,20 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 String.prototype.repeat = function (i) {
   return new Array(i + 1).join(undefined);
 };
+
+function noArtboards(logo) {
+  // There are no artboards
+  // Explain that Angle leverages artboards
+  var alert = NSAlert.alloc().init();
+
+  // alert.showsHelp = true;
+  alert.setMessageText("Angle needs an Artboard");
+  alert.setInformativeText("To start using Angle, create a new Artboard that contains your screen.");
+  alert.addButtonWithTitle("OK");
+  alert.icon = logo;
+
+  alert.runModal();
+}
 
 function getSelectionAndOptions_forAngleInstances(options) {
 
@@ -1189,13 +1200,13 @@ function applyAngles(options) {
     });
   } else {
 
-    var _angleLogo = Shared.loadLocalImage(context, "Contents/Resources/logo.png");
+    var angleLogo = Shared.loadLocalImage(context, "Contents/Resources/logo.png");
 
     var response = getSelectionAndOptions_forAngleInstances({
       artboards: artboards,
       otherArtboards: otherArtboards,
       angles: angles,
-      alertImage: _angleLogo
+      alertImage: angleLogo
     });
 
     if (response.alertOption != NSAlertFirstButtonReturn) {
@@ -1691,28 +1702,6 @@ var ShapeAngle = function (_Angle) {
 }(_Angle3['default']);
 
 exports['default'] = ShapeAngle;
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.noArtboards = noArtboards;
-function noArtboards(logo) {
-    // There are no artboards
-    // Explain that Angle leverages artboards
-    var alert = NSAlert.alloc().init();
-
-    // alert.showsHelp = true;
-    alert.setMessageText("Angle needs an Artboard");
-    alert.setInformativeText("To start using Angle, create a new Artboard that contains your screen.");
-    alert.addButtonWithTitle("OK");
-    alert.icon = logo;
-
-    alert.runModal();
-}
 
 /***/ })
 /******/ ]);

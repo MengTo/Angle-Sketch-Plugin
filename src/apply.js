@@ -1,12 +1,25 @@
 import Angle from './Angle'
 import * as Shared from './Shared'
-import * as Alert from './Alert'
 
 import { Error } from './Error'
 import { PixelDensity } from './PixelDensity'
 import { CompressionRatio } from './CompressionRatio'
 
 String.prototype.repeat = ((i) => (new Array(i + 1).join(this)));
+
+function noArtboards (logo) {
+  // There are no artboards
+  // Explain that Angle leverages artboards
+  var alert = NSAlert.alloc().init();
+
+  // alert.showsHelp = true;
+  alert.setMessageText("Angle needs an Artboard");
+  alert.setInformativeText("To start using Angle, create a new Artboard that contains your screen.");
+  alert.addButtonWithTitle("OK");
+  alert.icon = logo;
+
+  alert.runModal();
+}
 
 export function getSelectionAndOptions_forAngleInstances(options) {
 
@@ -186,6 +199,7 @@ function applyAngles (options) {
 export default function (context) {
 
   let selectedLayersNSArray = context.selection;
+  const angleLogo = Shared.loadLocalImage(context, "Contents/Resources/logo.png");
 
   if (selectedLayersNSArray == null) {
     Shared.showMessage_inContext(Error.emptySelection.message, context);
@@ -208,11 +222,6 @@ export default function (context) {
      .filter( a => a != parentArtboard )
      .sort(Shared.compareByRatioAndAlphabet);
 
-  if (artboards.length == 0) {
-    Alert.noArtboards(angleLogo);
-    return
-  }
-
   let otherArtboards = Array
     .fromNSArray(document.pages())
     .filter( a => a != document.currentPage())
@@ -220,7 +229,12 @@ export default function (context) {
     .map( a => Array.fromNSArray(a) )
     .reduce ( (p, a) => { return p.concat(a) }, new Array )
     .filter(Shared.filterPossibleArtboards)
-    .sort(Shared.compareByRatioAndAlphabet)
+    .sort(Shared.compareByRatioAndAlphabet);
+  
+  if ((artboards.length + otherArtboards.length) == 0) {
+    noArtboards(angleLogo);
+    return
+  }
 
   let possibleAngles = Angle.forSelectedLayers_inContext(selectedLayers, context);
 
