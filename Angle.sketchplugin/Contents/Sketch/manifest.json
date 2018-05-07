@@ -1,13 +1,13 @@
 {
-  "compatibleVersion": 3,
   "bundleVersion": 1,
-  "version": "1.0.5",
+  "version": "1.1.0",
   "icon": "icon.png",
   "identifier": "io.designcode.Angle",
   "description": "Apply perspective transforms on screen mockups. Auto-detect screens by resolution and works on shapes and symbols. Super fast.",
   "homepage": "https://designcode.io/angle",
   "author": "Design+Code",
   "authorEmail": "support@designcode.io",
+  "compatibleVersion": "50",
   "commands": [
     {
       "name": "Rotate Mockup",
@@ -18,7 +18,7 @@
     {
       "name": "Flip Mockup",
       "identifier": "Angle-Rotate-Flip",
-      "script": "simmetry.js",
+      "script": "symmetry.js",
       "shortcut": "cmd shift \\"
     },
     {

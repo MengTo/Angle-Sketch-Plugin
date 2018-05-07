@@ -8,28 +8,34 @@ export default function (context) {
     let selectedLayersNSArray = context.selection;
     
     if (selectedLayersNSArray == null) {
-        let error = Error.emptySelection
-        Shared.showMessage_inContext(Error.message, context);
+        Shared.show({
+            message: Error.emptySelection.message,
+            inDocument: context.document
+        });
         return
     }
     
     let selectedLayers = Array.fromNSArray(selectedLayersNSArray);
 
     if (selectedLayers.length == 0) {
-        let error = Error.emptySelection
-        Shared.showMessage_inContext(Error.message, context);
+        Shared.show({
+            message: Error.emptySelection.message,
+            inDocument: context.document
+        });
         return
     }
 
-    let possibleAngles = Angle.forSelectedLayers_inContext(selectedLayers,context);
+    let possibleAngles = Angle.tryCreating({ for: selectedLayers, in: context });
 
     let angles = possibleAngles.filter( a => a instanceof Angle );
     let errors = possibleAngles.filter( a => !(a instanceof Angle) );
 
-    // if (!((angleInstance = getAngle(options)) instanceof Angle)) {
     if (angles.length == 0) {
         let error = errors[0];
-        Shared.showMessage_inContext(Error.message, context);
+        Shared.show({
+            message: error.message,
+            inDocument: context.document
+        });
         return
     }
 
@@ -38,7 +44,10 @@ export default function (context) {
         a.applyImage();
     });
 
-    Shared.showMessage_inContext("Angle rotated! 🔄", context);
+    Shared.show({
+        message: "Angle rotated! 🔄",
+        inDocument: context.document
+    });
 
     return
 }

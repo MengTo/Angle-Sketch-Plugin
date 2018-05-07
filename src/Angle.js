@@ -1,5 +1,10 @@
 import { CompressionRatio } from './CompressionRatio'
 
+const SegmentType = { linear: 0, quadratic: 1, cubic: 2 }
+
+Array.prototype.rotated = function(n) {
+    return this.slice(n, this.length).concat(this.slice(0, n));
+}
 export default class Angle {
 
     // ---------------------------------
@@ -108,15 +113,6 @@ export default class Angle {
         }
 
         this.context.command.setValue_forKey_onLayer(value, key, this.selectedLayer);
-
-        // print("☑️ Persistent data imprinted into layer: " + key);
-        // print("Value: " + value);
-    }
-
-    imprintValues_forKeys(dictionary) {
-        for (let [key, value] of Object.entries(dictionary)) {
-            this.imprintValue_forKey(key, dictionary[key]);
-        }
     }
 
     loadValueForKey(key) {
@@ -126,8 +122,7 @@ export default class Angle {
         }
 
         let value = this.context.command.valueForKey_onLayer(key, this.selectedLayer);
-        // print("☑️ Persistent data loaded from layer: " + key);
-        // print("Value: " + value);
+
         return value
     }
 
@@ -145,21 +140,15 @@ export default class Angle {
     // IMAGE DATA
     // ---------------------------------
 
-    get imageData () {
+    imageData ({ from: artboard, with: pixelDensity, on: colorSpace }) {
 
-        let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(this.artboard);      
-        let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(this.pixelDensity, "Angle", "png");
+        let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(artboard);      
+        let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(pixelDensity, "Angle", "png");
         let exportRequest = MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
-        let exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, NSColorSpace.sRGBColorSpace());
-        let imageData = exporter.bitmapImageRep().TIFFRepresentation();
 
-        if (imageData == undefined) {
-            print("🛑 Unable to retrieve image data");
-        } else {
-            print("🖼 Image data retrieved");
-        }
-
-        return imageData
+        let exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, colorSpace);
+        
+        return exporter.bitmapImageRep().TIFFRepresentation();
     }
 
     // ---------------------------------
@@ -168,17 +157,11 @@ export default class Angle {
 
     get pointsAreValid () {
         
-        let points = this.pointsFromBezierPath;
-        if (points == null) { return false }
-        
-        let length = points.length;
+        let points = this.segments;
 
-        if (length != 7) { return false }
-
-        // If the shape is an X crossing shape, fail
-        // If two or more points coincide, fail
-
-        // There seems to be something wrong with your shape 😕
+        if (points == null ||
+            points.length != 4 ||
+            points.some( a => a.segmentType() != SegmentType.linear) ) { return false }
 
         return true
     }
@@ -190,11 +173,11 @@ export default class Angle {
         let hasAlreadyGuessed = this.loadValueForKey("guessed-rotation") == 1 ? true : false;
 
         if (hasAlreadyGuessed) {
-            print("⚠️ Angle has already guessed rotation and simmetry for this shape");
+            print("⚠️ Angle has already guessed rotation and symmetry for this shape");
             return
         }
 
-        print("🔄↔️ Angle has just guessed rotation and simmetry for this shape");
+        print("🔄↔️ Angle has just guessed rotation and symmetry for this shape");
         this.imprintValue_forKey(true, "guessed-rotation");
 
         let verticesLengths = this.verticesLengths;
@@ -227,10 +210,8 @@ export default class Angle {
         }
 
         let points = this.pointsFromBezierPath;
-        let minimumX = points.reduce(((p, a, i, as) => p > a.x ? a.x : p), points[0].x);
-        let minimumY = points.reduce(((p, a, i, as) => p > a.y ? a.y : p), points[0].y);
 
-        print(points);
+        var minimumY = Math.min( ...points.map( a => a.y ) );
 
         let mappedFirstPoint = points[this.mappedIndexFor(0)];
         let mappedSecondPoint = points[this.mappedIndexFor(1)];
@@ -243,49 +224,35 @@ export default class Angle {
             this.rotate();
         }
 
-        let maximumY = points.reduce(((p, a, i, as) => p < a.y ? a.y : p), points[0].y);
-
-        let shoelaceSumOfPoints = Array.from({ length: 4 }, (x, i) => i).reduce(function (p, a, i, as) {
-            let edgeSum = (- points[i].x + points[(i + 1) % 4].x) * (2 * maximumY - points[i].y - points[(i + 1) % 4].y)
-            return p + edgeSum;
-        }, 0);
-
-        if (shoelaceSumOfPoints < 0) {
-            print("🛑 COUNTERCLOCKWISE");
-            this.reverseSimmetry();
-        } else if (shoelaceSumOfPoints > 0) {
-            print("🛑 CLOCKWISE");
-        } else{
-            print("🛑 UNDEFINED CHIRALITY");
-        }
+        if (this.contour.isClockwise() == 1) { this.reverseSymmetry(); }
     }
 
     // ---------------------------------
     // PATH
     // ---------------------------------
 
+    get contour () {
+
+        // MSBezierContour
+        // https://github.com/abynim/Sketch-Headers/blob/4a95b06c0d5e620249f40583e25d3dc52e36494b/Headers/MSBezierContour.h
+
+        // : MSPath
+        // : https://github.com/abynim/Sketch-Headers/blob/4a95b06c0d5e620249f40583e25d3dc52e36494b/Headers/MSPath.h
+        return this.targetPath.contours().firstObject();
+    }
+
+    get segments () {
+
+        // : MSBezierSegment
+        // : https://github.com/abynim/Sketch-Headers/blob/4a95b06c0d5e620249f40583e25d3dc52e36494b/Headers/MSBezierSegment.h
+        return Array
+            .fromNSArray(this.contour.segments())
+    }
+
     get pointsFromBezierPath () {
 
-        if (this._pointsFromBezierPath != undefined) {
-            return this._pointsFromBezierPath;
-        }
-
-        let count = this.targetPath.elementCount();
-
-        if (count != 7) { return null }
-
-        let array = Array.from({ length: count }, (x, i) => i);
-
-        let points = array.map(
-            (a, i, as) => {
-            var pointsPointer = MOPointer.alloc().initWithValue_(CGPointMake(0, 0));
-            var element = this.targetPath.elementAtIndex_associatedPoints_(i, pointsPointer);
-
-            let point = pointsPointer.value();
-
-            return point
-            }
-        );
+        let points = this.segments
+            .map( a => a.endPoint1() );
 
         this._pointsFromBezierPath = points;
 
@@ -300,11 +267,13 @@ export default class Angle {
 
         let points = this.pointsFromBezierPath;
 
-        let verticesLengths = Array.from({ length: 4 }, (x, i) => i).map(function (a, i, as) {
-            let width = points[i].x - points[(i + 1) % 4].x;
-            let height = points[i].y - points[(i + 1) % 4].y;
-            return Math.sqrt( Math.pow(width, 2) + Math.pow(height, 2) )
-        });
+        let verticesLengths = Array
+            .from({ length: 4 }, (x, i) => i)
+            .map(function (a, i, as) {
+                let width = points[i].x - points[(i + 1) % 4].x;
+                let height = points[i].y - points[(i + 1) % 4].y;
+                return Math.sqrt( Math.pow(width, 2) + Math.pow(height, 2) )
+            });
 
         this._verticesLengths = verticesLengths;
 
@@ -313,17 +282,10 @@ export default class Angle {
 
     maximumVerticesWidthAndHeight () {
 
-        let verticesLengths = this.verticesLengths;
-        
-        let layerWidth, layerHeight;
-        
-        if (this.rotation % 2 == 0) {
-            layerWidth = verticesLengths[0] > verticesLengths[2] ? verticesLengths[0] : verticesLengths[2];
-            layerHeight = verticesLengths[1] > verticesLengths[3] ? verticesLengths[1] : verticesLengths[3];
-        } else {
-            layerWidth = verticesLengths[1] > verticesLengths[3] ? verticesLengths[1] : verticesLengths[3];
-            layerHeight = verticesLengths[0] > verticesLengths[2] ? verticesLengths[0] : verticesLengths[2];
-        }
+        let verticesLengths = this.verticesLengths.rotated(this.rotation % 2);
+
+        let layerWidth = Math.max(verticesLengths[0], verticesLengths[2]);
+        let layerHeight = Math.max(verticesLengths[1], verticesLengths[3]);
 
         return [layerWidth, layerHeight];
     }
@@ -332,21 +294,15 @@ export default class Angle {
 
         let points = this.pointsFromBezierPath;
 
-        let minimumX = points.reduce(((p, a, i, as) => p > a.x ? a.x : p), points[0].x);
-        let minimumY = points.reduce(((p, a, i, as) => p > a.y ? a.y : p), points[0].y);
-        let maximumY = points.reduce(((p, a, i, as) => p < a.y ? a.y : p), points[0].y);
+        var maximumY = Math.max( ...points.map( a => a.y ) );
 
         let pixelDensity = this.pixelDensity;
     
-        return points.map(
-            function (a, i, as) {
-                let xValue = minimumX >= 0 ? a.x - minimumX : a.x + minimumX;
-                let yValue = minimumY >= 0 ? a.y - minimumY : a.y + minimumY;
-                let vector = CIVector.vectorWithX_Y(
-                    xValue * pixelDensity,
-                    (maximumY - minimumY - yValue) * pixelDensity);
-    
-                return vector;
+        return points.map( a => {
+            return CIVector.vectorWithX_Y(
+                a.x * pixelDensity,
+                (maximumY - a.y) * pixelDensity
+            );
         });
     }
 
@@ -359,7 +315,7 @@ export default class Angle {
         this.rotation = (this.rotation + (this.reversed ? 1 : 3))%4;
     }
 
-    reverseSimmetry () {
+    reverseSymmetry () {
 
         this.rotation = (this.rotation + (this.reversed ? 1 : 3))%4;
 
@@ -412,8 +368,13 @@ export default class Angle {
         perspectiveTransform.setValue_forKey(vectors[this.mappedIndexFor(1)], "inputTopRight");
         perspectiveTransform.setValue_forKey(vectors[this.mappedIndexFor(2)], "inputBottomRight");
         perspectiveTransform.setValue_forKey(vectors[this.mappedIndexFor(3)], "inputBottomLeft");
+
+        let imageData = this.imageData({
+            from: this.artboard,
+            with: this.pixelDensity,
+            on: this.context.document.colorSpace() });
     
-        let imageBitmap = NSBitmapImageRep.imageRepWithData(this.imageData);
+        let imageBitmap = NSBitmapImageRep.imageRepWithData(imageData);
         let image = CIImage.alloc().initWithBitmapImageRep(imageBitmap);
     
         perspectiveTransform.setValue_forKey(image, "inputImage");
@@ -433,10 +394,6 @@ export default class Angle {
             ouputNSImage = this.lossyCompressionOfImage_atRate(perspectiveImage, compressionRatio);
         } else {
             ouputNSImage = this.pixelAccurateRepresentationOfImage(perspectiveImage);
-        }
-
-        if (MSApplicationMetadata.metadata().appVersion < 47) {
-            return MSImageData.alloc().initWithImage_convertColorSpace(ouputNSImage, false)
         }
     
         return MSImageData.alloc().initWithImage_(ouputNSImage)

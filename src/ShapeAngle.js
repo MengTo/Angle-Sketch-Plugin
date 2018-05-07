@@ -8,7 +8,7 @@ export default class ShapeAngle extends Angle {
         super(options);
 
         this.targetLayer = this.selectedLayer;
-        this.targetPath = this.selectedLayer.bezierPath();
+        this.targetPath = this.selectedLayer.pathInFrameWithTransforms();
 
         if (!this.pointsAreValid) {
             return Error.unsupportedShapePath

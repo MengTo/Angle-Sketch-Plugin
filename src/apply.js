@@ -7,26 +7,9 @@ import { CompressionRatio } from './CompressionRatio'
 
 String.prototype.repeat = ((i) => (new Array(i + 1).join(this)));
 
-function noArtboards (logo) {
-  // There are no artboards
-  // Explain that Angle leverages artboards
-  var alert = NSAlert.alloc().init();
-
-  // alert.showsHelp = true;
-  alert.setMessageText("Angle needs an Artboard");
-  alert.setInformativeText("To start using Angle, create a new Artboard that contains your screen.");
-  alert.addButtonWithTitle("OK");
-  alert.icon = logo;
-
-  alert.runModal();
-}
-
 export function getSelectionAndOptions_forAngleInstances(options) {
 
-  let artboards = options.artboards;
-  let otherArtboards = options.otherArtboards;
-  let alertImage = options.alertImage;
-  let angles = options.angles;
+  let { artboards, otherArtboards, alertImage, angles } = options;
 
   let array = Array.from({ length: angles.length }, (x, i) => i);
 
@@ -148,12 +131,19 @@ export function getSelectionAndOptions_forAngleInstances(options) {
   }
 }
 
+function loadLocalImage (context, filePath) {
+
+  let basePath = context.scriptPath
+    .stringByDeletingLastPathComponent()
+    .stringByDeletingLastPathComponent()
+    .stringByDeletingLastPathComponent();
+
+  return NSImage.alloc().initWithContentsOfFile(basePath + "/" + filePath);
+}
+
 function applyAngles (options) {
 
-  let angles = options.angles;
-  let artboards = options.artboards;
-  let context = options.context;
-  let otherArtboards = options.otherArtboards;
+  let { angles, artboardsOnSelectPage:artboards, context, artboardsOnOtherPages:otherArtboards } = options;
 
   if (artboards.length == 1) {
     
@@ -165,7 +155,7 @@ function applyAngles (options) {
   
   } else {
 
-    const angleLogo = Shared.loadLocalImage(context, "Contents/Resources/logo.png");
+    const angleLogo = loadLocalImage(context, "Contents/Resources/logo.png");
 
     let response = getSelectionAndOptions_forAngleInstances({
       artboards: artboards,
@@ -196,33 +186,40 @@ function applyAngles (options) {
   return true
 }
 
+const Sketch = require('sketch');
+
 export default function (context) {
 
-  let selectedLayersNSArray = context.selection;
-  const angleLogo = Shared.loadLocalImage(context, "Contents/Resources/logo.png");
+  let { api, command, document, plugin, scriptPath, scriptURL, selection } = context;
 
-  if (selectedLayersNSArray == null) {
-    Shared.showMessage_inContext(Error.emptySelection.message, context);
+  const angleLogo = loadLocalImage(context, "Contents/Resources/logo.png");
+
+  if (selection == null) {
+    Shared.show({
+      message: Error.emptySelection.message,
+      inDocument: document
+    });
     return
   }
 
-  let selectedLayers = Array.fromNSArray(selectedLayersNSArray);
+  selectedLayers = Array.fromNSArray(selection);
 
   if (selectedLayers.length == 0) {
-    Shared.showMessage_inContext(Error.emptySelection.message, context);
+    Shared.show({
+      message: Error.emptySelection.message,
+      inDocument: document
+    });
     return
   }
 
-  let document = context.document;
-
   let parentArtboard = selectedLayers[0].parentArtboard();
-  let artboardsNSArray = document.artboards();
-  let artboards = Array
-     .fromNSArray( artboardsNSArray )
-     .filter( a => a != parentArtboard )
-     .sort(Shared.compareByRatioAndAlphabet);
 
-  let otherArtboards = Array
+  let artboardsOnSelectPage = Array
+    .fromNSArray(document.artboards())
+    .filter( a => a != parentArtboard )
+    .sort(Shared.compareByRatioAndAlphabet);
+
+  let artboardsOnOtherPages = Array
     .fromNSArray(document.pages())
     .filter( a => a != document.currentPage())
     .map( a => a.artboards() )
@@ -231,12 +228,20 @@ export default function (context) {
     .filter(Shared.filterPossibleArtboards)
     .sort(Shared.compareByRatioAndAlphabet);
   
-  if ((artboards.length + otherArtboards.length) == 0) {
-    noArtboards(angleLogo);
+  if ((artboardsOnSelectPage.length + artboardsOnOtherPages.length) == 0) {
+
+    var alert = NSAlert.alloc().init();
+
+    alert.setMessageText("Angle needs an Artboard");
+    alert.setInformativeText("To start using Angle, create a new Artboard that contains your screen.");
+    alert.addButtonWithTitle("OK");
+    alert.icon = angleLogo;
+
+    alert.runModal();
     return
   }
 
-  let possibleAngles = Angle.forSelectedLayers_inContext(selectedLayers, context);
+  let possibleAngles = Angle.tryCreating({ for: selectedLayers, in: context });
 
   let angles = possibleAngles.filter( a => a instanceof Angle );
   let errors = possibleAngles.filter( a => !(a instanceof Angle) );
@@ -244,22 +249,30 @@ export default function (context) {
   if (angles.length != 0) {
     let appliedShapeAngles = applyAngles({
       angles: angles,
-      artboards: artboards,
-      otherArtboards: otherArtboards,
+      artboardsOnSelectPage: artboardsOnSelectPage,
+      artboardsOnOtherPages: artboardsOnOtherPages,
       context: context
     });
   
     if (appliedShapeAngles) {
-      Shared.showMessage_inContext("You got Angled! 📱", context);
+      Shared.show({
+        message: "You got Angled! 📱",
+        inDocument: document
+      });
     }
 
     return
   }
 
   if (errors.length == 0) {
-    Shared.showMessage_inContext(Error.unsupportedElement.message, context);
+    Shared.show({
+      message: Error.unsupportedElement.message,
+      inDocument: document
+    });
   } else {
-    Shared.showMessage_inContext(errors[0].message, context);
+    Shared.show({
+      message: errors[0].message,
+      inDocument: document
+    });
   }
-  
 }
