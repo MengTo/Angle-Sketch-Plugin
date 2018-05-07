@@ -1,5 +1,5 @@
 {
-  "bundleVersion": 1,
+  "bundleVersion": 2,
   "version" : "1.1.0",
   "icon": "icon.png",
   "identifier" : "io.designcode.Angle",
@@ -7,7 +7,7 @@
   "homepage": "https://designcode.io/angle",
   "author": "Design+Code",
   "authorEmail": "support@designcode.io",
-  "compatibleVersion": "50",
+  "compatibleVersion": 50,
   "commands": [
     {
       "name": "Rotate Mockup",

@@ -940,7 +940,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 
 _Angle2['default'].tryCreating = function (_ref) {
     var selectedLayers = _ref['for'],
-        context = _ref.inContext;
+        context = _ref['in'];
 
 
     return selectedLayers.map(function (layer) {

@@ -6,7 +6,7 @@ import ShapeAngle from './ShapeAngle'
 import { Error } from './Error'
 import { PixelDensity } from './PixelDensity'
 
-Angle.tryCreating = function ({ for : selectedLayers, inContext : context }) {
+Angle.tryCreating = function ({ for : selectedLayers, in : context }) {
 
     return selectedLayers
         .map ( layer => {
