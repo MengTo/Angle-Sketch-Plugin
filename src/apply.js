@@ -105,12 +105,12 @@ export function getSelectionAndOptions_forAngleInstances(options) {
   ));
   pixelDensitySelections.forEach( (a) => alertContent.addSubview(a));
 
-  let compressionRatioNames = Object.values(CompressionRatio).map((a) => a.selectionLabel);
+  let compressionRatioNames = CompressionRatio.map(a => a.selectionLabel);
   let compressionRatioSelections = array.map( (a,index,as) => Shared.popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaultSelected_onIndex (
       ((i) => NSMakeRect(fisrtColumnWidth + secondColumnWidth, labelHeight + 4 + (spacing * i) + 16, thirdColumnWidth, 28)),
       compressionRatioNames, null, index
   ));
-  compressionRatioSelections.forEach( (a) => alertContent.addSubview(a));
+  compressionRatioSelections.forEach( a => alertContent.addSubview(a) );
 
   movingYPosition = labelHeight + 4 + (spacing * angles.length) + 28;
 

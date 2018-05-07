@@ -388,7 +388,7 @@ export default class Angle {
 
         let ouputNSImage;
 
-        let compressionRatio = Object.values(CompressionRatio)[this.compressionRatio].ratio;
+        let compressionRatio = CompressionRatio[this.compressionRatio].ratio;
 
         if (compressionRatio != 1.0) {
             ouputNSImage = this.lossyCompressionOfImage_atRate(perspectiveImage, compressionRatio);
