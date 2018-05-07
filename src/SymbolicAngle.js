@@ -2,6 +2,7 @@ import Angle from './Angle'
 import { Error } from './Error'
 
 export default class SymbolicAngle extends Angle {
+    
     constructor (options = {}) {
         
         super(options);
@@ -12,7 +13,7 @@ export default class SymbolicAngle extends Angle {
             return Error.symbolWithBitMapLayer
         }
 
-        this.targetPath = options.override.affectedLayer().bezierPath();
+        this.targetPath = options.override.affectedLayer().pathInFrameWithTransforms();
 
         let parentSymbolIdentifier;
         if ((parentSymbolIdentifier = options.override.overridePoint().parent()) != null) {

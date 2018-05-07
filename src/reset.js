@@ -1,29 +1,37 @@
+import Angle from './Angle'
 import * as Shared from './Shared'
 
-export default function (context) {
+export default function ({ document, selection, command }) {
 
-    let selectedLayers = context.selection;
-
-    if (selectedLayers == null) { return }
-
-    if (selectedLayers.count() != 1) {
-        Shared.showMessage_inContext("Please, select only 1️⃣ element at a time", context);
+    if (selection == undefined || selection.count() != 1) {
+        Shared.show({
+            message: "Please, select 1️⃣ element to reset",
+            inDocument: document
+        });
         return
     }
 
-    let selectedLayer = selectedLayers.firstObject();
+    let layer = selection.firstObject();
+    let possibleAngle = Angle.tryCreating({ for: [layer], in: { document, selection, command } });
 
-    if ((selectedLayer.class() != MSSymbolInstance) && (selectedLayer.class() != MSShapeGroup)) {
-        Shared.showMessage_inContext("Angle only supports shapes and symbols.", context);
+    if (!(possibleAngle instanceof Angle)) {
+
+        Shared.show({
+            message: "Reset only works on shapes and symbols.",
+            inDocument: document
+        });
         return
     }
-        
-    context.command.setValue_forKey_onLayer(null, "pixel-density", selectedLayer);
-    context.command.setValue_forKey_onLayer(null, "rotation", selectedLayer);
-    context.command.setValue_forKey_onLayer(null, "artboard-id", selectedLayer);
-    context.command.setValue_forKey_onLayer(null, "compression-ratio", selectedLayer);
-    context.command.setValue_forKey_onLayer(null, "reversed", selectedLayer);
-    context.command.setValue_forKey_onLayer(null, "guessed-rotation", selectedLayer);
 
-    Shared.showMessage_inContext("Angle Mockup metadata reset.", context);
+    context.command.setValue_forKey_onLayer(null, "pixel-density", layer);
+    context.command.setValue_forKey_onLayer(null, "rotation", layer);
+    context.command.setValue_forKey_onLayer(null, "artboard-id", layer);
+    context.command.setValue_forKey_onLayer(null, "compression-ratio", layer);
+    context.command.setValue_forKey_onLayer(null, "reversed", layer);
+    context.command.setValue_forKey_onLayer(null, "guessed-rotation", layer);
+
+    Shared.show({
+        message: "Angle Mockup metadata reset.",
+        inDocument: document
+    });
 }

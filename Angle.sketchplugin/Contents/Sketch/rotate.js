@@ -65,7 +65,7 @@ var exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 4);
+/******/ 	return __webpack_require__(__webpack_require__.s = 3);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -104,13 +104,19 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _CompressionRatio = __webpack_require__(2);
+var _CompressionRatio = __webpack_require__(4);
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var SegmentType = { linear: 0, quadratic: 1, cubic: 2 };
+
+Array.prototype.rotated = function (n) {
+    return this.slice(n, this.length).concat(this.slice(0, n));
+};
 
 var Angle = function () {
     _createClass(Angle, [{
@@ -129,49 +135,9 @@ var Angle = function () {
                 }
 
                 this.context.command.setValue_forKey_onLayer(value, key, this.selectedLayer);
-
-                // print("☑️ Persistent data imprinted into layer: " + key);
-                // print("Value: " + value);
             }
 
             return imprintValue_forKey;
-        }()
-    }, {
-        key: "imprintValues_forKeys",
-        value: function () {
-            function imprintValues_forKeys(dictionary) {
-                var _iteratorNormalCompletion = true;
-                var _didIteratorError = false;
-                var _iteratorError = undefined;
-
-                try {
-                    for (var _iterator = Object.entries(dictionary)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                        var _ref = _step.value;
-
-                        var _ref2 = _slicedToArray(_ref, 2);
-
-                        var key = _ref2[0];
-                        var value = _ref2[1];
-
-                        this.imprintValue_forKey(key, dictionary[key]);
-                    }
-                } catch (err) {
-                    _didIteratorError = true;
-                    _iteratorError = err;
-                } finally {
-                    try {
-                        if (!_iteratorNormalCompletion && _iterator["return"]) {
-                            _iterator["return"]();
-                        }
-                    } finally {
-                        if (_didIteratorError) {
-                            throw _iteratorError;
-                        }
-                    }
-                }
-            }
-
-            return imprintValues_forKeys;
         }()
     }, {
         key: "loadValueForKey",
@@ -183,8 +149,7 @@ var Angle = function () {
                 }
 
                 var value = this.context.command.valueForKey_onLayer(key, this.selectedLayer);
-                // print("☑️ Persistent data loaded from layer: " + key);
-                // print("Value: " + value);
+
                 return value;
             }
 
@@ -367,6 +332,31 @@ var Angle = function () {
     // ---------------------------------
 
     _createClass(Angle, [{
+        key: "imageData",
+        value: function () {
+            function imageData(_ref) {
+                var artboard = _ref.from,
+                    pixelDensity = _ref["with"],
+                    colorSpace = _ref.on;
+
+
+                var layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(artboard);
+                var exportFormat = MSExportFormat.formatWithScale_name_fileFormat(pixelDensity, "Angle", "png");
+                var exportRequest = MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
+
+                var exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, colorSpace);
+
+                return exporter.bitmapImageRep().TIFFRepresentation();
+            }
+
+            return imageData;
+        }()
+
+        // ---------------------------------
+        // PATH VALIDATION AND CORRECTION
+        // ---------------------------------
+
+    }, {
         key: "guessRotationAndReversion",
         value: function () {
             function guessRotationAndReversion() {
@@ -376,11 +366,11 @@ var Angle = function () {
                 var hasAlreadyGuessed = this.loadValueForKey("guessed-rotation") == 1 ? true : false;
 
                 if (hasAlreadyGuessed) {
-                    print("⚠️ Angle has already guessed rotation and simmetry for this shape");
+                    print("⚠️ Angle has already guessed rotation and symmetry for this shape");
                     return;
                 }
 
-                print("🔄↔️ Angle has just guessed rotation and simmetry for this shape");
+                print("🔄↔️ Angle has just guessed rotation and symmetry for this shape");
                 this.imprintValue_forKey(true, "guessed-rotation");
 
                 var verticesLengths = this.verticesLengths;
@@ -413,14 +403,10 @@ var Angle = function () {
                 }
 
                 var points = this.pointsFromBezierPath;
-                var minimumX = points.reduce(function (p, a, i, as) {
-                    return p > a.x ? a.x : p;
-                }, points[0].x);
-                var minimumY = points.reduce(function (p, a, i, as) {
-                    return p > a.y ? a.y : p;
-                }, points[0].y);
 
-                print(points);
+                var minimumY = Math.min.apply(Math, _toConsumableArray(points.map(function (a) {
+                    return a.y;
+                })));
 
                 var mappedFirstPoint = points[this.mappedIndexFor(0)];
                 var mappedSecondPoint = points[this.mappedIndexFor(1)];
@@ -433,24 +419,8 @@ var Angle = function () {
                     this.rotate();
                 }
 
-                var maximumY = points.reduce(function (p, a, i, as) {
-                    return p < a.y ? a.y : p;
-                }, points[0].y);
-
-                var shoelaceSumOfPoints = Array.from({ length: 4 }, function (x, i) {
-                    return i;
-                }).reduce(function (p, a, i, as) {
-                    var edgeSum = (-points[i].x + points[(i + 1) % 4].x) * (2 * maximumY - points[i].y - points[(i + 1) % 4].y);
-                    return p + edgeSum;
-                }, 0);
-
-                if (shoelaceSumOfPoints < 0) {
-                    print("🛑 COUNTERCLOCKWISE");
-                    this.reverseSimmetry();
-                } else if (shoelaceSumOfPoints > 0) {
-                    print("🛑 CLOCKWISE");
-                } else {
-                    print("🛑 UNDEFINED CHIRALITY");
+                if (this.contour.isClockwise() == 1) {
+                    this.reverseSymmetry();
                 }
             }
 
@@ -466,18 +436,10 @@ var Angle = function () {
         value: function () {
             function maximumVerticesWidthAndHeight() {
 
-                var verticesLengths = this.verticesLengths;
+                var verticesLengths = this.verticesLengths.rotated(this.rotation % 2);
 
-                var layerWidth = void 0,
-                    layerHeight = void 0;
-
-                if (this.rotation % 2 == 0) {
-                    layerWidth = verticesLengths[0] > verticesLengths[2] ? verticesLengths[0] : verticesLengths[2];
-                    layerHeight = verticesLengths[1] > verticesLengths[3] ? verticesLengths[1] : verticesLengths[3];
-                } else {
-                    layerWidth = verticesLengths[1] > verticesLengths[3] ? verticesLengths[1] : verticesLengths[3];
-                    layerHeight = verticesLengths[0] > verticesLengths[2] ? verticesLengths[0] : verticesLengths[2];
-                }
+                var layerWidth = Math.max(verticesLengths[0], verticesLengths[2]);
+                var layerHeight = Math.max(verticesLengths[1], verticesLengths[3]);
 
                 return [layerWidth, layerHeight];
             }
@@ -501,16 +463,16 @@ var Angle = function () {
             return rotate;
         }()
     }, {
-        key: "reverseSimmetry",
+        key: "reverseSymmetry",
         value: function () {
-            function reverseSimmetry() {
+            function reverseSymmetry() {
 
                 this.rotation = (this.rotation + (this.reversed ? 1 : 3)) % 4;
 
                 this.reversed = !this.reversed;
             }
 
-            return reverseSimmetry;
+            return reverseSymmetry;
         }()
 
         // ---------------------------------
@@ -565,54 +527,46 @@ var Angle = function () {
             return pixelAccurateRepresentationOfImage;
         }()
     }, {
-        key: "imageData",
-        get: function () {
-            function get() {
-
-                var layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(this.artboard);
-                var exportFormat = MSExportFormat.formatWithScale_name_fileFormat(this.pixelDensity, "Angle", "png");
-                var exportRequest = MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
-                var exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, NSColorSpace.sRGBColorSpace());
-                var imageData = exporter.bitmapImageRep().TIFFRepresentation();
-
-                if (imageData == undefined) {
-                    print("🛑 Unable to retrieve image data");
-                } else {
-                    print("🖼 Image data retrieved");
-                }
-
-                return imageData;
-            }
-
-            return get;
-        }()
-
-        // ---------------------------------
-        // PATH VALIDATION AND CORRECTION
-        // ---------------------------------
-
-    }, {
         key: "pointsAreValid",
         get: function () {
             function get() {
 
-                var points = this.pointsFromBezierPath;
-                if (points == null) {
+                var points = this.segments;
+
+                if (points == null || points.length != 4 || points.some(function (a) {
+                    return a.segmentType() != SegmentType.linear;
+                })) {
                     return false;
                 }
-
-                var length = points.length;
-
-                if (length != 7) {
-                    return false;
-                }
-
-                // If the shape is an X crossing shape, fail
-                // If two or more points coincide, fail
-
-                // There seems to be something wrong with your shape 😕
 
                 return true;
+            }
+
+            return get;
+        }()
+    }, {
+        key: "contour",
+        get: function () {
+            function get() {
+
+                // MSBezierContour
+                // https://github.com/abynim/Sketch-Headers/blob/4a95b06c0d5e620249f40583e25d3dc52e36494b/Headers/MSBezierContour.h
+
+                // : MSPath
+                // : https://github.com/abynim/Sketch-Headers/blob/4a95b06c0d5e620249f40583e25d3dc52e36494b/Headers/MSPath.h
+                return this.targetPath.contours().firstObject();
+            }
+
+            return get;
+        }()
+    }, {
+        key: "segments",
+        get: function () {
+            function get() {
+
+                // : MSBezierSegment
+                // : https://github.com/abynim/Sketch-Headers/blob/4a95b06c0d5e620249f40583e25d3dc52e36494b/Headers/MSBezierSegment.h
+                return Array.fromNSArray(this.contour.segments());
             }
 
             return get;
@@ -621,29 +575,9 @@ var Angle = function () {
         key: "pointsFromBezierPath",
         get: function () {
             function get() {
-                var _this = this;
 
-                if (this._pointsFromBezierPath != undefined) {
-                    return this._pointsFromBezierPath;
-                }
-
-                var count = this.targetPath.elementCount();
-
-                if (count != 7) {
-                    return null;
-                }
-
-                var array = Array.from({ length: count }, function (x, i) {
-                    return i;
-                });
-
-                var points = array.map(function (a, i, as) {
-                    var pointsPointer = MOPointer.alloc().initWithValue_(CGPointMake(0, 0));
-                    var element = _this.targetPath.elementAtIndex_associatedPoints_(i, pointsPointer);
-
-                    var point = pointsPointer.value();
-
-                    return point;
+                var points = this.segments.map(function (a) {
+                    return a.endPoint1();
                 });
 
                 this._pointsFromBezierPath = points;
@@ -686,24 +620,14 @@ var Angle = function () {
 
                 var points = this.pointsFromBezierPath;
 
-                var minimumX = points.reduce(function (p, a, i, as) {
-                    return p > a.x ? a.x : p;
-                }, points[0].x);
-                var minimumY = points.reduce(function (p, a, i, as) {
-                    return p > a.y ? a.y : p;
-                }, points[0].y);
-                var maximumY = points.reduce(function (p, a, i, as) {
-                    return p < a.y ? a.y : p;
-                }, points[0].y);
+                var maximumY = Math.max.apply(Math, _toConsumableArray(points.map(function (a) {
+                    return a.y;
+                })));
 
                 var pixelDensity = this.pixelDensity;
 
-                return points.map(function (a, i, as) {
-                    var xValue = minimumX >= 0 ? a.x - minimumX : a.x + minimumX;
-                    var yValue = minimumY >= 0 ? a.y - minimumY : a.y + minimumY;
-                    var vector = CIVector.vectorWithX_Y(xValue * pixelDensity, (maximumY - minimumY - yValue) * pixelDensity);
-
-                    return vector;
+                return points.map(function (a) {
+                    return CIVector.vectorWithX_Y(a.x * pixelDensity, (maximumY - a.y) * pixelDensity);
                 });
             }
 
@@ -723,7 +647,12 @@ var Angle = function () {
                 perspectiveTransform.setValue_forKey(vectors[this.mappedIndexFor(2)], "inputBottomRight");
                 perspectiveTransform.setValue_forKey(vectors[this.mappedIndexFor(3)], "inputBottomLeft");
 
-                var imageBitmap = NSBitmapImageRep.imageRepWithData(this.imageData);
+                var imageData = this.imageData({
+                    from: this.artboard,
+                    "with": this.pixelDensity,
+                    on: this.context.document.colorSpace() });
+
+                var imageBitmap = NSBitmapImageRep.imageRepWithData(imageData);
                 var image = CIImage.alloc().initWithBitmapImageRep(imageBitmap);
 
                 perspectiveTransform.setValue_forKey(image, "inputImage");
@@ -745,10 +674,6 @@ var Angle = function () {
                     ouputNSImage = this.pixelAccurateRepresentationOfImage(perspectiveImage);
                 }
 
-                if (MSApplicationMetadata.metadata().appVersion < 47) {
-                    return MSImageData.alloc().initWithImage_convertColorSpace(ouputNSImage, false);
-                }
-
                 return MSImageData.alloc().initWithImage_(ouputNSImage);
             }
 
@@ -763,32 +688,6 @@ exports["default"] = Angle;
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports) {
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-var CompressionRatio = exports.CompressionRatio = {
-    best: {
-        selectionLabel: "Best",
-        ratio: 1.0
-    },
-    better: {
-        selectionLabel: "Better",
-        ratio: 0.9
-    },
-    good: {
-        selectionLabel: "Good",
-        ratio: 0.8
-    },
-    average: {
-        selectionLabel: "Average",
-        ratio: 0.7
-    }
-};
-
-/***/ }),
-/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 Object.defineProperty(exports, "__esModule", {
@@ -831,7 +730,7 @@ var SymbolicAngle = function (_Angle) {
             return _ret = _Error.Error.symbolWithBitMapLayer, _possibleConstructorReturn(_this, _ret);
         }
 
-        _this.targetPath = options.override.affectedLayer().bezierPath();
+        _this.targetPath = options.override.affectedLayer().pathInFrameWithTransforms();
 
         var parentSymbolIdentifier = void 0;
         if ((parentSymbolIdentifier = options.override.overridePoint().parent()) != null) {
@@ -902,7 +801,7 @@ var SymbolicAngle = function (_Angle) {
 exports['default'] = SymbolicAngle;
 
 /***/ }),
-/* 4 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 Object.defineProperty(exports, "__esModule", {
@@ -914,20 +813,24 @@ exports['default'] = function (context) {
     var selectedLayersNSArray = context.selection;
 
     if (selectedLayersNSArray == null) {
-        var error = _Error.Error.emptySelection;
-        Shared.showMessage_inContext(_Error.Error.message, context);
+        Shared.show({
+            message: _Error.Error.emptySelection.message,
+            inDocument: context.document
+        });
         return;
     }
 
     var selectedLayers = Array.fromNSArray(selectedLayersNSArray);
 
     if (selectedLayers.length == 0) {
-        var _error = _Error.Error.emptySelection;
-        Shared.showMessage_inContext(_Error.Error.message, context);
+        Shared.show({
+            message: _Error.Error.emptySelection.message,
+            inDocument: context.document
+        });
         return;
     }
 
-    var possibleAngles = _Angle2['default'].forSelectedLayers_inContext(selectedLayers, context);
+    var possibleAngles = _Angle2['default'].tryCreating({ 'for': selectedLayers, 'in': context });
 
     var angles = possibleAngles.filter(function (a) {
         return a instanceof _Angle2['default'];
@@ -936,10 +839,12 @@ exports['default'] = function (context) {
         return !(a instanceof _Angle2['default']);
     });
 
-    // if (!((angleInstance = getAngle(options)) instanceof Angle)) {
     if (angles.length == 0) {
-        var _error2 = errors[0];
-        Shared.showMessage_inContext(_Error.Error.message, context);
+        var error = errors[0];
+        Shared.show({
+            message: error.message,
+            inDocument: context.document
+        });
         return;
     }
 
@@ -948,7 +853,10 @@ exports['default'] = function (context) {
         a.applyImage();
     });
 
-    Shared.showMessage_inContext("Angle rotated! 🔄", context);
+    Shared.show({
+        message: "Angle rotated! 🔄",
+        inDocument: context.document
+    });
 
     return;
 };
@@ -968,17 +876,43 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /***/ }),
+/* 4 */
+/***/ (function(module, exports) {
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+var CompressionRatio = exports.CompressionRatio = {
+    best: {
+        selectionLabel: "Best",
+        ratio: 1.0
+    },
+    better: {
+        selectionLabel: "Better",
+        ratio: 0.9
+    },
+    good: {
+        selectionLabel: "Good",
+        ratio: 0.8
+    },
+    average: {
+        selectionLabel: "Average",
+        ratio: 0.7
+    }
+};
+
+/***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.showMessage_inContext = showMessage_inContext;
+exports.show = show;
 exports.filterPossibleArtboards = filterPossibleArtboards;
 exports.compareByRatioAndAlphabet = compareByRatioAndAlphabet;
+exports.introspect = introspect;
 exports.createLabel = createLabel;
-exports.loadLocalImage = loadLocalImage;
 exports.popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaultSelected_onIndex = popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaultSelected_onIndex;
 exports.smallImagesFromArtboard = smallImagesFromArtboard;
 
@@ -990,7 +924,7 @@ var _CompositionAngle = __webpack_require__(6);
 
 var _CompositionAngle2 = _interopRequireDefault(_CompositionAngle);
 
-var _SymbolicAngle = __webpack_require__(3);
+var _SymbolicAngle = __webpack_require__(2);
 
 var _SymbolicAngle2 = _interopRequireDefault(_SymbolicAngle);
 
@@ -1002,11 +936,12 @@ var _Error = __webpack_require__(0);
 
 var _PixelDensity = __webpack_require__(8);
 
-var _CompressionRatio = __webpack_require__(2);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-_Angle2['default'].forSelectedLayers_inContext = function (selectedLayers, context) {
+_Angle2['default'].tryCreating = function (_ref) {
+    var selectedLayers = _ref['for'],
+        context = _ref.inContext;
+
 
     return selectedLayers.map(function (layer) {
         switch (layer['class']()) {
@@ -1047,7 +982,7 @@ _Angle2['default'].forSelectedLayers_inContext = function (selectedLayers, conte
                     context: context
                 });
             default:
-                return [_Error.Error.unsupportedElement];
+                return _Error.Error.unsupportedElement;
         }
     }).reduce(function (p, a, i, as) {
         return p.concat(a);
@@ -1068,9 +1003,12 @@ Array.prototype.print = function () {
     });
 };
 
-function showMessage_inContext(message, context) {
-    if (context.document.showMessage != undefined) {
-        context.document.showMessage(message);
+function show(_ref2) {
+    var message = _ref2.message,
+        document = _ref2.inDocument;
+
+    if (document != undefined && document.showMessage != undefined) {
+        document.showMessage(message);
     }
 
     print(message);
@@ -1151,6 +1089,36 @@ function compareByRatioAndAlphabet(a, b) {
     return artboardARatio > artboardBRatio;
 }
 
+function introspect(type) {
+
+    var mocha = type['class']().mocha();
+
+    print("-----------------------------------------------");
+    print("PROPERTIES-------------------------------------");
+    print("-----------------------------------------------");
+
+    print(mocha.properties());
+    print(mocha.propertiesWithAncestors());
+
+    print("-----------------------------------------------");
+    print("INSTANCE METHODS-------------------------------");
+    print("-----------------------------------------------");
+    print(mocha.instanceMethods());
+    print(mocha.instanceMethodsWithAncestors());
+
+    print("-----------------------------------------------");
+    print("CLASS METHODS----------------------------------");
+    print("-----------------------------------------------");
+    print(mocha.classMethods());
+    print(mocha.classMethodsWithAncestors());
+
+    print("-----------------------------------------------");
+    print("PROTOCOLS--------------------------------------");
+    print("-----------------------------------------------");
+    print(mocha.protocols());
+    print(mocha.protocolsWithAncestors());
+}
+
 function createLabel(text, size, frame) {
     var label = NSTextField.alloc().initWithFrame(frame);
 
@@ -1162,18 +1130,6 @@ function createLabel(text, size, frame) {
     label.setSelectable(false);
 
     return label;
-}
-
-function loadLocalImage(context, filePath) {
-
-    var basePath = context.scriptPath.stringByDeletingLastPathComponent().stringByDeletingLastPathComponent().stringByDeletingLastPathComponent();
-
-    if (!NSFileManager.defaultManager().fileExistsAtPath(basePath + "/" + filePath)) {
-        print("File does not exist at path");
-        return null;
-    }
-
-    return NSImage.alloc().initWithContentsOfFile(basePath + "/" + filePath);
 }
 
 function popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaultSelected_onIndex(rectangle, titles, images, index) {
@@ -1251,7 +1207,7 @@ var _get = function () {
     return get;
 }();
 
-var _SymbolicAngle2 = __webpack_require__(3);
+var _SymbolicAngle2 = __webpack_require__(2);
 
 var _SymbolicAngle3 = _interopRequireDefault(_SymbolicAngle2);
 
@@ -1374,7 +1330,7 @@ var ShapeAngle = function (_Angle) {
         var _this = _possibleConstructorReturn(this, (ShapeAngle.__proto__ || Object.getPrototypeOf(ShapeAngle)).call(this, options));
 
         _this.targetLayer = _this.selectedLayer;
-        _this.targetPath = _this.selectedLayer.bezierPath();
+        _this.targetPath = _this.selectedLayer.pathInFrameWithTransforms();
 
         if (!_this.pointsAreValid) {
             var _ret;

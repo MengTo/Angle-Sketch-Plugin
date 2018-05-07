@@ -5,13 +5,12 @@ import ShapeAngle from './ShapeAngle'
 
 import { Error } from './Error'
 import { PixelDensity } from './PixelDensity'
-import { CompressionRatio } from './CompressionRatio'
 
-Angle.forSelectedLayers_inContext = function (selectedLayers, context) {
+Angle.tryCreating = function ({ for : selectedLayers, inContext : context }) {
 
     return selectedLayers
         .map ( layer => {
-        switch (layer.class()) {
+            switch (layer.class()) {
             case MSSymbolInstance:
             
                 let overrides = Array.fromNSArray(layer.availableOverrides()) || [];
@@ -47,8 +46,8 @@ Angle.forSelectedLayers_inContext = function (selectedLayers, context) {
                     context: context
                 })
             default:
-                return [ Error.unsupportedElement ]
-        }
+                return Error.unsupportedElement
+            }
         })
         .reduce ( ((p, a, i, as) => p.concat(a)), []);
 }
@@ -63,9 +62,9 @@ Array.prototype.print = function () {
     return this.map ( a => { print(a); return a } )
 }
 
-export function showMessage_inContext(message, context) {
-    if (context.document.showMessage != undefined) {
-        context.document.showMessage(message);
+export function show({ message, inDocument : document}) {
+    if (document != undefined && document.showMessage != undefined) {
+        document.showMessage(message);
     }
 
     print(message);
@@ -137,6 +136,36 @@ export function compareByRatioAndAlphabet (a, b) {
     return artboardARatio > artboardBRatio;
 }
 
+export function introspect (type) {
+
+    let mocha = type.class().mocha();
+  
+    print("-----------------------------------------------");
+    print("PROPERTIES-------------------------------------");
+    print("-----------------------------------------------");
+
+    print(mocha.properties());
+    print(mocha.propertiesWithAncestors());
+
+    print("-----------------------------------------------");
+    print("INSTANCE METHODS-------------------------------");
+    print("-----------------------------------------------");
+    print(mocha.instanceMethods());
+    print(mocha.instanceMethodsWithAncestors());
+
+    print("-----------------------------------------------");
+    print("CLASS METHODS----------------------------------");
+    print("-----------------------------------------------");
+    print(mocha.classMethods());
+    print(mocha.classMethodsWithAncestors());
+
+    print("-----------------------------------------------");
+    print("PROTOCOLS--------------------------------------");
+    print("-----------------------------------------------");
+    print(mocha.protocols());
+    print(mocha.protocolsWithAncestors());
+}
+
 export function createLabel(text, size, frame) {
     var label = NSTextField.alloc().initWithFrame(frame);
 
@@ -149,21 +178,6 @@ export function createLabel(text, size, frame) {
 
     return label;
 }
-
-export function loadLocalImage (context, filePath) {
-
-    let basePath = context.scriptPath
-      .stringByDeletingLastPathComponent()
-      .stringByDeletingLastPathComponent()
-      .stringByDeletingLastPathComponent();
-  
-    if (!NSFileManager.defaultManager().fileExistsAtPath(basePath + "/" + filePath)) {
-        print("File does not exist at path");
-        return null;
-    }
-  
-    return NSImage.alloc().initWithContentsOfFile(basePath + "/" + filePath);
-  }
 
 export function popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaultSelected_onIndex (rectangle, titles, images, index) {
 
