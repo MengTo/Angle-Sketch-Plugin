@@ -1,13 +1,14 @@
 {
   "compatibleVersion": 3,
   "bundleVersion": 1,
-  "version": "1.0.5",
+  "version": "1.0.7",
   "icon": "icon.png",
   "identifier": "io.designcode.Angle",
   "description": "Apply perspective transforms on screen mockups. Auto-detect screens by resolution and works on shapes and symbols. Super fast.",
   "homepage": "https://designcode.io/angle",
   "author": "Design+Code",
   "authorEmail": "support@designcode.io",
+  "maxCompatibleVersion": "49.3",
   "commands": [
     {
       "name": "Rotate Mockup",
