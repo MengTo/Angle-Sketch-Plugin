@@ -156,12 +156,24 @@ export default class Angle {
     // ---------------------------------
 
     get pointsAreValid () {
-        
-        let points = this.segments;
 
-        if (points == null ||
-            points.length != 4 ||
-            points.some( a => a.segmentType() != SegmentType.linear) ) { return false }
+        if (MSApplicationMetadata.metadata().appVersion >= 50) {
+
+            let points = this.segments;
+
+            if (points == null ||
+                points.length != 4 ||
+                points.some( a => a.segmentType() != SegmentType.linear) ) { return false }
+
+            return true
+        }
+
+        let points = this.pointsFromBezierPath;
+        if (points == null) { return false }
+
+        let length = points.length;
+
+        if (length != 7) { return false }
 
         return true
     }
@@ -224,7 +236,35 @@ export default class Angle {
             this.rotate();
         }
 
-        if (this.contour.isClockwise() == 1) { this.reverseSymmetry(); }
+        if (MSApplicationMetadata.metadata().appVersion >= 50) {
+
+            if (this.contour.isClockwise() == 1) { this.reverseSymmetry(); }
+
+        } else {
+
+            let shoelaceSumOfPoints = shorlaceSum({ of: points });
+
+            if (shoelaceSumOfPoints < 0) {
+                print("🛑 COUNTERCLOCKWISE");
+                this.reverseSimmetry();
+            } else if (shoelaceSumOfPoints > 0) {
+                print("🛑 CLOCKWISE");
+            } else{
+                print("🛑 UNDEFINED CHIRALITY");
+            }
+        }
+    }
+
+    shorlaceSum({ of : points }) {
+
+        let maximumY = Math.max( ...points.map( a => a.y ) );
+
+        return Array
+            .from({ length: 4 }, (x, i) => i)
+            .reduce(function (p, a, i, as) {
+                let edgeSum = (- points[i].x + points[(i + 1) % 4].x) * (2 * maximumY - points[i].y - points[(i + 1) % 4].y)
+                return p + edgeSum;
+            }, 0);
     }
 
     // ---------------------------------
@@ -251,12 +291,41 @@ export default class Angle {
 
     get pointsFromBezierPath () {
 
-        let points = this.segments
+        if (this._pointsFromBezierPath != undefined) {
+            return this._pointsFromBezierPath;
+        }
+
+        if (MSApplicationMetadata.metadata().appVersion >= 50) {
+
+            let points = this.segments
             .map( a => a.endPoint1() );
+
+            this._pointsFromBezierPath = points;
+
+            return points;
+        }
+
+
+        let count = this.targetPath.elementCount();
+
+        if (count != 7) { return null }
+
+        let array = Array.from({ length: count }, (x, i) => i);
+
+        let points = array.map(
+            (a, i, as) => {
+            var pointsPointer = MOPointer.alloc().initWithValue_(CGPointMake(0, 0));
+            var element = this.targetPath.elementAtIndex_associatedPoints_(i, pointsPointer);
+
+            let point = pointsPointer.value();
+
+            return point
+        });
 
         this._pointsFromBezierPath = points;
 
         return points;
+
     }
 
     get verticesLengths () {
@@ -317,7 +386,7 @@ export default class Angle {
 
     reverseSymmetry () {
 
-        this.rotation = (this.rotation + (this.reversed ? 1 : 3))%4;
+        rotate();
 
         this.reversed = !this.reversed;
     }
@@ -394,6 +463,10 @@ export default class Angle {
             ouputNSImage = this.lossyCompressionOfImage_atRate(perspectiveImage, compressionRatio);
         } else {
             ouputNSImage = this.pixelAccurateRepresentationOfImage(perspectiveImage);
+        }
+
+        if (MSApplicationMetadata.metadata().appVersion < 47) {
+            return MSImageData.alloc().initWithImage_convertColorSpace(ouputNSImage, false)
         }
     
         return MSImageData.alloc().initWithImage_(ouputNSImage)
