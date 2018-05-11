@@ -386,7 +386,7 @@ export default class Angle {
 
     reverseSymmetry () {
 
-        rotate();
+        this.rotate();
 
         this.reversed = !this.reversed;
     }
