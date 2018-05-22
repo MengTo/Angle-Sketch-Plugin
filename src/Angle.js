@@ -140,7 +140,7 @@ export default class Angle {
     // IMAGE DATA
     // ---------------------------------
 
-    imageData ({ from: artboard, with: pixelDensity, on: colorSpace }) {
+    ciImage ({ from: artboard, with: pixelDensity, on: colorSpace }) {
 
         let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(artboard);      
         let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(pixelDensity, "Angle", "png");
@@ -148,7 +148,10 @@ export default class Angle {
 
         let exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, colorSpace);
         
-        return exporter.bitmapImageRep().TIFFRepresentation();
+        let bitmapRepresentation = exporter.bitmapImageRep();
+        let image = CIImage.alloc().initWithCGImage(bitmapRepresentation.CGImage());
+
+        return image
     }
 
     // ---------------------------------
@@ -420,7 +423,7 @@ export default class Angle {
 
     pixelAccurateRepresentationOfImage(image) {
 
-        let representation = NSCIImageRep.imageRepWithCIImage(image);
+        let representation = NSCIImageRep.alloc().initWithCIImage(image);
         let nsImage = NSImage.alloc().initWithSize(representation.size());
         nsImage.addRepresentation(representation);
     
@@ -438,13 +441,10 @@ export default class Angle {
         perspectiveTransform.setValue_forKey(vectors[this.mappedIndexFor(2)], "inputBottomRight");
         perspectiveTransform.setValue_forKey(vectors[this.mappedIndexFor(3)], "inputBottomLeft");
 
-        let imageData = this.imageData({
+        let image = this.ciImage({
             from: this.artboard,
             with: this.pixelDensity,
             on: this.context.document.colorSpace() });
-    
-        let imageBitmap = NSBitmapImageRep.imageRepWithData(imageData);
-        let image = CIImage.alloc().initWithBitmapImageRep(imageBitmap);
     
         perspectiveTransform.setValue_forKey(image, "inputImage");
     
@@ -465,10 +465,15 @@ export default class Angle {
             ouputNSImage = this.pixelAccurateRepresentationOfImage(perspectiveImage);
         }
 
+        let imageData;
+
         if (MSApplicationMetadata.metadata().appVersion < 47) {
-            return MSImageData.alloc().initWithImage_convertColorSpace(ouputNSImage, false)
+            imageData = MSImageData.alloc().initWithImage_convertColorSpace(ouputNSImage, true);
+            return imageData
         }
     
-        return MSImageData.alloc().initWithImage_(ouputNSImage)
+        imageData = MSImageData.alloc().initWithImage_(ouputNSImage);
+
+        return imageData
     }
 }

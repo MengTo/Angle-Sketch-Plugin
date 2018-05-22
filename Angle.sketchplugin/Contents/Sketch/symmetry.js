@@ -332,9 +332,9 @@ var Angle = function () {
     // ---------------------------------
 
     _createClass(Angle, [{
-        key: "imageData",
+        key: "ciImage",
         value: function () {
-            function imageData(_ref) {
+            function ciImage(_ref) {
                 var artboard = _ref.from,
                     pixelDensity = _ref["with"],
                     colorSpace = _ref.on;
@@ -346,10 +346,13 @@ var Angle = function () {
 
                 var exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, colorSpace);
 
-                return exporter.bitmapImageRep().TIFFRepresentation();
+                var bitmapRepresentation = exporter.bitmapImageRep();
+                var image = CIImage.alloc().initWithCGImage(bitmapRepresentation.CGImage());
+
+                return image;
             }
 
-            return imageData;
+            return ciImage;
         }()
 
         // ---------------------------------
@@ -419,12 +422,48 @@ var Angle = function () {
                     this.rotate();
                 }
 
-                if (this.contour.isClockwise() == 1) {
-                    this.reverseSymmetry();
+                if (MSApplicationMetadata.metadata().appVersion >= 50) {
+
+                    if (this.contour.isClockwise() == 1) {
+                        this.reverseSymmetry();
+                    }
+                } else {
+
+                    var shoelaceSumOfPoints = shorlaceSum({ of: points });
+
+                    if (shoelaceSumOfPoints < 0) {
+                        print("🛑 COUNTERCLOCKWISE");
+                        this.reverseSimmetry();
+                    } else if (shoelaceSumOfPoints > 0) {
+                        print("🛑 CLOCKWISE");
+                    } else {
+                        print("🛑 UNDEFINED CHIRALITY");
+                    }
                 }
             }
 
             return guessRotationAndReversion;
+        }()
+    }, {
+        key: "shorlaceSum",
+        value: function () {
+            function shorlaceSum(_ref2) {
+                var points = _ref2.of;
+
+
+                var maximumY = Math.max.apply(Math, _toConsumableArray(points.map(function (a) {
+                    return a.y;
+                })));
+
+                return Array.from({ length: 4 }, function (x, i) {
+                    return i;
+                }).reduce(function (p, a, i, as) {
+                    var edgeSum = (-points[i].x + points[(i + 1) % 4].x) * (2 * maximumY - points[i].y - points[(i + 1) % 4].y);
+                    return p + edgeSum;
+                }, 0);
+            }
+
+            return shorlaceSum;
         }()
 
         // ---------------------------------
@@ -467,7 +506,7 @@ var Angle = function () {
         value: function () {
             function reverseSymmetry() {
 
-                this.rotation = (this.rotation + (this.reversed ? 1 : 3)) % 4;
+                this.rotate();
 
                 this.reversed = !this.reversed;
             }
@@ -517,7 +556,7 @@ var Angle = function () {
         value: function () {
             function pixelAccurateRepresentationOfImage(image) {
 
-                var representation = NSCIImageRep.imageRepWithCIImage(image);
+                var representation = NSCIImageRep.alloc().initWithCIImage(image);
                 var nsImage = NSImage.alloc().initWithSize(representation.size());
                 nsImage.addRepresentation(representation);
 
@@ -531,11 +570,27 @@ var Angle = function () {
         get: function () {
             function get() {
 
-                var points = this.segments;
+                if (MSApplicationMetadata.metadata().appVersion >= 50) {
 
-                if (points == null || points.length != 4 || points.some(function (a) {
-                    return a.segmentType() != SegmentType.linear;
-                })) {
+                    var _points = this.segments;
+
+                    if (_points == null || _points.length != 4 || _points.some(function (a) {
+                        return a.segmentType() != SegmentType.linear;
+                    })) {
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                var points = this.pointsFromBezierPath;
+                if (points == null) {
+                    return false;
+                }
+
+                var length = points.length;
+
+                if (length != 7) {
                     return false;
                 }
 
@@ -575,9 +630,40 @@ var Angle = function () {
         key: "pointsFromBezierPath",
         get: function () {
             function get() {
+                var _this = this;
 
-                var points = this.segments.map(function (a) {
-                    return a.endPoint1();
+                if (this._pointsFromBezierPath != undefined) {
+                    return this._pointsFromBezierPath;
+                }
+
+                if (MSApplicationMetadata.metadata().appVersion >= 50) {
+
+                    var _points2 = this.segments.map(function (a) {
+                        return a.endPoint1();
+                    });
+
+                    this._pointsFromBezierPath = _points2;
+
+                    return _points2;
+                }
+
+                var count = this.targetPath.elementCount();
+
+                if (count != 7) {
+                    return null;
+                }
+
+                var array = Array.from({ length: count }, function (x, i) {
+                    return i;
+                });
+
+                var points = array.map(function (a, i, as) {
+                    var pointsPointer = MOPointer.alloc().initWithValue_(CGPointMake(0, 0));
+                    var element = _this.targetPath.elementAtIndex_associatedPoints_(i, pointsPointer);
+
+                    var point = pointsPointer.value();
+
+                    return point;
                 });
 
                 this._pointsFromBezierPath = points;
@@ -647,13 +733,10 @@ var Angle = function () {
                 perspectiveTransform.setValue_forKey(vectors[this.mappedIndexFor(2)], "inputBottomRight");
                 perspectiveTransform.setValue_forKey(vectors[this.mappedIndexFor(3)], "inputBottomLeft");
 
-                var imageData = this.imageData({
+                var image = this.ciImage({
                     from: this.artboard,
                     "with": this.pixelDensity,
                     on: this.context.document.colorSpace() });
-
-                var imageBitmap = NSBitmapImageRep.imageRepWithData(imageData);
-                var image = CIImage.alloc().initWithBitmapImageRep(imageBitmap);
 
                 perspectiveTransform.setValue_forKey(image, "inputImage");
 
@@ -666,7 +749,7 @@ var Angle = function () {
 
                 var ouputNSImage = void 0;
 
-                var compressionRatio = Object.values(_CompressionRatio.CompressionRatio)[this.compressionRatio].ratio;
+                var compressionRatio = _CompressionRatio.CompressionRatio[this.compressionRatio].ratio;
 
                 if (compressionRatio != 1.0) {
                     ouputNSImage = this.lossyCompressionOfImage_atRate(perspectiveImage, compressionRatio);
@@ -674,7 +757,16 @@ var Angle = function () {
                     ouputNSImage = this.pixelAccurateRepresentationOfImage(perspectiveImage);
                 }
 
-                return MSImageData.alloc().initWithImage_(ouputNSImage);
+                var imageData = void 0;
+
+                if (MSApplicationMetadata.metadata().appVersion < 47) {
+                    imageData = MSImageData.alloc().initWithImage_convertColorSpace(ouputNSImage, true);
+                    return imageData;
+                }
+
+                imageData = MSImageData.alloc().initWithImage_(ouputNSImage);
+
+                return imageData;
             }
 
             return get;
@@ -730,7 +822,11 @@ var SymbolicAngle = function (_Angle) {
             return _ret = _Error.Error.symbolWithBitMapLayer, _possibleConstructorReturn(_this, _ret);
         }
 
-        _this.targetPath = options.override.affectedLayer().pathInFrameWithTransforms();
+        if (MSApplicationMetadata.metadata().appVersion < 50) {
+            _this.targetPath = options.override.affectedLayer().bezierPath();
+        } else {
+            _this.targetPath = options.override.affectedLayer().pathInFrameWithTransforms();
+        }
 
         var parentSymbolIdentifier = void 0;
         if ((parentSymbolIdentifier = options.override.overridePoint().parent()) != null) {
@@ -881,24 +977,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-var CompressionRatio = exports.CompressionRatio = {
-    best: {
-        selectionLabel: "Best",
-        ratio: 1.0
-    },
-    better: {
-        selectionLabel: "Better",
-        ratio: 0.9
-    },
-    good: {
-        selectionLabel: "Good",
-        ratio: 0.8
-    },
-    average: {
-        selectionLabel: "Average",
-        ratio: 0.7
-    }
-};
+var CompressionRatio = exports.CompressionRatio = [{ selectionLabel: "Best", ratio: 1.0 }, { selectionLabel: "Better", ratio: 0.9 }, { selectionLabel: "Good", ratio: 0.8 }, { selectionLabel: "Average", ratio: 0.7 }];
 
 /***/ }),
 /* 5 */
@@ -1329,7 +1408,12 @@ var ShapeAngle = function (_Angle) {
         var _this = _possibleConstructorReturn(this, (ShapeAngle.__proto__ || Object.getPrototypeOf(ShapeAngle)).call(this, options));
 
         _this.targetLayer = _this.selectedLayer;
-        _this.targetPath = _this.selectedLayer.pathInFrameWithTransforms();
+
+        if (MSApplicationMetadata.metadata().appVersion < 50) {
+            _this.targetPath = options.selectedLayer.bezierPath();
+        } else {
+            _this.targetPath = options.selectedLayer.pathInFrameWithTransforms();
+        }
 
         if (!_this.pointsAreValid) {
             var _ret;
