@@ -37,6 +37,7 @@ Angle.tryCreating = function ({ for : selectedLayers, in : context }) {
                         });
                     });
                 return symbolAngles.concat(nestedAngles)
+            case MSShapeGroup:
             case MSShapePathLayer:
             case MSRectangleShape:
                 return new ShapeAngle ({

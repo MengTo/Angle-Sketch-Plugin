@@ -142,10 +142,19 @@ export default class Angle {
 
     exporter () {
 
-        const format = MSExportFormat.alloc().init()
-        format.fileFormat = "png";
-        format.scale = this.pixelDensity;
-        const request = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(this.artboard, [format], true).firstObject();
+        let request
+
+        const sketchVersion = MSApplicationMetadata.metadata().appVersion
+        if (sketchVersion < 52) {
+            let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(artboard);      
+            let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(pixelDensity, "Angle", "png");
+            request = MSExportRequestexportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
+        } else {
+            const format = MSExportFormat.alloc().init()
+            format.fileFormat = "png";
+            format.scale = this.pixelDensity;
+            request = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(this.artboard, [format], true).firstObject();
+        }
 
         const colorSpace = this.context.document.colorSpace()
         return MSExporter.exporterForRequest_colorSpace(request, colorSpace)
@@ -161,6 +170,30 @@ export default class Angle {
     // ---------------------------------
 
     get pointsAreValid () {
+
+        const sketchVersion = MSApplicationMetadata.metadata().appVersion
+        if (sketchVersion < 50) {
+
+            let points = this.pointsFromBezierPath;
+
+            if (points === null)
+                return false
+
+            if (points.length !== 7)
+                return false
+
+            return true
+
+        } else if (sketchVersion < 52) {
+
+            let points = this.segments;
+
+            if (points == null ||
+                points.length != 4 ||
+                points.some( a => a.segmentType() != SegmentType.linear) ) { return false }
+
+            return true
+        }
 
         let points = this.targetLayer.points()
 
@@ -229,15 +262,22 @@ export default class Angle {
             this.rotate();
         }
 
-        let shoelaceSumOfPoints = this.shorlaceSum();
-
-        if (shoelaceSumOfPoints < 0) {
-            print("🛑 COUNTERCLOCKWISE");
-            this.reverseSymmetry();
-        } else if (shoelaceSumOfPoints > 0) {
-            print("🛑 CLOCKWISE");
-        } else{
-            print("🛑 UNDEFINED CHIRALITY");
+        const sketchVersion = MSApplicationMetadata.metadata().appVersion
+        if (sketchVersion < 50 || sketchVersion >= 52) {
+            
+            let shoelaceSumOfPoints = this.shorlaceSum();
+            if (shoelaceSumOfPoints < 0) {
+                print("🛑 COUNTERCLOCKWISE");
+                this.reverseSymmetry();
+            } else if (shoelaceSumOfPoints > 0) {
+                print("🛑 CLOCKWISE");
+            } else{
+                print("🛑 UNDEFINED CHIRALITY");
+            }
+        } else if (sketchVersion < 52) {
+            const contour = this.targetPath.contours().firstObject()
+            if (contour.isClockwise() == 1) 
+                this.reverseSymmetry()
         }
 
         print("🔄↔️ Angle has just guessed rotation and symmetry for this shape");
@@ -262,6 +302,25 @@ export default class Angle {
     // ---------------------------------
 
     get pointsFromBezierPath () {
+
+        const sketchVersion = MSApplicationMetadata.metadata().appVersion
+        if (sketchVersion < 50) {
+            let count = this.targetPath.elementCount();
+            if (count != 7) { return null }
+    
+            return Array
+            .from({ length: count }, (x, i) => i)
+            .map(i => {
+                var pointsPointer = MOPointer.alloc().initWithValue_(CGPointMake(0, 0));
+                var element = this.targetPath.elementAtIndex_associatedPoints_(i, pointsPointer);
+                return pointsPointer.value();
+            });
+        } else if (sketchVersion < 52) {
+            const contour = this.targetPath.contours().firstObject()
+            return Array.fromNSArray(contour.segments())
+            .map(a => a.endPoint1())
+        }
+
         const size = this.targetLayer.rect().size;
         return Array
         .fromNSArray(this.targetLayer.points())

@@ -8,6 +8,13 @@ export default class ShapeAngle extends Angle {
 
         this.targetLayer = this.selectedLayer;
 
+        const sketchVersion = MSApplicationMetadata.metadata().appVersion
+        if (sketchVersion < 50) {
+            this.targetPath = this.selectedLayer.bezierPath();
+        } else if (sketchVersion < 52) {
+            this.targetPath = this.selectedLayer.pathInFrameWithTransforms();
+        }
+
         if (!this.pointsAreValid) {
             return Error.unsupportedShapePath
         }

@@ -12,8 +12,12 @@ export default class SymbolicAngle extends Angle {
         if (this.targetLayer.class() === MSImmutableBitmapLayer)
             return Error.symbolWithBitMapLayer
 
-        // MSImmutableShapePathLayer
-        this.targetPath = options.override.affectedLayer()
+        const sketchVersion = MSApplicationMetadata.metadata().appVersion
+        if (sketchVersion < 50) {
+            this.targetPath = options.override.affectedLayer().bezierPath();
+        } else if (sketchVersion < 52) {
+            this.targetPath = options.override.affectedLayer().pathInFrameWithTransforms();
+        }
 
         let parentSymbolIdentifier = options.override.overridePoint().parent()
         if (parentSymbolIdentifier !== null) {
