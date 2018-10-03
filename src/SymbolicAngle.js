@@ -9,20 +9,15 @@ export default class SymbolicAngle extends Angle {
 
         this.targetLayer = options.override.affectedLayer();
 
-        if (this.targetLayer.class() == MSImmutableBitmapLayer) {
+        if (this.targetLayer.class() === MSImmutableBitmapLayer)
             return Error.symbolWithBitMapLayer
-        }
 
-        if (MSApplicationMetadata.metadata().appVersion < 50) {
-            this.targetPath = options.override.affectedLayer().bezierPath();
-        } else {
-            this.targetPath = options.override.affectedLayer().pathInFrameWithTransforms();
-        }
-        
+        // MSImmutableShapePathLayer
+        this.targetPath = options.override.affectedLayer()
 
-        let parentSymbolIdentifier;
-        if ((parentSymbolIdentifier = options.override.overridePoint().parent()) != null) {
-            this.overrideLayer = parentSymbolIdentifier;
+        let parentSymbolIdentifier = options.override.overridePoint().parent()
+        if (parentSymbolIdentifier !== null) {
+            this.overrideLayer = parentSymbolIdentifier
         }
 
         if (!this.pointsAreValid) {

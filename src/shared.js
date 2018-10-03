@@ -4,7 +4,6 @@ import SymbolicAngle from './SymbolicAngle'
 import ShapeAngle from './ShapeAngle'
 
 import { Error } from './Error'
-import { PixelDensity } from './PixelDensity'
 
 Angle.tryCreating = function ({ for : selectedLayers, in : context }) {
 
@@ -12,7 +11,6 @@ Angle.tryCreating = function ({ for : selectedLayers, in : context }) {
         .map ( layer => {
             switch (layer.class()) {
             case MSSymbolInstance:
-            
                 let overrides = Array.fromNSArray(layer.availableOverrides()) || [];
                 
                 let symbolAngles = overrides
@@ -38,9 +36,9 @@ Angle.tryCreating = function ({ for : selectedLayers, in : context }) {
                             context: context
                         });
                     });
-
                 return symbolAngles.concat(nestedAngles)
-            case MSShapeGroup:
+            case MSShapePathLayer:
+            case MSRectangleShape:
                 return new ShapeAngle ({
                     selectedLayer: layer,
                     context: context

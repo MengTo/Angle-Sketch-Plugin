@@ -2,18 +2,11 @@ import Angle from './Angle'
 import { Error } from './Error'
 
 const StyleFillType = { solid: 0, gradient: 1, pattern: 4, noise: 5 };
-
 export default class ShapeAngle extends Angle {
     constructor (options = {}) {
         super(options);
 
         this.targetLayer = this.selectedLayer;
-
-        if (MSApplicationMetadata.metadata().appVersion < 50) {
-            this.targetPath = options.selectedLayer.bezierPath();
-        } else {
-            this.targetPath = options.selectedLayer.pathInFrameWithTransforms();
-        }
 
         if (!this.pointsAreValid) {
             return Error.unsupportedShapePath
@@ -25,7 +18,7 @@ export default class ShapeAngle extends Angle {
         let imageFill = MSStyleFill.alloc().init();
         imageFill.setImage(this.transformedImage);
         imageFill.fillType = StyleFillType.pattern;
-    
+
         this.targetLayer.style().removeAllStyleFills();
         this.targetLayer.style().addStyleFill(imageFill);
     }

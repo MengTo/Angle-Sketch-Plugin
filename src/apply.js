@@ -131,9 +131,9 @@ export function getSelectionAndOptions_forAngleInstances(options) {
   }
 }
 
-function loadLocalImage (context, filePath) {
+function loadLocalImage (scriptPath, filePath) {
 
-  let basePath = context.scriptPath
+  const basePath = scriptPath
     .stringByDeletingLastPathComponent()
     .stringByDeletingLastPathComponent()
     .stringByDeletingLastPathComponent();
@@ -145,8 +145,8 @@ function applyAngles (options) {
 
   let { angles, artboardsOnSelectPage:artboards, context, artboardsOnOtherPages:otherArtboards } = options;
 
-  if (artboards.length == 1) {
-    
+  if (artboards.length === 1) {
+
     angles.forEach(function (a) {
       a.artboard = artboards[0];
       a.pixelDensity = 0;
@@ -155,7 +155,7 @@ function applyAngles (options) {
   
   } else {
 
-    const angleLogo = loadLocalImage(context, "Contents/Resources/logo.png");
+    const angleLogo = loadLocalImage(context.scriptPath, "Contents/Resources/logo.png");
 
     let response = getSelectionAndOptions_forAngleInstances({
       artboards: artboards,
@@ -177,7 +177,7 @@ function applyAngles (options) {
     });
   }
 
-  angles.forEach(function (a, i, as) {
+  angles.forEach(a => {
 
     a.guessRotationAndReversion();
     a.applyImage();
@@ -186,13 +186,11 @@ function applyAngles (options) {
   return true
 }
 
-const Sketch = require('sketch');
-
 export default function (context) {
 
-  let { api, command, document, plugin, scriptPath, scriptURL, selection } = context;
+  let { document, selection } = context;
 
-  const angleLogo = loadLocalImage(context, "Contents/Resources/logo.png");
+  const angleLogo = loadLocalImage(context.scriptPath, "Contents/Resources/logo.png");
 
   if (selection == null) {
     Shared.show({
@@ -202,7 +200,7 @@ export default function (context) {
     return
   }
 
-  selectedLayers = Array.fromNSArray(selection);
+  const selectedLayers = Array.fromNSArray(selection);
 
   if (selectedLayers.length == 0) {
     Shared.show({

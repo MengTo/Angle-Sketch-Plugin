@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"search.exclude": {
+			"**/Angle.sketchplugin": true,
+			"**/Angle.xcodeproj": true
+		}
+	},
+}

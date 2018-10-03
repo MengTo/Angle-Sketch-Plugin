@@ -140,18 +140,20 @@ export default class Angle {
     // IMAGE DATA
     // ---------------------------------
 
-    ciImage ({ from: artboard, with: pixelDensity, on: colorSpace }) {
+    exporter () {
 
-        let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(artboard);      
-        let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(pixelDensity, "Angle", "png");
-        let exportRequest = MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
+        const format = MSExportFormat.alloc().init()
+        format.fileFormat = "png";
+        format.scale = this.pixelDensity;
+        const request = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(this.artboard, [format], true).firstObject();
 
-        let exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, colorSpace);
-        
-        let bitmapRepresentation = exporter.bitmapImageRep();
-        let image = CIImage.alloc().initWithCGImage(bitmapRepresentation.CGImage());
+        const colorSpace = this.context.document.colorSpace()
+        return MSExporter.exporterForRequest_colorSpace(request, colorSpace)
+    }
 
-        return image
+    ciImage () {
+        const bitmapRepresentation = this.exporter().bitmapImageRep()
+        return CIImage.alloc().initWithCGImage(bitmapRepresentation.CGImage());
     }
 
     // ---------------------------------
@@ -160,23 +162,14 @@ export default class Angle {
 
     get pointsAreValid () {
 
-        if (MSApplicationMetadata.metadata().appVersion >= 50) {
+        let points = this.targetLayer.points()
 
-            let points = this.segments;
-
-            if (points == null ||
-                points.length != 4 ||
-                points.some( a => a.segmentType() != SegmentType.linear) ) { return false }
-
-            return true
-        }
-
-        let points = this.pointsFromBezierPath;
-        if (points == null) { return false }
-
-        let length = points.length;
-
-        if (length != 7) { return false }
+        if (points === null)
+            return false
+        if (points.length !== 4)
+            return false
+        if (points.some(a => !a.isStraight())) 
+            return false
 
         return true
     }
@@ -185,15 +178,12 @@ export default class Angle {
 
         // Avoid double inference overriding user configuration
 
-        let hasAlreadyGuessed = this.loadValueForKey("guessed-rotation") == 1 ? true : false;
+        let hasAlreadyGuessed = this.loadValueForKey("guessed-rotation") === 1 ? true : false;
 
         if (hasAlreadyGuessed) {
             print("⚠️ Angle has already guessed rotation and symmetry for this shape");
             return
         }
-
-        print("🔄↔️ Angle has just guessed rotation and symmetry for this shape");
-        this.imprintValue_forKey(true, "guessed-rotation");
 
         let verticesLengths = this.verticesLengths;
 
@@ -239,117 +229,61 @@ export default class Angle {
             this.rotate();
         }
 
-        if (MSApplicationMetadata.metadata().appVersion >= 50) {
+        let shoelaceSumOfPoints = this.shorlaceSum();
 
-            if (this.contour.isClockwise() == 1) { this.reverseSymmetry(); }
-
-        } else {
-
-            let shoelaceSumOfPoints = shorlaceSum({ of: points });
-
-            if (shoelaceSumOfPoints < 0) {
-                print("🛑 COUNTERCLOCKWISE");
-                this.reverseSimmetry();
-            } else if (shoelaceSumOfPoints > 0) {
-                print("🛑 CLOCKWISE");
-            } else{
-                print("🛑 UNDEFINED CHIRALITY");
-            }
+        if (shoelaceSumOfPoints < 0) {
+            print("🛑 COUNTERCLOCKWISE");
+            this.reverseSymmetry();
+        } else if (shoelaceSumOfPoints > 0) {
+            print("🛑 CLOCKWISE");
+        } else{
+            print("🛑 UNDEFINED CHIRALITY");
         }
+
+        print("🔄↔️ Angle has just guessed rotation and symmetry for this shape");
+        this.imprintValue_forKey(true, "guessed-rotation");
     }
 
-    shorlaceSum({ of : points }) {
+    shorlaceSum () {
 
+        const points = this.pointsFromBezierPath
         let maximumY = Math.max( ...points.map( a => a.y ) );
 
         return Array
-            .from({ length: 4 }, (x, i) => i)
-            .reduce(function (p, a, i, as) {
-                let edgeSum = (- points[i].x + points[(i + 1) % 4].x) * (2 * maximumY - points[i].y - points[(i + 1) % 4].y)
-                return p + edgeSum;
-            }, 0);
+        .from({ length: 4 }, (x, i) => i)
+        .reduce(function (p, i) {
+            let edgeSum = (- points[i].x + points[(i + 1) % 4].x) * (2 * maximumY - points[i].y - points[(i + 1) % 4].y)
+            return p + edgeSum;
+        }, 0);
     }
 
     // ---------------------------------
     // PATH
     // ---------------------------------
 
-    get contour () {
-
-        // MSBezierContour
-        // https://github.com/abynim/Sketch-Headers/blob/4a95b06c0d5e620249f40583e25d3dc52e36494b/Headers/MSBezierContour.h
-
-        // : MSPath
-        // : https://github.com/abynim/Sketch-Headers/blob/4a95b06c0d5e620249f40583e25d3dc52e36494b/Headers/MSPath.h
-        return this.targetPath.contours().firstObject();
-    }
-
-    get segments () {
-
-        // : MSBezierSegment
-        // : https://github.com/abynim/Sketch-Headers/blob/4a95b06c0d5e620249f40583e25d3dc52e36494b/Headers/MSBezierSegment.h
-        return Array
-            .fromNSArray(this.contour.segments())
-    }
-
     get pointsFromBezierPath () {
-
-        if (this._pointsFromBezierPath != undefined) {
-            return this._pointsFromBezierPath;
-        }
-
-        if (MSApplicationMetadata.metadata().appVersion >= 50) {
-
-            let points = this.segments
-            .map( a => a.endPoint1() );
-
-            this._pointsFromBezierPath = points;
-
-            return points;
-        }
-
-
-        let count = this.targetPath.elementCount();
-
-        if (count != 7) { return null }
-
-        let array = Array.from({ length: count }, (x, i) => i);
-
-        let points = array.map(
-            (a, i, as) => {
-            var pointsPointer = MOPointer.alloc().initWithValue_(CGPointMake(0, 0));
-            var element = this.targetPath.elementAtIndex_associatedPoints_(i, pointsPointer);
-
-            let point = pointsPointer.value();
-
-            return point
-        });
-
-        this._pointsFromBezierPath = points;
-
-        return points;
-
+        const size = this.targetLayer.rect().size;
+        return Array
+        .fromNSArray(this.targetLayer.points())
+        .map(a => a.point())
+        .map(a => ({
+            x: Number(a.x) * Number(size.width),
+            y: Number(a.y) * Number(size.height)
+        }))
     }
 
     get verticesLengths () {
 
-        if (this._verticesLengths != undefined) {
-            return this._verticesLengths;
-        }
+        let points = this.pointsFromBezierPath
 
-        let points = this.pointsFromBezierPath;
-
-        let verticesLengths = Array
-            .from({ length: 4 }, (x, i) => i)
-            .map(function (a, i, as) {
-                let width = points[i].x - points[(i + 1) % 4].x;
-                let height = points[i].y - points[(i + 1) % 4].y;
-                return Math.sqrt( Math.pow(width, 2) + Math.pow(height, 2) )
-            });
-
-        this._verticesLengths = verticesLengths;
-
-        return verticesLengths;
+        return Array
+        .from({ length: 4 }, (x, i) => i)
+        .map(i => {
+            const j = (i + 1) % 4
+            const width = points[i].x - points[j].x;
+            const height = points[i].y - points[j].y;
+            return Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2))
+        })
     }
 
     maximumVerticesWidthAndHeight () {
@@ -441,10 +375,7 @@ export default class Angle {
         perspectiveTransform.setValue_forKey(vectors[this.mappedIndexFor(2)], "inputBottomRight");
         perspectiveTransform.setValue_forKey(vectors[this.mappedIndexFor(3)], "inputBottomLeft");
 
-        let image = this.ciImage({
-            from: this.artboard,
-            with: this.pixelDensity,
-            on: this.context.document.colorSpace() });
+        let image = this.ciImage()
     
         perspectiveTransform.setValue_forKey(image, "inputImage");
     
