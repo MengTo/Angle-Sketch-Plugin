@@ -342,10 +342,19 @@ var Angle = function () {
         value: function () {
             function exporter() {
 
-                var format = MSExportFormat.alloc().init();
-                format.fileFormat = "png";
-                format.scale = this.pixelDensity;
-                var request = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(this.artboard, [format], true).firstObject();
+                var request = void 0;
+
+                var sketchVersion = MSApplicationMetadata.metadata().appVersion;
+                if (sketchVersion < 52) {
+                    var layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(artboard);
+                    var exportFormat = MSExportFormat.formatWithScale_name_fileFormat(pixelDensity, "Angle", "png");
+                    request = MSExportRequestexportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
+                } else {
+                    var format = MSExportFormat.alloc().init();
+                    format.fileFormat = "png";
+                    format.scale = this.pixelDensity;
+                    request = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(this.artboard, [format], true).firstObject();
+                }
 
                 var colorSpace = this.context.document.colorSpace();
                 return MSExporter.exporterForRequest_colorSpace(request, colorSpace);
@@ -428,15 +437,21 @@ var Angle = function () {
                     this.rotate();
                 }
 
-                var shoelaceSumOfPoints = this.shorlaceSum();
+                var sketchVersion = MSApplicationMetadata.metadata().appVersion;
+                if (sketchVersion < 50 || sketchVersion >= 52) {
 
-                if (shoelaceSumOfPoints < 0) {
-                    print("🛑 COUNTERCLOCKWISE");
-                    this.reverseSymmetry();
-                } else if (shoelaceSumOfPoints > 0) {
-                    print("🛑 CLOCKWISE");
-                } else {
-                    print("🛑 UNDEFINED CHIRALITY");
+                    var shoelaceSumOfPoints = this.shorlaceSum();
+                    if (shoelaceSumOfPoints < 0) {
+                        print("🛑 COUNTERCLOCKWISE");
+                        this.reverseSymmetry();
+                    } else if (shoelaceSumOfPoints > 0) {
+                        print("🛑 CLOCKWISE");
+                    } else {
+                        print("🛑 UNDEFINED CHIRALITY");
+                    }
+                } else if (sketchVersion < 52) {
+                    var contour = this.targetPath.contours().firstObject();
+                    if (contour.isClockwise() == 1) this.reverseSymmetry();
                 }
 
                 print("🔄↔️ Angle has just guessed rotation and symmetry for this shape");
@@ -570,6 +585,29 @@ var Angle = function () {
         get: function () {
             function get() {
 
+                var sketchVersion = MSApplicationMetadata.metadata().appVersion;
+                if (sketchVersion < 50) {
+
+                    var _points = this.pointsFromBezierPath;
+
+                    if (_points === null) return false;
+
+                    if (_points.length !== 7) return false;
+
+                    return true;
+                } else if (sketchVersion < 52) {
+
+                    var _points2 = this.segments;
+
+                    if (_points2 == null || _points2.length != 4 || _points2.some(function (a) {
+                        return a.segmentType() != SegmentType.linear;
+                    })) {
+                        return false;
+                    }
+
+                    return true;
+                }
+
                 var points = this.targetLayer.points();
 
                 if (points === null) return false;
@@ -587,6 +625,29 @@ var Angle = function () {
         key: "pointsFromBezierPath",
         get: function () {
             function get() {
+                var _this = this;
+
+                var sketchVersion = MSApplicationMetadata.metadata().appVersion;
+                if (sketchVersion < 50) {
+                    var count = this.targetPath.elementCount();
+                    if (count != 7) {
+                        return null;
+                    }
+
+                    return Array.from({ length: count }, function (x, i) {
+                        return i;
+                    }).map(function (i) {
+                        var pointsPointer = MOPointer.alloc().initWithValue_(CGPointMake(0, 0));
+                        var element = _this.targetPath.elementAtIndex_associatedPoints_(i, pointsPointer);
+                        return pointsPointer.value();
+                    });
+                } else if (sketchVersion < 52) {
+                    var contour = this.targetPath.contours().firstObject();
+                    return Array.fromNSArray(contour.segments()).map(function (a) {
+                        return a.endPoint1();
+                    });
+                }
+
                 var size = this.targetLayer.rect().size;
                 return Array.fromNSArray(this.targetLayer.points()).map(function (a) {
                     return a.point();
@@ -740,8 +801,12 @@ var SymbolicAngle = function (_Angle) {
 
         if (_this.targetLayer['class']() === MSImmutableBitmapLayer) return _ret = _Error.Error.symbolWithBitMapLayer, _possibleConstructorReturn(_this, _ret);
 
-        // MSImmutableShapePathLayer
-        _this.targetPath = options.override.affectedLayer();
+        var sketchVersion = MSApplicationMetadata.metadata().appVersion;
+        if (sketchVersion < 50) {
+            _this.targetPath = options.override.affectedLayer().bezierPath();
+        } else if (sketchVersion < 52) {
+            _this.targetPath = options.override.affectedLayer().pathInFrameWithTransforms();
+        }
 
         var parentSymbolIdentifier = options.override.overridePoint().parent();
         if (parentSymbolIdentifier !== null) {
@@ -974,6 +1039,7 @@ _Angle2['default'].tryCreating = function (_ref) {
                     });
                 });
                 return symbolAngles.concat(nestedAngles);
+            case MSShapeGroup:
             case MSShapePathLayer:
             case MSRectangleShape:
                 return new _ShapeAngle2['default']({
@@ -1335,6 +1401,13 @@ var ShapeAngle = function (_Angle) {
         var _this = _possibleConstructorReturn(this, (ShapeAngle.__proto__ || Object.getPrototypeOf(ShapeAngle)).call(this, options));
 
         _this.targetLayer = _this.selectedLayer;
+
+        var sketchVersion = MSApplicationMetadata.metadata().appVersion;
+        if (sketchVersion < 50) {
+            _this.targetPath = _this.selectedLayer.bezierPath();
+        } else if (sketchVersion < 52) {
+            _this.targetPath = _this.selectedLayer.pathInFrameWithTransforms();
+        }
 
         if (!_this.pointsAreValid) {
             var _ret;
