@@ -307,25 +307,31 @@ var Angle = function () {
     // ---------------------------------
 
     _createClass(Angle, [{
+        key: "exportRequest_lessThan52",
+        value: function () {
+            function exportRequest_lessThan52() {
+                var layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(this.artboard);
+                var exportFormat = MSExportFormat.formatWithScale_name_fileFormat(this.pixelDensity, "Angle", "png");
+                return MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
+            }
+
+            return exportRequest_lessThan52;
+        }()
+    }, {
         key: "exporter",
         value: function () {
             function exporter() {
 
-                var request = void 0;
+                var colorSpace = this.context.document.colorSpace();
 
                 var sketchVersion = MSApplicationMetadata.metadata().appVersion;
-                if (sketchVersion < 52) {
-                    var layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(artboard);
-                    var exportFormat = MSExportFormat.formatWithScale_name_fileFormat(pixelDensity, "Angle", "png");
-                    request = MSExportRequestexportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
-                } else {
-                    var format = MSExportFormat.alloc().init();
-                    format.fileFormat = "png";
-                    format.scale = this.pixelDensity;
-                    request = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(this.artboard, [format], true).firstObject();
-                }
+                if (sketchVersion < 52) return MSExporter.exporterForRequest_colorSpace(this.exportRequest_lessThan52(), colorSpace);
 
-                var colorSpace = this.context.document.colorSpace();
+                var format = MSExportFormat.alloc().init();
+                format.fileFormat = "png";
+                format.scale = this.pixelDensity;
+                var request = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(this.artboard, [format], true).firstObject();
+
                 return MSExporter.exporterForRequest_colorSpace(request, colorSpace);
             }
 
@@ -420,7 +426,13 @@ var Angle = function () {
                     }
                 } else if (sketchVersion < 52) {
                     var contour = this.targetPath.contours().firstObject();
-                    if (contour.isClockwise() == 1) this.reverseSymmetry();
+                    if (contour.isClockwise() === 1) {
+                        this.reverseSymmetry();
+                        print("🛑 CLOCKWISE");
+                    } else {
+                        print("🛑 COUNTERCLOCKWISE");
+                    }
+                    print("🛑 UNDEFINED CHIRALITY");
                 }
 
                 print("🔄↔️ Angle has just guessed rotation and symmetry for this shape");
@@ -550,32 +562,52 @@ var Angle = function () {
             return pixelAccurateRepresentationOfImage;
         }()
     }, {
+        key: "pointsAreValid_lessThan50",
+        get: function () {
+            function get() {
+
+                var points = this.pointsFromBezierPath;
+
+                if (points === null) return false;
+
+                if (points.length !== 7) return false;
+
+                return true;
+            }
+
+            return get;
+        }()
+    }, {
+        key: "pointsAreValid_lessThan52",
+        get: function () {
+            function get() {
+
+                var contour = this.targetPath.contours().firstObject();
+                var points = Array.fromNSArray(contour.segments());
+
+                if (points === null) return false;
+
+                if (points.length !== 4) return false;
+
+                if (points.some(function (a) {
+                    return a.segmentType() != SegmentType.linear;
+                })) return false;
+
+                return true;
+            }
+
+            return get;
+        }()
+    }, {
         key: "pointsAreValid",
         get: function () {
             function get() {
 
                 var sketchVersion = MSApplicationMetadata.metadata().appVersion;
-                if (sketchVersion < 50) {
 
-                    var _points = this.pointsFromBezierPath;
+                if (sketchVersion < 50) return this.pointsAreValid_lessThan50;
 
-                    if (_points === null) return false;
-
-                    if (_points.length !== 7) return false;
-
-                    return true;
-                } else if (sketchVersion < 52) {
-
-                    var _points2 = this.segments;
-
-                    if (_points2 == null || _points2.length != 4 || _points2.some(function (a) {
-                        return a.segmentType() != SegmentType.linear;
-                    })) {
-                        return false;
-                    }
-
-                    return true;
-                }
+                if (sketchVersion < 52) return this.pointsAreValid_lessThan52;
 
                 var points = this.targetLayer.points();
 
