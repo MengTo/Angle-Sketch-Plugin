@@ -140,23 +140,25 @@ export default class Angle {
     // IMAGE DATA
     // ---------------------------------
 
+    exportRequest_lessThan52 () {
+        let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(this.artboard)
+        let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(this.pixelDensity, "Angle", "png")
+        return MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject()
+    }
+
     exporter () {
 
-        let request
+        const colorSpace = this.context.document.colorSpace()
 
         const sketchVersion = MSApplicationMetadata.metadata().appVersion
-        if (sketchVersion < 52) {
-            let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(artboard);      
-            let exportFormat = MSExportFormat.formatWithScale_name_fileFormat(pixelDensity, "Angle", "png");
-            request = MSExportRequestexportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
-        } else {
-            const format = MSExportFormat.alloc().init()
-            format.fileFormat = "png";
-            format.scale = this.pixelDensity;
-            request = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(this.artboard, [format], true).firstObject();
-        }
+        if (sketchVersion < 52)
+            return MSExporter.exporterForRequest_colorSpace(this.exportRequest_lessThan52(), colorSpace)
 
-        const colorSpace = this.context.document.colorSpace()
+        const format = MSExportFormat.alloc().init()
+        format.fileFormat = "png"
+        format.scale = this.pixelDensity
+        const request = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(this.artboard, [format], true).firstObject()
+
         return MSExporter.exporterForRequest_colorSpace(request, colorSpace)
     }
 
@@ -169,31 +171,46 @@ export default class Angle {
     // PATH VALIDATION AND CORRECTION
     // ---------------------------------
 
+    get pointsAreValid_lessThan50 () {
+
+        let points = this.pointsFromBezierPath
+
+        if (points === null)
+            return false
+
+        if (points.length !== 7)
+            return false
+
+        return true
+    }
+
+    get pointsAreValid_lessThan52 () {
+
+        const contour = this.targetPath.contours().firstObject()
+        const points = Array
+        .fromNSArray(contour.segments())
+
+        if (points === null)
+            return false
+
+        if (points.length !== 4)
+            return false
+
+        if (points.some(a => a.segmentType() != SegmentType.linear))
+            return false
+
+        return true
+    }
+
     get pointsAreValid () {
 
         const sketchVersion = MSApplicationMetadata.metadata().appVersion
-        if (sketchVersion < 50) {
 
-            let points = this.pointsFromBezierPath;
+        if (sketchVersion < 50)
+            return this.pointsAreValid_lessThan50
 
-            if (points === null)
-                return false
-
-            if (points.length !== 7)
-                return false
-
-            return true
-
-        } else if (sketchVersion < 52) {
-
-            let points = this.segments;
-
-            if (points == null ||
-                points.length != 4 ||
-                points.some( a => a.segmentType() != SegmentType.linear) ) { return false }
-
-            return true
-        }
+        if (sketchVersion < 52)
+            return this.pointsAreValid_lessThan52
 
         let points = this.targetLayer.points()
 
@@ -264,7 +281,7 @@ export default class Angle {
 
         const sketchVersion = MSApplicationMetadata.metadata().appVersion
         if (sketchVersion < 50 || sketchVersion >= 52) {
-            
+
             let shoelaceSumOfPoints = this.shorlaceSum();
             if (shoelaceSumOfPoints < 0) {
                 print("🛑 COUNTERCLOCKWISE");
@@ -276,8 +293,13 @@ export default class Angle {
             }
         } else if (sketchVersion < 52) {
             const contour = this.targetPath.contours().firstObject()
-            if (contour.isClockwise() == 1) 
+            if (contour.isClockwise() === 1) {
                 this.reverseSymmetry()
+                print("🛑 CLOCKWISE");
+            } else {
+                print("🛑 COUNTERCLOCKWISE");
+            }
+            print("🛑 UNDEFINED CHIRALITY");
         }
 
         print("🔄↔️ Angle has just guessed rotation and symmetry for this shape");
