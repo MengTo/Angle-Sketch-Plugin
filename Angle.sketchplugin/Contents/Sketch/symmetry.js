@@ -65,15 +65,12 @@ var exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
+/******/ 	return __webpack_require__(__webpack_require__.s = 6);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
+/***/ (function(module, exports) {
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -103,16 +100,13 @@ var Error = exports.Error = {
 /* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-
-
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _CompressionRatio = __webpack_require__(4);
+var _CompressionRatio = __webpack_require__(7);
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
@@ -121,679 +115,668 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var SegmentType = { linear: 0, quadratic: 1, cubic: 2 };
 
 Array.prototype.rotated = function (n) {
-    return this.slice(n, this.length).concat(this.slice(0, n));
+  return this.slice(n, this.length).concat(this.slice(0, n));
 };
 
 var Angle = function () {
-    _createClass(Angle, [{
-        key: "imprintValue_forKey",
+  _createClass(Angle, [{
+    key: 'imprintValue_forKey',
 
-
-        // ---------------------------------
-        // PERSISTENCY METHODS
-        // ---------------------------------
-
-        value: function () {
-            function imprintValue_forKey(value, key) {
-                if (this.selectedLayer == null) {
-                    print("🛑 Imprinting value before selected layer assignment");
-                    return;
-                }
-
-                this.context.command.setValue_forKey_onLayer(value, key, this.selectedLayer);
-            }
-
-            return imprintValue_forKey;
-        }()
-    }, {
-        key: "loadValueForKey",
-        value: function () {
-            function loadValueForKey(key) {
-                if (this.selectedLayer == null) {
-                    print("🛑 Loading value before selected layer assignment");
-                    return null;
-                }
-
-                var value = this.context.command.valueForKey_onLayer(key, this.selectedLayer);
-
-                return value;
-            }
-
-            return loadValueForKey;
-        }()
-
-        // ---------------------------------
-        // CONSTRUCTOR
-        // ---------------------------------
-
-    }, {
-        key: "artboardID",
-
-
-        // ---------------------------------
-        // PERSISTENT PROPERTIES
-        // ---------------------------------
-
-        get: function () {
-            function get() {
-                if (this._artboardID != undefined) {
-                    return this._artboardID;
-                }
-
-                // Javascript string cohersion
-                this._artboardID = this.loadValueForKey("artboard-id") + "";
-
-                return this._artboardID;
-            }
-
-            return get;
-        }(),
-        set: function () {
-            function set(value) {
-                return;
-            }
-
-            return set;
-        }()
-    }, {
-        key: "artboard",
-        get: function () {
-            function get() {
-                if (this._artboard != undefined) {
-                    return this._artboard;
-                }
-
-                if (this.artboardID == undefined) {
-                    print("🛑 No artboard ID registered");
-                    return;
-                }
-
-                var artboards = this.context.document.artboards();
-
-                for (var index = 0; index < artboards.count(); index++) {
-                    if (artboards[index].objectID() == this.artboardID) {
-                        this._artboard = artboards[index];
-                    }
-                }
-
-                if (this._artboard == undefined) {
-                    print("🛑 Not able to retrieve artboard from id in document");
-                    return;
-                }
-
-                return this._artboard;
-            }
-
-            return get;
-        }(),
-        set: function () {
-            function set(value) {
-                this._artboard = value;
-                this.imprintValue_forKey(value.objectID(), "artboard-id");
-            }
-
-            return set;
-        }()
-    }, {
-        key: "rotation",
-        get: function () {
-            function get() {
-                if (this._rotation == undefined) {
-                    this._rotation = this.loadValueForKey("rotation");
-                }
-                return this._rotation;
-            }
-
-            return get;
-        }(),
-        set: function () {
-            function set(value) {
-                this._rotation = value;
-                this.imprintValue_forKey(value, "rotation");
-            }
-
-            return set;
-        }()
-    }, {
-        key: "pixelDensity",
-        get: function () {
-            function get() {
-                if (this._pixelDensity == undefined) {
-                    this._pixelDensity = this.loadValueForKey("pixel-density") + 0;
-                }
-
-                if (this._pixelDensity == 0) {
-                    var roundedEstimate = Math.round(2 * this.estimatePixelDensity() + 0.5);
-                    return roundedEstimate == 0 ? 1 : roundedEstimate;
-                }
-
-                return this._pixelDensity;
-            }
-
-            return get;
-        }(),
-        set: function () {
-            function set(value) {
-                this._pixelDensity = value;
-                this.imprintValue_forKey(value, "pixel-density");
-            }
-
-            return set;
-        }()
-    }, {
-        key: "compressionRatio",
-        get: function () {
-            function get() {
-                if (this._compressionRatio == undefined) {
-                    this._compressionRatio = this.loadValueForKey("compression-ratio") + 0;
-                }
-
-                return this._compressionRatio;
-            }
-
-            return get;
-        }(),
-        set: function () {
-            function set(value) {
-                this._compressionRatio = value;
-                this.imprintValue_forKey(value, "compression-ratio");
-            }
-
-            return set;
-        }()
-    }, {
-        key: "reversed",
-        get: function () {
-            function get() {
-                if (this._reversed == undefined) {
-                    // Javascript boolean cohersion
-                    this._reversed = this.loadValueForKey("reversed") == 1 ? true : false;
-                }
-                return this._reversed;
-            }
-
-            return get;
-        }(),
-        set: function () {
-            function set(value) {
-                this._reversed = value;
-                this.imprintValue_forKey(value, "reversed");
-            }
-
-            return set;
-        }()
-    }]);
-
-    function Angle() {
-        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-        _classCallCheck(this, Angle);
-
-        this.context = options.context;
-        this.selectedLayer = options.selectedLayer;
-    }
 
     // ---------------------------------
-    // IMAGE DATA
+    // PERSISTENCY METHODS
     // ---------------------------------
 
-    _createClass(Angle, [{
-        key: "exportRequest_lessThan52",
-        value: function () {
-            function exportRequest_lessThan52() {
-                var layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(this.artboard);
-                var exportFormat = MSExportFormat.formatWithScale_name_fileFormat(this.pixelDensity, "Angle", "png");
-                return MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
-            }
-
-            return exportRequest_lessThan52;
-        }()
-    }, {
-        key: "exporter",
-        value: function () {
-            function exporter() {
-
-                var colorSpace = this.context.document.colorSpace();
-
-                var sketchVersion = MSApplicationMetadata.metadata().appVersion;
-                if (sketchVersion < 52) return MSExporter.exporterForRequest_colorSpace(this.exportRequest_lessThan52(), colorSpace);
-
-                var format = MSExportFormat.alloc().init();
-                format.fileFormat = "png";
-                format.scale = this.pixelDensity;
-                var request = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(this.artboard, [format], true).firstObject();
-
-                return MSExporter.exporterForRequest_colorSpace(request, colorSpace);
-            }
-
-            return exporter;
-        }()
-    }, {
-        key: "ciImage",
-        value: function () {
-            function ciImage() {
-                var bitmapRepresentation = this.exporter().bitmapImageRep();
-                return CIImage.alloc().initWithCGImage(bitmapRepresentation.CGImage());
-            }
-
-            return ciImage;
-        }()
-
-        // ---------------------------------
-        // PATH VALIDATION AND CORRECTION
-        // ---------------------------------
-
-    }, {
-        key: "guessRotationAndReversion",
-        value: function () {
-            function guessRotationAndReversion() {
-
-                // Avoid double inference overriding user configuration
-
-                var hasAlreadyGuessed = this.loadValueForKey("guessed-rotation") === 1 ? true : false;
-
-                if (hasAlreadyGuessed) {
-                    print("⚠️ Angle has already guessed rotation and symmetry for this shape");
-                    return;
-                }
-
-                var verticesLengths = this.verticesLengths;
-
-                var artboardSize = void 0;
-
-                if (this.artboard["class"]() == MSSymbolMaster) {
-                    // artboard.frame == undefined
-                    return;
-                    artboardSize = this.artboard.optimalBoundingBox();
-                } else {
-                    artboardSize = this.artboard.frame();
-                }
-
-                var firstVerticeLength = verticesLengths[0];
-                var secondVerticeLength = verticesLengths[1];
-
-                var isHorizontal = firstVerticeLength > secondVerticeLength;
-                var hasHorizontalArtboard = artboardSize.width() > artboardSize.height();
-
-                if (isHorizontal) {
-                    // Ensures that the first vertice is smaller
-                    print("🛑 HORIZONTAL");
-                    this.rotate();
-                }
-
-                if (hasHorizontalArtboard) {
-                    print("🛑 HAS HORIZONTAL ARTBOARD");
-                    this.rotate();
-                }
-
-                var points = this.pointsFromBezierPath;
-
-                var minimumY = Math.min.apply(Math, _toConsumableArray(points.map(function (a) {
-                    return a.y;
-                })));
-
-                var mappedFirstPoint = points[this.mappedIndexFor(0)];
-                var mappedSecondPoint = points[this.mappedIndexFor(1)];
-
-                var isUpsideDown = !(mappedFirstPoint.y == minimumY || mappedSecondPoint.y == minimumY);
-
-                if (isUpsideDown) {
-                    print("🛑 UPSIDE DOWN");
-                    this.rotate();
-                    this.rotate();
-                }
-
-                var sketchVersion = MSApplicationMetadata.metadata().appVersion;
-                if (sketchVersion < 50 || sketchVersion >= 52) {
-
-                    var shoelaceSumOfPoints = this.shorlaceSum();
-                    if (shoelaceSumOfPoints < 0) {
-                        print("🛑 COUNTERCLOCKWISE");
-                        this.reverseSymmetry();
-                    } else if (shoelaceSumOfPoints > 0) {
-                        print("🛑 CLOCKWISE");
-                    } else {
-                        print("🛑 UNDEFINED CHIRALITY");
-                    }
-                } else if (sketchVersion < 52) {
-                    var contour = this.targetPath.contours().firstObject();
-                    if (contour.isClockwise() === 1) {
-                        this.reverseSymmetry();
-                        print("🛑 CLOCKWISE");
-                    } else {
-                        print("🛑 COUNTERCLOCKWISE");
-                    }
-                    print("🛑 UNDEFINED CHIRALITY");
-                }
-
-                print("🔄↔️ Angle has just guessed rotation and symmetry for this shape");
-                this.imprintValue_forKey(true, "guessed-rotation");
-            }
-
-            return guessRotationAndReversion;
-        }()
-    }, {
-        key: "shorlaceSum",
-        value: function () {
-            function shorlaceSum() {
-
-                var points = this.pointsFromBezierPath;
-                var maximumY = Math.max.apply(Math, _toConsumableArray(points.map(function (a) {
-                    return a.y;
-                })));
-
-                return Array.from({ length: 4 }, function (x, i) {
-                    return i;
-                }).reduce(function (p, i) {
-                    var edgeSum = (-points[i].x + points[(i + 1) % 4].x) * (2 * maximumY - points[i].y - points[(i + 1) % 4].y);
-                    return p + edgeSum;
-                }, 0);
-            }
-
-            return shorlaceSum;
-        }()
-
-        // ---------------------------------
-        // PATH
-        // ---------------------------------
-
-    }, {
-        key: "maximumVerticesWidthAndHeight",
-        value: function () {
-            function maximumVerticesWidthAndHeight() {
-
-                var verticesLengths = this.verticesLengths.rotated(this.rotation % 2);
-
-                var layerWidth = Math.max(verticesLengths[0], verticesLengths[2]);
-                var layerHeight = Math.max(verticesLengths[1], verticesLengths[3]);
-
-                return [layerWidth, layerHeight];
-            }
-
-            return maximumVerticesWidthAndHeight;
-        }()
-    }, {
-        key: "rotate",
-
-
-        // ---------------------------------
-        // INTERFACE
-        // ---------------------------------
-
-        value: function () {
-            function rotate() {
-
-                this.rotation = (this.rotation + (this.reversed ? 1 : 3)) % 4;
-            }
-
-            return rotate;
-        }()
-    }, {
-        key: "reverseSymmetry",
-        value: function () {
-            function reverseSymmetry() {
-
-                this.rotate();
-
-                this.reversed = !this.reversed;
-            }
-
-            return reverseSymmetry;
-        }()
-
-        // ---------------------------------
-        // DRAWING
-        // ---------------------------------
-
-    }, {
-        key: "mappedIndexFor",
-        value: function () {
-            function mappedIndexFor(index) {
-
-                if (this.reversed) {
-                    return [0, 3, 2, 1][(index + this.rotation) % 4];
-                }
-                return (index + this.rotation) % 4;
-            }
-
-            return mappedIndexFor;
-        }()
-    }, {
-        key: "lossyCompressionOfImage_atRate",
-        value: function () {
-            function lossyCompressionOfImage_atRate(image, rate) {
-
-                var representation = NSBitmapImageRep.alloc().initWithCIImage(image);
-                var properties = NSMutableDictionary.dictionary();
-
-                properties.setObject_forKey(NSTIFFCompressionJPEG, NSImageCompressionMethod);
-                properties.setObject_forKey(rate, NSImageCompressionFactor);
-                properties.setObject_forKey(NSColor.whiteColor(), NSImageFallbackBackgroundColor);
-
-                var compressed = representation.representationUsingType_properties(NSJPEGFileType, properties);
-                var nsImage = NSImage.alloc().initWithData(compressed);
-
-                return nsImage;
-            }
-
-            return lossyCompressionOfImage_atRate;
-        }()
-    }, {
-        key: "pixelAccurateRepresentationOfImage",
-        value: function () {
-            function pixelAccurateRepresentationOfImage(image) {
-
-                var representation = NSCIImageRep.alloc().initWithCIImage(image);
-                var nsImage = NSImage.alloc().initWithSize(representation.size());
-                nsImage.addRepresentation(representation);
-
-                return nsImage;
-            }
-
-            return pixelAccurateRepresentationOfImage;
-        }()
-    }, {
-        key: "pointsAreValid_lessThan50",
-        get: function () {
-            function get() {
-
-                var points = this.pointsFromBezierPath;
-
-                if (points === null) return false;
-
-                if (points.length !== 7) return false;
-
-                return true;
-            }
-
-            return get;
-        }()
-    }, {
-        key: "pointsAreValid_lessThan52",
-        get: function () {
-            function get() {
-
-                var contour = this.targetPath.contours().firstObject();
-                var points = Array.fromNSArray(contour.segments());
-
-                if (points === null) return false;
-
-                if (points.length !== 4) return false;
-
-                if (points.some(function (a) {
-                    return a.segmentType() != SegmentType.linear;
-                })) return false;
-
-                return true;
-            }
-
-            return get;
-        }()
-    }, {
-        key: "pointsAreValid",
-        get: function () {
-            function get() {
-
-                var sketchVersion = MSApplicationMetadata.metadata().appVersion;
-
-                if (sketchVersion < 50) return this.pointsAreValid_lessThan50;
-
-                if (sketchVersion < 52) return this.pointsAreValid_lessThan52;
-
-                var points = this.targetLayer.points();
-
-                if (points === null) return false;
-                if (points.length !== 4) return false;
-                if (points.some(function (a) {
-                    return !a.isStraight();
-                })) return false;
-
-                return true;
-            }
-
-            return get;
-        }()
-    }, {
-        key: "pointsFromBezierPath",
-        get: function () {
-            function get() {
-                var _this = this;
-
-                var sketchVersion = MSApplicationMetadata.metadata().appVersion;
-                if (sketchVersion < 50) {
-                    var count = this.targetPath.elementCount();
-                    if (count != 7) {
-                        return null;
-                    }
-
-                    return Array.from({ length: count }, function (x, i) {
-                        return i;
-                    }).map(function (i) {
-                        var pointsPointer = MOPointer.alloc().initWithValue_(CGPointMake(0, 0));
-                        var element = _this.targetPath.elementAtIndex_associatedPoints_(i, pointsPointer);
-                        return pointsPointer.value();
-                    });
-                } else if (sketchVersion < 52) {
-                    var contour = this.targetPath.contours().firstObject();
-                    return Array.fromNSArray(contour.segments()).map(function (a) {
-                        return a.endPoint1();
-                    });
-                }
-
-                var size = this.targetLayer.rect().size;
-                return Array.fromNSArray(this.targetLayer.points()).map(function (a) {
-                    return a.point();
-                }).map(function (a) {
-                    return {
-                        x: Number(a.x) * Number(size.width),
-                        y: Number(a.y) * Number(size.height)
-                    };
-                });
-            }
-
-            return get;
-        }()
-    }, {
-        key: "verticesLengths",
-        get: function () {
-            function get() {
-
-                var points = this.pointsFromBezierPath;
-
-                return Array.from({ length: 4 }, function (x, i) {
-                    return i;
-                }).map(function (i) {
-                    var j = (i + 1) % 4;
-                    var width = points[i].x - points[j].x;
-                    var height = points[i].y - points[j].y;
-                    return Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
-                });
-            }
-
-            return get;
-        }()
-    }, {
-        key: "normalizedCIVectors",
-        get: function () {
-            function get() {
-
-                var points = this.pointsFromBezierPath;
-
-                var maximumY = Math.max.apply(Math, _toConsumableArray(points.map(function (a) {
-                    return a.y;
-                })));
-
-                var pixelDensity = this.pixelDensity;
-
-                return points.map(function (a) {
-                    return CIVector.vectorWithX_Y(a.x * pixelDensity, (maximumY - a.y) * pixelDensity);
-                });
-            }
-
-            return get;
-        }()
-    }, {
-        key: "transformedImage",
-        get: function () {
-            function get() {
-
-                var vectors = this.normalizedCIVectors;
-
-                var perspectiveTransform = CIFilter.filterWithName("CIPerspectiveTransform");
-
-                perspectiveTransform.setValue_forKey(vectors[this.mappedIndexFor(0)], "inputTopLeft");
-                perspectiveTransform.setValue_forKey(vectors[this.mappedIndexFor(1)], "inputTopRight");
-                perspectiveTransform.setValue_forKey(vectors[this.mappedIndexFor(2)], "inputBottomRight");
-                perspectiveTransform.setValue_forKey(vectors[this.mappedIndexFor(3)], "inputBottomLeft");
-
-                var image = this.ciImage();
-
-                perspectiveTransform.setValue_forKey(image, "inputImage");
-
-                var perspectiveImage = perspectiveTransform.valueForKey("outputImage");
-
-                if (!perspectiveImage) {
-                    print("🛑 Unable to form perspective image");
-                    return;
-                }
-
-                var ouputNSImage = void 0;
-
-                var compressionRatio = _CompressionRatio.CompressionRatio[this.compressionRatio].ratio;
-
-                if (compressionRatio != 1.0) {
-                    ouputNSImage = this.lossyCompressionOfImage_atRate(perspectiveImage, compressionRatio);
-                } else {
-                    ouputNSImage = this.pixelAccurateRepresentationOfImage(perspectiveImage);
-                }
-
-                var imageData = void 0;
-
-                if (MSApplicationMetadata.metadata().appVersion < 47) {
-                    imageData = MSImageData.alloc().initWithImage_convertColorSpace(ouputNSImage, true);
-                    return imageData;
-                }
-
-                imageData = MSImageData.alloc().initWithImage_(ouputNSImage);
-
-                return imageData;
-            }
-
-            return get;
-        }()
-    }]);
-
-    return Angle;
+    value: function () {
+      function imprintValue_forKey(value, key) {
+        if (this.selectedLayer == null) {
+          print('🛑 Imprinting value before selected layer assignment');
+          return;
+        }
+
+        this.context.command.setValue_forKey_onLayer(value, key, this.selectedLayer);
+      }
+
+      return imprintValue_forKey;
+    }()
+  }, {
+    key: 'loadValueForKey',
+    value: function () {
+      function loadValueForKey(key) {
+        if (this.selectedLayer == null) {
+          print('🛑 Loading value before selected layer assignment');
+          return null;
+        }
+
+        var value = this.context.command.valueForKey_onLayer(key, this.selectedLayer);
+
+        return value;
+      }
+
+      return loadValueForKey;
+    }()
+
+    // ---------------------------------
+    // CONSTRUCTOR
+    // ---------------------------------
+
+  }, {
+    key: 'artboardID',
+
+    // ---------------------------------
+    // PERSISTENT PROPERTIES
+    // ---------------------------------
+
+    get: function () {
+      function get() {
+        if (this._artboardID != undefined) {
+          return this._artboardID;
+        }
+
+        // Javascript string cohersion
+        this._artboardID = this.loadValueForKey('artboard-id') + '';
+
+        return this._artboardID;
+      }
+
+      return get;
+    }(),
+    set: function () {
+      function set(value) {
+        return;
+      }
+
+      return set;
+    }()
+  }, {
+    key: 'artboard',
+    get: function () {
+      function get() {
+        if (this._artboard != undefined) {
+          return this._artboard;
+        }
+
+        if (this.artboardID == undefined) {
+          print('🛑 No artboard ID registered');
+          return;
+        }
+
+        var artboards = this.context.document.artboards();
+
+        for (var index = 0; index < artboards.count(); index++) {
+          if (artboards[index].objectID() == this.artboardID) {
+            this._artboard = artboards[index];
+          }
+        }
+
+        if (this._artboard == undefined) {
+          print('🛑 Not able to retrieve artboard from id in document');
+          return;
+        }
+
+        return this._artboard;
+      }
+
+      return get;
+    }(),
+    set: function () {
+      function set(value) {
+        this._artboard = value;
+        this.imprintValue_forKey(value.objectID(), 'artboard-id');
+      }
+
+      return set;
+    }()
+  }, {
+    key: 'rotation',
+    get: function () {
+      function get() {
+        if (this._rotation == undefined) {
+          this._rotation = this.loadValueForKey('rotation');
+        }
+        return this._rotation;
+      }
+
+      return get;
+    }(),
+    set: function () {
+      function set(value) {
+        this._rotation = value;
+        this.imprintValue_forKey(value, 'rotation');
+      }
+
+      return set;
+    }()
+  }, {
+    key: 'pixelDensity',
+    get: function () {
+      function get() {
+        if (this._pixelDensity == undefined) {
+          this._pixelDensity = this.loadValueForKey('pixel-density') + 0;
+        }
+
+        if (this._pixelDensity == 0) {
+          var roundedEstimate = Math.round(2 * this.estimatePixelDensity() + 0.5);
+          return roundedEstimate == 0 ? 1 : roundedEstimate;
+        }
+
+        return this._pixelDensity;
+      }
+
+      return get;
+    }(),
+    set: function () {
+      function set(value) {
+        this._pixelDensity = value;
+        this.imprintValue_forKey(value, 'pixel-density');
+      }
+
+      return set;
+    }()
+  }, {
+    key: 'compressionRatio',
+    get: function () {
+      function get() {
+        if (this._compressionRatio == undefined) {
+          this._compressionRatio = this.loadValueForKey('compression-ratio') + 0;
+        }
+
+        return this._compressionRatio;
+      }
+
+      return get;
+    }(),
+    set: function () {
+      function set(value) {
+        this._compressionRatio = value;
+        this.imprintValue_forKey(value, 'compression-ratio');
+      }
+
+      return set;
+    }()
+  }, {
+    key: 'reversed',
+    get: function () {
+      function get() {
+        if (this._reversed == undefined) {
+          // Javascript boolean cohersion
+          this._reversed = this.loadValueForKey('reversed') == 1 ? true : false;
+        }
+        return this._reversed;
+      }
+
+      return get;
+    }(),
+    set: function () {
+      function set(value) {
+        this._reversed = value;
+        this.imprintValue_forKey(value, 'reversed');
+      }
+
+      return set;
+    }()
+  }]);
+
+  function Angle() {
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    _classCallCheck(this, Angle);
+
+    this.context = options.context;
+    this.selectedLayer = options.selectedLayer;
+  }
+
+  // ---------------------------------
+  // IMAGE DATA
+  // ---------------------------------
+
+  _createClass(Angle, [{
+    key: 'exportRequest_lessThan52',
+    value: function () {
+      function exportRequest_lessThan52() {
+        // let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(this.artboard)
+        // let layerAncestry = this.artboard.ancestry();
+
+        // MSImmutableLayerAncestry has been renamed(As of V.66.1) and must be called from the class string
+        var cls = NSClassFromString('SketchModel.MSImmutableLayerAncestry');
+        var layerAncestry = cls.alloc().initWithMutableLayer(context.selection[0]);
+
+        var exportFormat = MSExportFormat.formatWithScale_name_fileFormat(this.pixelDensity, 'Angle', 'png');
+        return MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
+      }
+
+      return exportRequest_lessThan52;
+    }()
+  }, {
+    key: 'exporter',
+    value: function () {
+      function exporter() {
+        var colorSpace = this.context.document.colorSpace();
+
+        var sketchVersion = MSApplicationMetadata.metadata().appVersion;
+        if (sketchVersion < 52) return MSExporter.exporterForRequest_colorSpace(this.exportRequest_lessThan52(), colorSpace);
+
+        var format = MSExportFormat.alloc().init();
+        format.fileFormat = 'png';
+        format.scale = this.pixelDensity;
+        var request = MSExportRequest.exportRequestsFromExportableLayer_exportFormats_useIDForName(this.artboard, [format], true).firstObject();
+
+        return MSExporter.exporterForRequest_colorSpace(request, colorSpace);
+      }
+
+      return exporter;
+    }()
+  }, {
+    key: 'ciImage',
+    value: function () {
+      function ciImage() {
+        var bitmapRepresentation = this.exporter().bitmapImageRep();
+        return CIImage.alloc().initWithCGImage(bitmapRepresentation.CGImage());
+      }
+
+      return ciImage;
+    }()
+
+    // ---------------------------------
+    // PATH VALIDATION AND CORRECTION
+    // ---------------------------------
+
+  }, {
+    key: 'guessRotationAndReversion',
+    value: function () {
+      function guessRotationAndReversion() {
+        // Avoid double inference overriding user configuration
+
+        var hasAlreadyGuessed = this.loadValueForKey('guessed-rotation') === 1 ? true : false;
+
+        if (hasAlreadyGuessed) {
+          print('⚠️ Angle has already guessed rotation and symmetry for this shape');
+          return;
+        }
+
+        var verticesLengths = this.verticesLengths;
+
+        var artboardSize = void 0;
+
+        if (this.artboard['class']() == MSSymbolMaster) {
+          // artboard.frame == undefined
+          return;
+          artboardSize = this.artboard.optimalBoundingBox();
+        } else {
+          artboardSize = this.artboard.frame();
+        }
+
+        var firstVerticeLength = verticesLengths[0];
+        var secondVerticeLength = verticesLengths[1];
+
+        var isHorizontal = firstVerticeLength > secondVerticeLength;
+        var hasHorizontalArtboard = artboardSize.width() > artboardSize.height();
+
+        if (isHorizontal) {
+          // Ensures that the first vertice is smaller
+          print('🛑 HORIZONTAL');
+          this.rotate();
+        }
+
+        if (hasHorizontalArtboard) {
+          print('🛑 HAS HORIZONTAL ARTBOARD');
+          this.rotate();
+        }
+
+        var points = this.pointsFromBezierPath;
+
+        var minimumY = Math.min.apply(Math, _toConsumableArray(points.map(function (a) {
+          return a.y;
+        })));
+
+        var mappedFirstPoint = points[this.mappedIndexFor(0)];
+        var mappedSecondPoint = points[this.mappedIndexFor(1)];
+
+        var isUpsideDown = !(mappedFirstPoint.y == minimumY || mappedSecondPoint.y == minimumY);
+
+        if (isUpsideDown) {
+          print('🛑 UPSIDE DOWN');
+          this.rotate();
+          this.rotate();
+        }
+
+        var sketchVersion = MSApplicationMetadata.metadata().appVersion;
+        if (sketchVersion < 50 || sketchVersion >= 52) {
+          var shoelaceSumOfPoints = this.shorlaceSum();
+          if (shoelaceSumOfPoints < 0) {
+            print('🛑 COUNTERCLOCKWISE');
+            this.reverseSymmetry();
+          } else if (shoelaceSumOfPoints > 0) {
+            print('🛑 CLOCKWISE');
+          } else {
+            print('🛑 UNDEFINED CHIRALITY');
+          }
+        } else if (sketchVersion < 52) {
+          var contour = this.targetPath.contours().firstObject();
+          if (contour.isClockwise() === 1) {
+            this.reverseSymmetry();
+            print('🛑 CLOCKWISE');
+          } else {
+            print('🛑 COUNTERCLOCKWISE');
+          }
+          print('🛑 UNDEFINED CHIRALITY');
+        }
+
+        print('🔄↔️ Angle has just guessed rotation and symmetry for this shape');
+        this.imprintValue_forKey(true, 'guessed-rotation');
+      }
+
+      return guessRotationAndReversion;
+    }()
+  }, {
+    key: 'shorlaceSum',
+    value: function () {
+      function shorlaceSum() {
+        var points = this.pointsFromBezierPath;
+        var maximumY = Math.max.apply(Math, _toConsumableArray(points.map(function (a) {
+          return a.y;
+        })));
+
+        return Array.from({ length: 4 }, function (x, i) {
+          return i;
+        }).reduce(function (p, i) {
+          var edgeSum = (-points[i].x + points[(i + 1) % 4].x) * (2 * maximumY - points[i].y - points[(i + 1) % 4].y);
+          return p + edgeSum;
+        }, 0);
+      }
+
+      return shorlaceSum;
+    }()
+
+    // ---------------------------------
+    // PATH
+    // ---------------------------------
+
+  }, {
+    key: 'maximumVerticesWidthAndHeight',
+    value: function () {
+      function maximumVerticesWidthAndHeight() {
+        var verticesLengths = this.verticesLengths.rotated(this.rotation % 2);
+
+        var layerWidth = Math.max(verticesLengths[0], verticesLengths[2]);
+        var layerHeight = Math.max(verticesLengths[1], verticesLengths[3]);
+
+        return [layerWidth, layerHeight];
+      }
+
+      return maximumVerticesWidthAndHeight;
+    }()
+  }, {
+    key: 'rotate',
+
+
+    // ---------------------------------
+    // INTERFACE
+    // ---------------------------------
+
+    value: function () {
+      function rotate() {
+        this.rotation = (this.rotation + (this.reversed ? 1 : 3)) % 4;
+      }
+
+      return rotate;
+    }()
+  }, {
+    key: 'reverseSymmetry',
+    value: function () {
+      function reverseSymmetry() {
+        this.rotate();
+
+        this.reversed = !this.reversed;
+      }
+
+      return reverseSymmetry;
+    }()
+
+    // ---------------------------------
+    // DRAWING
+    // ---------------------------------
+
+  }, {
+    key: 'mappedIndexFor',
+    value: function () {
+      function mappedIndexFor(index) {
+        if (this.reversed) {
+          return [0, 3, 2, 1][(index + this.rotation) % 4];
+        }
+        return (index + this.rotation) % 4;
+      }
+
+      return mappedIndexFor;
+    }()
+  }, {
+    key: 'lossyCompressionOfImage_atRate',
+    value: function () {
+      function lossyCompressionOfImage_atRate(image, rate) {
+        var representation = NSBitmapImageRep.alloc().initWithCIImage(image);
+        var properties = NSMutableDictionary.dictionary();
+
+        properties.setObject_forKey(NSTIFFCompressionJPEG, NSImageCompressionMethod);
+        properties.setObject_forKey(rate, NSImageCompressionFactor);
+        properties.setObject_forKey(NSColor.whiteColor(), NSImageFallbackBackgroundColor);
+
+        var compressed = representation.representationUsingType_properties(NSJPEGFileType, properties);
+        var nsImage = NSImage.alloc().initWithData(compressed);
+
+        return nsImage;
+      }
+
+      return lossyCompressionOfImage_atRate;
+    }()
+  }, {
+    key: 'pixelAccurateRepresentationOfImage',
+    value: function () {
+      function pixelAccurateRepresentationOfImage(image) {
+        var representation = NSCIImageRep.alloc().initWithCIImage(image);
+        var nsImage = NSImage.alloc().initWithSize(representation.size());
+        nsImage.addRepresentation(representation);
+
+        return nsImage;
+      }
+
+      return pixelAccurateRepresentationOfImage;
+    }()
+  }, {
+    key: 'pointsAreValid_lessThan50',
+    get: function () {
+      function get() {
+        var points = this.pointsFromBezierPath;
+
+        if (points === null) return false;
+
+        if (points.length !== 7) return false;
+
+        return true;
+      }
+
+      return get;
+    }()
+  }, {
+    key: 'pointsAreValid_lessThan52',
+    get: function () {
+      function get() {
+        var contour = this.targetPath.contours().firstObject();
+        var points = Array.fromNSArray(contour.segments());
+
+        if (points === null) return false;
+
+        if (points.length !== 4) return false;
+
+        if (points.some(function (a) {
+          return a.segmentType() != SegmentType.linear;
+        })) return false;
+
+        return true;
+      }
+
+      return get;
+    }()
+  }, {
+    key: 'pointsAreValid',
+    get: function () {
+      function get() {
+        var sketchVersion = MSApplicationMetadata.metadata().appVersion;
+
+        if (sketchVersion < 50) return this.pointsAreValid_lessThan50;
+
+        if (sketchVersion < 52) return this.pointsAreValid_lessThan52;
+
+        var points = this.targetLayer.points();
+
+        if (points === null) return false;
+        if (points.length !== 4) return false;
+        if (points.some(function (a) {
+          return !a.isStraight();
+        })) return false;
+
+        return true;
+      }
+
+      return get;
+    }()
+  }, {
+    key: 'pointsFromBezierPath',
+    get: function () {
+      function get() {
+        var _this = this;
+
+        var sketchVersion = MSApplicationMetadata.metadata().appVersion;
+        if (sketchVersion < 50) {
+          var count = this.targetPath.elementCount();
+          if (count != 7) {
+            return null;
+          }
+
+          return Array.from({ length: count }, function (x, i) {
+            return i;
+          }).map(function (i) {
+            var pointsPointer = MOPointer.alloc().initWithValue_(CGPointMake(0, 0));
+            var element = _this.targetPath.elementAtIndex_associatedPoints_(i, pointsPointer);
+            return pointsPointer.value();
+          });
+        } else if (sketchVersion < 52) {
+          var contour = this.targetPath.contours().firstObject();
+          return Array.fromNSArray(contour.segments()).map(function (a) {
+            return a.endPoint1();
+          });
+        }
+
+        var size = this.targetLayer.rect().size;
+        return Array.fromNSArray(this.targetLayer.points()).map(function (a) {
+          return a.point();
+        }).map(function (a) {
+          return {
+            x: Number(a.x) * Number(size.width),
+            y: Number(a.y) * Number(size.height)
+          };
+        });
+      }
+
+      return get;
+    }()
+  }, {
+    key: 'verticesLengths',
+    get: function () {
+      function get() {
+        var points = this.pointsFromBezierPath;
+
+        return Array.from({ length: 4 }, function (x, i) {
+          return i;
+        }).map(function (i) {
+          var j = (i + 1) % 4;
+          var width = points[i].x - points[j].x;
+          var height = points[i].y - points[j].y;
+          return Math.sqrt(Math.pow(width, 2) + Math.pow(height, 2));
+        });
+      }
+
+      return get;
+    }()
+  }, {
+    key: 'normalizedCIVectors',
+    get: function () {
+      function get() {
+        var points = this.pointsFromBezierPath;
+
+        var maximumY = Math.max.apply(Math, _toConsumableArray(points.map(function (a) {
+          return a.y;
+        })));
+
+        var pixelDensity = this.pixelDensity;
+
+        return points.map(function (a) {
+          return CIVector.vectorWithX_Y(a.x * pixelDensity, (maximumY - a.y) * pixelDensity);
+        });
+      }
+
+      return get;
+    }()
+  }, {
+    key: 'transformedImage',
+    get: function () {
+      function get() {
+        var vectors = this.normalizedCIVectors;
+
+        var perspectiveTransform = CIFilter.filterWithName('CIPerspectiveTransform');
+
+        perspectiveTransform.setValue_forKey(vectors[this.mappedIndexFor(0)], 'inputTopLeft');
+        perspectiveTransform.setValue_forKey(vectors[this.mappedIndexFor(1)], 'inputTopRight');
+        perspectiveTransform.setValue_forKey(vectors[this.mappedIndexFor(2)], 'inputBottomRight');
+        perspectiveTransform.setValue_forKey(vectors[this.mappedIndexFor(3)], 'inputBottomLeft');
+
+        var image = this.ciImage();
+
+        perspectiveTransform.setValue_forKey(image, 'inputImage');
+
+        var perspectiveImage = perspectiveTransform.valueForKey('outputImage');
+
+        if (!perspectiveImage) {
+          print('🛑 Unable to form perspective image');
+          return;
+        }
+
+        var ouputNSImage = void 0;
+
+        var compressionRatio = _CompressionRatio.CompressionRatio[this.compressionRatio].ratio;
+
+        if (compressionRatio != 1.0) {
+          ouputNSImage = this.lossyCompressionOfImage_atRate(perspectiveImage, compressionRatio);
+        } else {
+          ouputNSImage = this.pixelAccurateRepresentationOfImage(perspectiveImage);
+        }
+
+        var imageData = void 0;
+
+        if (MSApplicationMetadata.metadata().appVersion < 47) {
+          imageData = MSImageData.alloc().initWithImage_convertColorSpace(ouputNSImage, true);
+          return imageData;
+        }
+
+        imageData = MSImageData.alloc().initWithImage_(ouputNSImage);
+
+        return imageData;
+      }
+
+      return get;
+    }()
+  }]);
+
+  return Angle;
 }();
 
-exports["default"] = Angle;
+exports['default'] = Angle;
 
 /***/ }),
-/* 2 */
+/* 2 */,
+/* 3 */,
+/* 4 */,
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -909,73 +892,69 @@ var SymbolicAngle = function (_Angle) {
 exports['default'] = SymbolicAngle;
 
 /***/ }),
-/* 3 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-
-
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 exports['default'] = function (context) {
+  var selectedLayersNSArray = context.selection[0];
 
-    var selectedLayersNSArray = context.selection;
-
-    if (selectedLayersNSArray == null) {
-        Shared.show({
-            message: _Error.Error.emptySelection.message,
-            inDocument: context.document
-        });
-        return;
-    }
-
-    var selectedLayers = Array.fromNSArray(selectedLayersNSArray);
-
-    if (selectedLayers.length == 0) {
-        Shared.show({
-            message: _Error.Error.emptySelection.message,
-            inDocument: context.document
-        });
-        return;
-    }
-
-    var possibleAngles = _Angle2['default'].tryCreating({ 'for': selectedLayers, 'in': context });
-
-    var angles = possibleAngles.filter(function (a) {
-        return a instanceof _Angle2['default'];
-    });
-    var errors = possibleAngles.filter(function (a) {
-        return !(a instanceof _Angle2['default']);
-    });
-
-    if (angles.length == 0) {
-        Shared.show({
-            message: errors[0].message,
-            inDocument: context.document
-        });
-        return;
-    }
-
-    angles.forEach(function (a) {
-        a.reverseSymmetry();
-        a.applyImage();
-    });
-
+  if (selectedLayersNSArray == null) {
     Shared.show({
-        message: "Angle flipped! ↔️",
-        inDocument: context.document
+      message: _Error.Error.emptySelection.message,
+      inDocument: context.document
     });
-
     return;
+  }
+
+  var selectedLayers = Array.fromNSArray(selectedLayersNSArray);
+
+  if (selectedLayers.length == 0) {
+    Shared.show({
+      message: _Error.Error.emptySelection.message,
+      inDocument: context.document
+    });
+    return;
+  }
+
+  var possibleAngles = _Angle2['default'].tryCreating({ 'for': selectedLayers, 'in': context });
+
+  var angles = possibleAngles.filter(function (a) {
+    return a instanceof _Angle2['default'];
+  });
+  var errors = possibleAngles.filter(function (a) {
+    return !(a instanceof _Angle2['default']);
+  });
+
+  if (angles.length == 0) {
+    Shared.show({
+      message: errors[0].message,
+      inDocument: context.document
+    });
+    return;
+  }
+
+  angles.forEach(function (a) {
+    a.reverseSymmetry();
+    a.applyImage();
+  });
+
+  Shared.show({
+    message: 'Angle flipped! ↔️',
+    inDocument: context.document
+  });
+
+  return;
 };
 
 var _Angle = __webpack_require__(1);
 
 var _Angle2 = _interopRequireDefault(_Angle);
 
-var _Shared = __webpack_require__(5);
+var _Shared = __webpack_require__(8);
 
 var Shared = _interopRequireWildcard(_Shared);
 
@@ -986,11 +965,8 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
+/* 7 */
+/***/ (function(module, exports) {
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -998,14 +974,11 @@ Object.defineProperty(exports, "__esModule", {
 var CompressionRatio = exports.CompressionRatio = [{ selectionLabel: "Best", ratio: 1.0 }, { selectionLabel: "Better", ratio: 0.9 }, { selectionLabel: "Good", ratio: 0.8 }, { selectionLabel: "Average", ratio: 0.7 }];
 
 /***/ }),
-/* 5 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
-
-
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 exports.show = show;
 exports.filterPossibleArtboards = filterPossibleArtboards;
@@ -1019,15 +992,15 @@ var _Angle = __webpack_require__(1);
 
 var _Angle2 = _interopRequireDefault(_Angle);
 
-var _CompositionAngle = __webpack_require__(6);
+var _CompositionAngle = __webpack_require__(14);
 
 var _CompositionAngle2 = _interopRequireDefault(_CompositionAngle);
 
-var _SymbolicAngle = __webpack_require__(2);
+var _SymbolicAngle = __webpack_require__(5);
 
 var _SymbolicAngle2 = _interopRequireDefault(_SymbolicAngle);
 
-var _ShapeAngle = __webpack_require__(7);
+var _ShapeAngle = __webpack_require__(15);
 
 var _ShapeAngle2 = _interopRequireDefault(_ShapeAngle);
 
@@ -1036,264 +1009,265 @@ var _Error = __webpack_require__(0);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 _Angle2['default'].tryCreating = function (_ref) {
-    var selectedLayers = _ref['for'],
-        context = _ref['in'];
+  var selectedLayers = _ref['for'],
+      context = _ref['in'];
 
+  return selectedLayers.map(function (layer) {
+    switch (layer['class']()) {
+      case MSSymbolInstance:
+        var overrides = Array.fromNSArray(layer.availableOverrides()) || [];
 
-    return selectedLayers.map(function (layer) {
-        switch (layer['class']()) {
-            case MSSymbolInstance:
-                var overrides = Array.fromNSArray(layer.availableOverrides()) || [];
+        var symbolAngles = overrides.filter(function (override) {
+          return override.currentValue()['class']() == MSImageData;
+        }).map(function (override) {
+          return new _SymbolicAngle2['default']({
+            selectedLayer: layer,
+            context: context,
+            override: override
+          });
+        });
 
-                var symbolAngles = overrides.filter(function (override) {
-                    return override.currentValue()['class']() == MSImageData;
-                }).map(function (override) {
-                    return new _SymbolicAngle2['default']({
-                        selectedLayer: layer,
-                        context: context,
-                        override: override
-                    });
-                });
-
-                var nestedAngles = overrides.map(function (a) {
-                    return a.children();
-                }).filter(function (a) {
-                    return a != null;
-                }).map(Array.fromNSArray).reduce(function (p, a) {
-                    return p.concat(a);
-                }, []).filter(function (a) {
-                    return a['class']() == MSAvailableOverride;
-                }).map(function (a) {
-                    return new _CompositionAngle2['default']({
-                        override: a,
-                        selectedLayer: layer,
-                        context: context
-                    });
-                });
-                return symbolAngles.concat(nestedAngles);
-            case MSShapeGroup:
-            case MSShapePathLayer:
-            case MSRectangleShape:
-                return new _ShapeAngle2['default']({
-                    selectedLayer: layer,
-                    context: context
-                });
-            default:
-                return _Error.Error.unsupportedElement;
-        }
-    }).reduce(function (p, a, i, as) {
-        return p.concat(a);
-    }, []);
+        var nestedAngles = overrides.map(function (a) {
+          return a.children();
+        }).filter(function (a) {
+          return a != null;
+        }).map(Array.fromNSArray).reduce(function (p, a) {
+          return p.concat(a);
+        }, []).filter(function (a) {
+          return a['class']() == MSAvailableOverride;
+        }).map(function (a) {
+          return new _CompositionAngle2['default']({
+            override: a,
+            selectedLayer: layer,
+            context: context
+          });
+        });
+        return symbolAngles.concat(nestedAngles);
+      case MSShapeGroup:
+      case MSShapePathLayer:
+      case MSRectangleShape:
+        return new _ShapeAngle2['default']({
+          selectedLayer: layer,
+          context: context
+        });
+      default:
+        return _Error.Error.unsupportedElement;
+    }
+  }).reduce(function (p, a, i, as) {
+    return p.concat(a);
+  }, []);
 };
 
 Array.fromNSArray = function (nsArray) {
-    var array = [];
-    for (var i = 0; i < nsArray.count(); i++) {
-        array.push(nsArray[i]);
-    }
-    return array;
+  var array = [];
+  for (var i = 0; i < nsArray.length; i++) {
+    array.push(nsArray[i]);
+  }
+  return array;
 };
 
 Array.prototype.print = function () {
-    return this.map(function (a) {
-        print(a);return a;
-    });
+  return this.map(function (a) {
+    print(a);
+    return a;
+  });
 };
 
 function show(_ref2) {
-    var message = _ref2.message,
-        document = _ref2.inDocument;
+  var message = _ref2.message,
+      document = _ref2.inDocument;
 
-    if (document != undefined && document.showMessage != undefined) {
-        document.showMessage(message);
-    }
+  if (document != undefined && document.showMessage != undefined) {
+    document.showMessage(message);
+  }
 
-    print(message);
+  print(message);
 }
 
 function filterPossibleArtboards(artboardOrSymbol) {
+  var upperMaring = 0.8;
+  var lowerMargin = 0.4;
+  var minimumDimention = 250;
 
-    var upperMaring = 0.8;
-    var lowerMargin = 0.4;
-    var minimumDimention = 250;
+  var elementClass = artboardOrSymbol['class']();
 
-    var elementClass = artboardOrSymbol['class']();
+  switch (elementClass) {
+    case MSArtboardGroup:
+      var artboard = artboardOrSymbol;
+      var frame = artboard.frame();
 
-    switch (elementClass) {
-        case MSArtboardGroup:
+      if (frame.width() < minimumDimention || frame.height() < minimumDimention) {
+        return false;
+      }
 
-            var artboard = artboardOrSymbol;
-            var frame = artboard.frame();
+      var ratio = frame.width() / frame.height();
+      if (ratio > 1) {
+        ratio = 1 / ratio;
+      }
 
-            if (frame.width() < minimumDimention || frame.height() < minimumDimention) {
-                return false;
-            }
+      if (ratio < lowerMargin) {
+        return false;
+      }
+      break;
+    case MSSymbolMaster:
+      // Traversion of symbols does not work properly yet.
+      return false;
 
-            var ratio = frame.width() / frame.height();
-            if (ratio > 1) {
-                ratio = 1 / ratio;
-            }
+    default:
+      print(elementClass);
+      return false;
+  }
 
-            if (ratio < lowerMargin) {
-                return false;
-            }
-            break;
-        case MSSymbolMaster:
-            // Traversion of symbols does not work properly yet.
-            return false;
-
-        default:
-            print(elementClass);
-            return false;
-    }
-
-    return true;
+  return true;
 }
 
 function compareByRatioAndAlphabet(a, b) {
-    var upperMaring = 0.8;
-    var lowerMargin = 0.4;
+  var upperMaring = 0.8;
+  var lowerMargin = 0.4;
 
-    var artboardSizeA = a.frame();
-    var artboardSizeB = b.frame();
+  var artboardSizeA = a.frame();
+  var artboardSizeB = b.frame();
 
-    var artboardARatio = artboardSizeA.width() / artboardSizeA.height();
-    if (artboardARatio > 1) {
-        artboardARatio = 1 / artboardARatio;
-    }
+  var artboardARatio = artboardSizeA.width() / artboardSizeA.height();
+  if (artboardARatio > 1) {
+    artboardARatio = 1 / artboardARatio;
+  }
 
-    var artboardARatioInsideMargin = artboardARatio > lowerMargin && artboardARatio < upperMaring;
+  var artboardARatioInsideMargin = artboardARatio > lowerMargin && artboardARatio < upperMaring;
 
-    var artboardBRatio = artboardSizeB.width() / artboardSizeB.height();
-    if (artboardBRatio > 1) {
-        artboardBRatio = 1 / artboardBRatio;
-    }
+  var artboardBRatio = artboardSizeB.width() / artboardSizeB.height();
+  if (artboardBRatio > 1) {
+    artboardBRatio = 1 / artboardBRatio;
+  }
 
-    var artboardBRatioInsideMargin = artboardBRatio > lowerMargin && artboardBRatio < upperMaring;
+  var artboardBRatioInsideMargin = artboardBRatio > lowerMargin && artboardBRatio < upperMaring;
 
-    if (artboardARatioInsideMargin && !artboardBRatioInsideMargin) {
-        return false;
-    }
+  if (artboardARatioInsideMargin && !artboardBRatioInsideMargin) {
+    return false;
+  }
 
-    if (artboardBRatioInsideMargin && !artboardARatioInsideMargin) {
-        return true;
-    }
+  if (artboardBRatioInsideMargin && !artboardARatioInsideMargin) {
+    return true;
+  }
 
-    if (artboardARatio == artboardBRatio) {
-        return a.name() > b.name();
-    }
+  if (artboardARatio == artboardBRatio) {
+    return a.name() > b.name();
+  }
 
-    return artboardARatio > artboardBRatio;
+  return artboardARatio > artboardBRatio;
 }
 
 function introspect(type) {
+  var mocha = type['class']().mocha();
 
-    var mocha = type['class']().mocha();
+  print('-----------------------------------------------');
+  print('PROPERTIES-------------------------------------');
+  print('-----------------------------------------------');
 
-    print("-----------------------------------------------");
-    print("PROPERTIES-------------------------------------");
-    print("-----------------------------------------------");
+  print(mocha.properties());
+  print(mocha.propertiesWithAncestors());
 
-    print(mocha.properties());
-    print(mocha.propertiesWithAncestors());
+  print('-----------------------------------------------');
+  print('INSTANCE METHODS-------------------------------');
+  print('-----------------------------------------------');
+  print(mocha.instanceMethods());
+  print(mocha.instanceMethodsWithAncestors());
 
-    print("-----------------------------------------------");
-    print("INSTANCE METHODS-------------------------------");
-    print("-----------------------------------------------");
-    print(mocha.instanceMethods());
-    print(mocha.instanceMethodsWithAncestors());
+  print('-----------------------------------------------');
+  print('CLASS METHODS----------------------------------');
+  print('-----------------------------------------------');
+  print(mocha.classMethods());
+  print(mocha.classMethodsWithAncestors());
 
-    print("-----------------------------------------------");
-    print("CLASS METHODS----------------------------------");
-    print("-----------------------------------------------");
-    print(mocha.classMethods());
-    print(mocha.classMethodsWithAncestors());
-
-    print("-----------------------------------------------");
-    print("PROTOCOLS--------------------------------------");
-    print("-----------------------------------------------");
-    print(mocha.protocols());
-    print(mocha.protocolsWithAncestors());
+  print('-----------------------------------------------');
+  print('PROTOCOLS--------------------------------------');
+  print('-----------------------------------------------');
+  print(mocha.protocols());
+  print(mocha.protocolsWithAncestors());
 }
 
 function createLabel(text, size, frame) {
-    var label = NSTextField.alloc().initWithFrame(frame);
+  var label = NSTextField.alloc().initWithFrame(frame);
 
-    label.setStringValue(text);
-    label.setFont(NSFont.boldSystemFontOfSize(size));
-    label.setBezeled(false);
-    label.setDrawsBackground(false);
-    label.setEditable(false);
-    label.setSelectable(false);
+  label.setStringValue(text);
+  label.setFont(NSFont.boldSystemFontOfSize(size));
+  label.setBezeled(false);
+  label.setDrawsBackground(false);
+  label.setEditable(false);
+  label.setSelectable(false);
 
-    return label;
+  return label;
 }
 
 function popUpButtonsforRectangleIndexer_withTitleIndexer_andImageIndexer_defaultSelected_onIndex(rectangle, titles, images, index) {
+  var button = NSPopUpButton.alloc().initWithFrame(rectangle(index));
+  button.addItemsWithTitles(titles);
 
-    var button = NSPopUpButton.alloc().initWithFrame(rectangle(index));
-    button.addItemsWithTitles(titles);
+  if (images != null) {
+    button.imageScaling = NSImageScaleProportionallyUpOrDown;
 
-    if (images != null) {
+    Array.fromNSArray(button.itemArray()).forEach(function (a, i, as) {
+      a.image = images[i];
+    });
+  }
 
-        button.imageScaling = NSImageScaleProportionallyUpOrDown;
-
-        Array.fromNSArray(button.itemArray()).forEach(function (a, i, as) {
-            a.image = images[i];
-        });
-    }
-
-    return button;
+  return button;
 }
 
 function smallImagesFromArtboard(artboard) {
+  // var sketch = require('sketch/dom');
+  // var artboard = sketch.fromNative(msartboard);
 
-    // var sketch = require('sketch/dom');
-    // var artboard = sketch.fromNative(msartboard);
+  // //let image = sketch.export(artboard);
 
-    // //let image = sketch.export(artboard);
+  // print(msartboard.unselectedPreviewImage());
 
-    // print(msartboard.unselectedPreviewImage());
+  // return nil
 
-    // return nil
+  if (artboard['class']() == MSSymbolMaster) {
+    print(artboard);
+    return null;
+  }
 
-    if (artboard['class']() == MSSymbolMaster) {
-        print(artboard);
-        return null;
-    }
+  if (artboard.frame == undefined) {
+    print(artboard);
+  }
 
-    if (artboard.frame == undefined) {
-        print(artboard);
-    }
+  var artboardWidth = artboard.frame().width();
+  var artboardHeight = artboard.frame().height();
+  var artboardRatio = artboardWidth / artboardHeight;
+  if (artboardRatio > 1) {
+    artboardRatio = 1 / artboardRatio;
+  }
 
-    var artboardWidth = artboard.frame().width();
-    var artboardHeight = artboard.frame().height();
-    var artboardRatio = artboardWidth / artboardHeight;
-    if (artboardRatio > 1) {
-        artboardRatio = 1 / artboardRatio;
-    }
+  if (artboardRatio > 0.8 || artboardRatio < 0.4) {
+    return null;
+  }
 
-    if (artboardRatio > 0.8 || artboardRatio < 0.4) {
-        return null;
-    }
+  // let layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(artboard);
+  //   let layerAncestry = this.artboard.ancestry();
 
-    var layerAncestry = MSImmutableLayerAncestry.alloc().initWithMSLayer(artboard);
+  // MSImmutableLayerAncestry has been renamed (As of V.66.1) and must be called from the class string
+  var cls = NSClassFromString('SketchModel.MSImmutableLayerAncestry');
+  var layerAncestry = cls.alloc().initWithMutableLayer(context.selection[0]);
 
-    var biggerDimention = artboardWidth > artboardHeight ? artboardWidth : artboardHeight;
-    var exportScale = 48 / biggerDimention;
-    var exportFormat = MSExportFormat.formatWithScale_name_fileFormat(exportScale, "", "png");
-    var exportRequest = MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
-    var exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, NSColorSpace.sRGBColorSpace());
+  var biggerDimention = artboardWidth > artboardHeight ? artboardWidth : artboardHeight;
+  var exportScale = 48 / biggerDimention;
+  var exportFormat = MSExportFormat.formatWithScale_name_fileFormat(exportScale, '', 'png');
+  var exportRequest = MSExportRequest.exportRequestsFromLayerAncestry_exportFormats(layerAncestry, [exportFormat]).firstObject();
+  var exporter = MSExporter.exporterForRequest_colorSpace(exportRequest, NSColorSpace.sRGBColorSpace());
 
-    return exporter.previewImage();
+  return exporter.previewImage();
 }
 
 /***/ }),
-/* 6 */
+/* 9 */,
+/* 10 */,
+/* 11 */,
+/* 12 */,
+/* 13 */,
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -1307,7 +1281,7 @@ var _get = function () {
     return get;
 }();
 
-var _SymbolicAngle2 = __webpack_require__(2);
+var _SymbolicAngle2 = __webpack_require__(5);
 
 var _SymbolicAngle3 = _interopRequireDefault(_SymbolicAngle2);
 
@@ -1392,11 +1366,8 @@ var CompositionAngle = function (_SymbolicAngle) {
 exports['default'] = CompositionAngle;
 
 /***/ }),
-/* 7 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
 
 Object.defineProperty(exports, "__esModule", {
     value: true
