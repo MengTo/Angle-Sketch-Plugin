@@ -65,7 +65,7 @@ var exports =
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 6);
+/******/ 	return __webpack_require__(__webpack_require__.s = 3);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -78,7 +78,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _CompressionRatio = __webpack_require__(7);
+var _CompressionRatio = __webpack_require__(4);
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
@@ -772,10 +772,7 @@ var Error = exports.Error = {
 };
 
 /***/ }),
-/* 2 */,
-/* 3 */,
-/* 4 */,
-/* 5 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 Object.defineProperty(exports, "__esModule", {
@@ -892,7 +889,7 @@ var SymbolicAngle = function (_Angle) {
 exports['default'] = SymbolicAngle;
 
 /***/ }),
-/* 6 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 Object.defineProperty(exports, "__esModule", {
@@ -942,7 +939,7 @@ var _Angle = __webpack_require__(0);
 
 var _Angle2 = _interopRequireDefault(_Angle);
 
-var _Shared = __webpack_require__(8);
+var _Shared = __webpack_require__(5);
 
 var Shared = _interopRequireWildcard(_Shared);
 
@@ -951,7 +948,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
 /***/ }),
-/* 7 */
+/* 4 */
 /***/ (function(module, exports) {
 
 Object.defineProperty(exports, "__esModule", {
@@ -960,7 +957,7 @@ Object.defineProperty(exports, "__esModule", {
 var CompressionRatio = exports.CompressionRatio = [{ selectionLabel: "Best", ratio: 1.0 }, { selectionLabel: "Better", ratio: 0.9 }, { selectionLabel: "Good", ratio: 0.8 }, { selectionLabel: "Average", ratio: 0.7 }];
 
 /***/ }),
-/* 8 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 Object.defineProperty(exports, "__esModule", {
@@ -978,15 +975,15 @@ var _Angle = __webpack_require__(0);
 
 var _Angle2 = _interopRequireDefault(_Angle);
 
-var _CompositionAngle = __webpack_require__(14);
+var _CompositionAngle = __webpack_require__(6);
 
 var _CompositionAngle2 = _interopRequireDefault(_CompositionAngle);
 
-var _SymbolicAngle = __webpack_require__(5);
+var _SymbolicAngle = __webpack_require__(2);
 
 var _SymbolicAngle2 = _interopRequireDefault(_SymbolicAngle);
 
-var _ShapeAngle = __webpack_require__(15);
+var _ShapeAngle = __webpack_require__(7);
 
 var _ShapeAngle2 = _interopRequireDefault(_ShapeAngle);
 
@@ -1235,7 +1232,7 @@ function smallImagesFromArtboard(artboard) {
 
   // MSImmutableLayerAncestry has been renamed (As of V.66.1) and must be called from the class string
   var cls = NSClassFromString('SketchModel.MSImmutableLayerAncestry');
-  var layerAncestry = cls.alloc().initWithMutableLayer(context.selection[0]);
+  var layerAncestry = cls.alloc().initWithMutableLayer(artboard);
 
   var biggerDimention = artboardWidth > artboardHeight ? artboardWidth : artboardHeight;
   var exportScale = 48 / biggerDimention;
@@ -1247,12 +1244,7 @@ function smallImagesFromArtboard(artboard) {
 }
 
 /***/ }),
-/* 9 */,
-/* 10 */,
-/* 11 */,
-/* 12 */,
-/* 13 */,
-/* 14 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 Object.defineProperty(exports, "__esModule", {
@@ -1267,7 +1259,7 @@ var _get = function () {
     return get;
 }();
 
-var _SymbolicAngle2 = __webpack_require__(5);
+var _SymbolicAngle2 = __webpack_require__(2);
 
 var _SymbolicAngle3 = _interopRequireDefault(_SymbolicAngle2);
 
@@ -1352,7 +1344,7 @@ var CompositionAngle = function (_SymbolicAngle) {
 exports['default'] = CompositionAngle;
 
 /***/ }),
-/* 15 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 Object.defineProperty(exports, "__esModule", {

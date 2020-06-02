@@ -252,7 +252,7 @@ export function smallImagesFromArtboard(artboard) {
 
   // MSImmutableLayerAncestry has been renamed (As of V.66.1) and must be called from the class string
   let cls = NSClassFromString('SketchModel.MSImmutableLayerAncestry');
-  let layerAncestry = cls.alloc().initWithMutableLayer(context.selection[0]);
+  let layerAncestry = cls.alloc().initWithMutableLayer(artboard);
 
   let biggerDimention =
     artboardWidth > artboardHeight ? artboardWidth : artboardHeight;
