@@ -1,10 +1,10 @@
 {
   "bundleVersion": 1,
-  "version" : "1.1.4",
+  "version": "1.1.4",
   "icon": "icon.png",
-  "identifier" : "io.designcode.Angle",
+  "identifier": "io.designcode.Angle",
   "description": "Apply perspective transforms on screen mockups. Auto-detect screens by resolution and works on shapes and symbols. Super fast.",
-  "homepage": "https://designcode.io/angle",
+  "homepage": "https://angle.sh",
   "author": "Design+Code",
   "authorEmail": "support@designcode.io",
   "compatibleVersion": 50,
