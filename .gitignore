@@ -1,4 +1,6 @@
-
+Angle.sketchplugin
+node_modules
+.DS_Store
 
 # Created by https://www.gitignore.io/api/node
 
