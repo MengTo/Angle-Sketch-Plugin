@@ -27,7 +27,6 @@ Angle.tryCreating = function ({ for: selectedLayers, in: context }) {
           let nestedAngles = overrides
             .map((a) => a.children())
             .filter((a) => a != null)
-            .map(Array.fromNSArray)
             .reduce((p, a) => p.concat(a), [])
             .filter(function (a) {
               return a.class() == MSAvailableOverride;

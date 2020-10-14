@@ -11,10 +11,10 @@ export default function ({ document, selection, command }) {
         return
     }
 
-    let layer = selection.firstObject();
-    let possibleAngle = Angle.tryCreating({ for: [layer], in: { document, selection, command } });
+    let layer = selection[0];
+    let possibleAngles = Angle.tryCreating({ for: [layer], in: { document, selection, command } });
 
-    if (!(possibleAngle instanceof Angle)) {
+    if (!(possibleAngles[0] instanceof Angle)) {
 
         Shared.show({
             message: "Reset only works on shapes and symbols.",

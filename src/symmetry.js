@@ -4,7 +4,7 @@ import * as Shared from './Shared';
 import { Error } from './Error';
 
 export default function (context) {
-  let selectedLayersNSArray = context.selection[0];
+  let selectedLayersNSArray = context.selection;
 
   if (selectedLayersNSArray == null) {
     Shared.show({
