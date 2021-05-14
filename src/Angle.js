@@ -173,7 +173,7 @@ export default class Angle {
   exporter() {
     const colorSpace = this.context.document.colorSpace();
 
-    const sketchVersion = MSApplicationMetadata.metadata().appVersion;
+    const sketchVersion = BCSketchInfo.shared().metadata().appVersion;
     if (sketchVersion < 52)
       return MSExporter.exporterForRequest_colorSpace(
         this.exportRequest_lessThan52(),
@@ -225,7 +225,7 @@ export default class Angle {
   }
 
   get pointsAreValid() {
-    const sketchVersion = MSApplicationMetadata.metadata().appVersion;
+    const sketchVersion = BCSketchInfo.shared().metadata().appVersion;
 
     if (sketchVersion < 50) return this.pointsAreValid_lessThan50;
 
@@ -299,7 +299,7 @@ export default class Angle {
       this.rotate();
     }
 
-    const sketchVersion = MSApplicationMetadata.metadata().appVersion;
+    const sketchVersion = BCSketchInfo.shared().metadata().appVersion;
     if (sketchVersion < 50 || sketchVersion >= 52) {
       let shoelaceSumOfPoints = this.shorlaceSum();
       if (shoelaceSumOfPoints < 0) {
@@ -342,7 +342,7 @@ export default class Angle {
   // ---------------------------------
 
   get pointsFromBezierPath() {
-    const sketchVersion = MSApplicationMetadata.metadata().appVersion;
+    const sketchVersion = BCSketchInfo.shared().metadata().appVersion;
     if (sketchVersion < 50) {
       let count = this.targetPath.elementCount();
       if (count != 7) {
@@ -512,7 +512,7 @@ export default class Angle {
 
     let imageData;
 
-    if (MSApplicationMetadata.metadata().appVersion < 47) {
+    if (BCSketchInfo.shared().metadata().appVersion < 47) {
       imageData = MSImageData.alloc().initWithImage_convertColorSpace(
         ouputNSImage,
         true
