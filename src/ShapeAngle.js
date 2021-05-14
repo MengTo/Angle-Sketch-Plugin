@@ -8,7 +8,7 @@ export default class ShapeAngle extends Angle {
 
         this.targetLayer = this.selectedLayer;
 
-        const sketchVersion = MSApplicationMetadata.metadata().appVersion
+        const sketchVersion = BCSketchInfo.shared().metadata().appVersion
         if (sketchVersion < 50) {
             this.targetPath = this.selectedLayer.bezierPath();
         } else if (sketchVersion < 52) {
