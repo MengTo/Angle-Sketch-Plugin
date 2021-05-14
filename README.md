@@ -13,7 +13,7 @@ Make sure you have the latest version of Sketch (66+) running on Mojave+.
 - [Download the zip file](https://github.com/MengTo/Angle-Sketch-Plugin/archive/master.zip).
 - Double-click on Angle.sketchplugin
 
-**Important note: use 1.1.5 (current) for Sketch 66+ and [1.1.4](https://www.dropbox.com/s/m1ep6sbhz88ehd2/Angle1.1.4.sketchplugin.zip?dl=1) for Sketch 65 and earlier. Apply perspective transforms on screen mockups. Auto-detect screens by resolution and works on shapes and symbols. Super fast.**
+**Important note: use version 1.1.6 for Sketch 72+, version 1.1.5 for Sketch 66 to Sketch 71 and 1.1.4 for Sketch 65 and earlier. Apply perspective transforms on screen mockups. Auto-detect screens by resolution and works on shapes and symbols.**
 
 ## Usage
 
