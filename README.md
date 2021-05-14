@@ -8,22 +8,24 @@ The only thing that Angle needs to work is an Artboard containing your Screen. T
 
 ## Installation
 
-Make sure you have the latest version of Sketch (66+) running on Mojave+.
+Make sure you have the latest version of Sketch (72+) running on macOS Catalina (10.15.0) or newer.
 
 - [Download the zip file](https://github.com/MengTo/Angle-Sketch-Plugin/archive/master.zip).
 - Double-click on Angle.sketchplugin
 
-**Important note: use version 1.1.6 for Sketch 72+, version 1.1.5 for Sketch 66 to Sketch 71 and 1.1.4 for Sketch 65 and earlier. Apply perspective transforms on screen mockups. Auto-detect screens by resolution and works on shapes and symbols.**
+**Important note:**
+use version [1.1.6](https://github.com/MengTo/Angle-Sketch-Plugin/releases/download/v1.1.6/Angle.sketchplugin.zip) for Sketch 72+
+use version [1.1.5](https://github.com/MengTo/Angle-Sketch-Plugin/releases/download/v1.1.5/Angle.sketchplugin.zip) for Sketch 66 to Sketch 71.2
+use version [1.1.4](https://github.com/MengTo/Angle-Sketch-Plugin/releases/download/v1.1.4/Angle.sketchplugin.zip) for Sketch 65 and earlier.
+
+Apply perspective transforms on screen mockups. Auto-detect screens by resolution and works on shapes and symbols.
 
 ## Usage
 
 Select a shape layer and do **Apply Mockup** `Command + \`.
-![](https://cl.ly/2g133f1m1s0T/download/Angle-Usage.png)
+![](https://images.ctfassets.net/l7neci24wkw8/ebI08E1aZfvpMN1pChH1J/0fdfa8806ca1443aaeb786fd449adb72/Apply.png)
 
 - **Apply Mockup** `Command + \`: this will apply an Artboard to your selected shape.
-- **Flip Mockup** `Command + Shift + \`: once a mockup is applied, you can decide to **Flip** it.
-- **Rotate Mockup** `Control + \`.
-- **Reset Mockup** `Control + Command + \`: remove the metadata that was applied to your mockup.
 
 ## Auto-Detect
 
