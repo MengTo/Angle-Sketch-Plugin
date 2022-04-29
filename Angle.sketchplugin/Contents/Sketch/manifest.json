@@ -1,24 +1,47 @@
 {
   "bundleVersion": 1,
-  "version": "1.1.6",
+  "version": "1.1.7",
   "icon": "icon.png",
   "identifier": "io.designcode.Angle",
-  "description": "Important note: use version 1.1.6 for Sketch 72+, version 1.1.5 for Sketch 66 to Sketch 71 and 1.1.4 for Sketch 65 and earlier. Apply perspective transforms on screen mockups. Auto-detect screens by resolution and works on shapes and symbols.",
+  "description": "Important note: use version 1.1.7 for Sketch 86+, version 1.1.6 for Sketch 72-85, version 1.1.5 for Sketch 66-71 and version 1.1.4 for Sketch 65 and earlier. Apply perspective transforms on screen mockups. Auto-detect screens by resolution and works on shapes and symbols.",
   "homepage": "https://angle.sh",
   "author": "Design+Code",
-  "authorEmail": "support@designcode.io",
+  "authorEmail": "angle@designcode.io",
   "compatibleVersion": 50,
   "commands": [
     {
+      "name": "Rotate Mockup",
+      "identifier": "Angle-Rotate-Mockup",
+      "script": "__rotate.js",
+      "shortcut": "control \\"
+    },
+    {
+      "name": "Flip Mockup",
+      "identifier": "Angle-Rotate-Flip",
+      "script": "__symmetry.js",
+      "shortcut": "cmd shift \\"
+    },
+    {
       "name": "Apply Mockup",
       "identifier": "Angle-Apply-Mockup",
-      "script": "apply.js",
+      "script": "__apply.js",
       "shortcut": "cmd \\"
+    },
+    {
+      "name": "Reset Mockup",
+      "identifier": "Angle-Reset-Metadata",
+      "script": "__reset.js",
+      "shortcut": "cmd control \\"
     }
   ],
   "menu": {
     "title": "Angle",
-    "items": ["Angle-Apply-Mockup"]
+    "items": [
+      "Angle-Apply-Mockup",
+      "Angle-Rotate-Flip",
+      "Angle-Rotate-Mockup",
+      "Angle-Reset-Metadata"
+    ]
   },
   "name": "Angle",
   "disableCocoaScriptPreprocessor": true,

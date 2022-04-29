@@ -13,10 +13,12 @@ Make sure you have the latest version of Sketch (72+) running on macOS Catalina 
 - [Download the zip file](https://github.com/MengTo/Angle-Sketch-Plugin/archive/master.zip).
 - Double-click on Angle.sketchplugin
 
-**Important note:**
-use version [1.1.6](https://github.com/MengTo/Angle-Sketch-Plugin/releases/download/v1.1.6/Angle.sketchplugin.zip) for Sketch 72+
-use version [1.1.5](https://github.com/MengTo/Angle-Sketch-Plugin/releases/download/v1.1.5/Angle.sketchplugin.zip) for Sketch 66 to Sketch 71.2
-use version [1.1.4](https://github.com/MengTo/Angle-Sketch-Plugin/releases/download/v1.1.4/Angle.sketchplugin.zip) for Sketch 65 and earlier.
+#### Important note:
+
+- use version [1.1.7](https://github.com/MengTo/Angle-Sketch-Plugin/releases/download/v1.1.7/Angle.sketchplugin.zip) for Sketch 86+
+- use version [1.1.6](https://github.com/MengTo/Angle-Sketch-Plugin/releases/download/v1.1.6/Angle.sketchplugin.zip) for Sketch 72 to Sketch 85.1
+- use version [1.1.5](https://github.com/MengTo/Angle-Sketch-Plugin/releases/download/v1.1.5/Angle.sketchplugin.zip) for Sketch 66 to Sketch 71.2
+- use version [1.1.4](https://github.com/MengTo/Angle-Sketch-Plugin/releases/download/v1.1.4/Angle.sketchplugin.zip) for Sketch 65 and earlier.
 
 Apply perspective transforms on screen mockups. Auto-detect screens by resolution and works on shapes and symbols.
 

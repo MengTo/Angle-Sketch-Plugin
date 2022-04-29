@@ -171,7 +171,7 @@ export default class Angle {
   }
 
   exporter() {
-    const colorSpace = this.context.document.colorSpace();
+    const colorSpace = this.context.document.colorSpace().CGColorSpace();
 
     const sketchVersion = BCSketchInfo.shared().metadata().appVersion;
     if (sketchVersion < 52)
@@ -194,7 +194,10 @@ export default class Angle {
 
   ciImage() {
     const bitmapRepresentation = this.exporter().bitmapImageRep();
+    
     return CIImage.alloc().initWithCGImage(bitmapRepresentation.CGImage());
+    // Below works too
+    // return CIImage.alloc().initWithBitmapImageRep(bitmapRepresentation);
   }
 
   // ---------------------------------
