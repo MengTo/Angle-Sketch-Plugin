@@ -103,3 +103,6 @@ xcuserdata/
 
 
 # End of https://www.gitignore.io/api/xcode
+
+Angle.sketchplugin
+.DS_Store
