@@ -14,7 +14,7 @@ Make sure you have the latest version of Sketch (72+) running on macOS Catalina 
 - Double-click on Angle.sketchplugin
 
 #### Important note:
-- This plugin may not work for Sketch 93+. When we created this plugin, there was no other option at the time. Today, there is a great alternative called [Mockup](https://github.com/ruslanlatypov/Mockup-Plugin-for-Sketch). This will work with Angle mockups.
+- This plugin may not work for Sketch 93+. You can use [Mockup](https://github.com/ruslanlatypov/Mockup-Plugin-for-Sketch) (make sure to Detach from Symbol and once applied, rotate 3 times). This will work with Angle mockups.
 - use version [1.1.7](https://github.com/MengTo/Angle-Sketch-Plugin/releases/download/v1.1.7/Angle.sketchplugin.zip) for Sketch 86+
 - use version [1.1.6](https://github.com/MengTo/Angle-Sketch-Plugin/releases/download/v1.1.6/Angle.sketchplugin.zip) for Sketch 72 to Sketch 85.1
 - use version [1.1.5](https://github.com/MengTo/Angle-Sketch-Plugin/releases/download/v1.1.5/Angle.sketchplugin.zip) for Sketch 66 to Sketch 71.2
